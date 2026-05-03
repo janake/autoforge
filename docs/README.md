@@ -4,7 +4,7 @@ Projekt dokumentaciok helye.
 
 Az OCI infrastrukturahoz kapcsolodo aktualis runbook jelenleg a kovetkezo fajlban van:
 
-- `<redacted-home>/oci-prodet-new-runbook.md`
+- `./oci-prodet-new-runbook.md`
 
 Itt lesznek majd:
 
@@ -12,6 +12,10 @@ Itt lesznek majd:
 - deploy folyamat
 - local dev megjegyzesek
 - task tracking
+
+Biztonsági vizsgálatok és PR-specifikus runbookok:
+
+- `docs/security/` alatt tároljuk a PR-enkénti audit és image-scan jelentéseket és útmutatókat (például: `docs/security/pr-10-audit-and-scan.md`).
 
 ## Task tracking szabaly
 

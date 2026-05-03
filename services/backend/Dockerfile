@@ -11,6 +11,10 @@ WORKDIR /app
 
 COPY --from=build /workspace/target/backend-0.1.0-SNAPSHOT.jar app.jar
 
+# Run the container as a non-root UID where possible (safer than running as root).
+# Using an explicit numeric UID avoids depending on useradd being available in the base image.
+USER 1000
+
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

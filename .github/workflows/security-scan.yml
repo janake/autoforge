@@ -1,0 +1,95 @@
+name: Security scan (npm audit + Trivy)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/security-scan.yml'
+      - 'apps/web/**'
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  security-scan:
+    name: Run npm audit, build image and Trivy scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit (JSON)
+        run: |
+          npm audit --json > npm-audit.json || true
+
+      - name: Build web Docker image
+        run: |
+          docker build -t autoforge-web:${{ github.sha }} -f apps/web/Dockerfile .
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget ca-certificates
+          wget -qO- https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+          trivy --version
+
+      - name: Run Trivy image scan (JSON)
+        run: |
+          trivy image --format json -o trivy-image.json autoforge-web:${{ github.sha }} || true
+
+      - name: Create summaries
+        run: |
+          # npm-audit summary
+          if [ -f npm-audit.json ]; then
+            jq -r '.metadata.vulnerabilities | to_entries | map("") | join(", ")' npm-audit.json > npm-audit-summary.txt || true
+          else
+            echo "no npm-audit.json" > npm-audit-summary.txt
+          fi
+
+          # trivy summary
+          if [ -f trivy-image.json ]; then
+            jq -r '.Results[] | .Target + ": " + ((.Vulnerabilities|length)|tostring) + " vulns"' trivy-image.json > trivy-summary.txt || true
+            jq -r '[.Results[].Vulnerabilities[].VulnerabilityID] | unique | length' trivy-image.json > trivy-unique-vuln-count.txt || true
+          else
+            echo "no trivy-image.json" > trivy-summary.txt
+            echo 0 > trivy-unique-vuln-count.txt
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-${{ github.event.number }}-security-scan
+          path: |
+            npm-audit.json
+            npm-audit-summary.txt
+            trivy-image.json
+            trivy-summary.txt
+            trivy-unique-vuln-count.txt
+
+      - name: Post PR comment with short summary
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const npmSummary = fs.existsSync('npm-audit-summary.txt') ? fs.readFileSync('npm-audit-summary.txt','utf8') : 'no npm-audit-summary';
+            const trivySummary = fs.existsSync('trivy-summary.txt') ? fs.readFileSync('trivy-summary.txt','utf8') : 'no trivy-summary';
+            const trivyCount = fs.existsSync('trivy-unique-vuln-count.txt') ? fs.readFileSync('trivy-unique-vuln-count.txt','utf8') : '0';
+            const body = `**Security scan for PR #${context.payload.pull_request.number}**\n\n**npm audit vulnerabilities:**\n```
+${npmSummary}
+```\n\n**Trivy image vulnerabilities (per target):**\n```
+${trivySummary}
+```\n\nUnique Trivy vuln IDs: ${trivyCount}\n\nArtifacts uploaded: \`pr-${context.payload.pull_request.number}-security-scan\` (npm-audit.json, trivy-image.json and summaries).`;
+            await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.pull_request.number, body});
+
