@@ -37,13 +37,13 @@ jobs:
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |
-          SSH_COMMON="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
-          SSH_PROXY="-o ProxyCommand=ssh $SSH_COMMON $PUBLIC_USER@$PUBLIC_HOST -W %h:%p"
+          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519)
+          JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
           TARGET="$PRIVATE_USER@$PRIVATE_HOST"
-          ssh $SSH_COMMON $SSH_PROXY "$TARGET" "mkdir -p '$DEPLOY_PATH'"
-          scp $SSH_COMMON $SSH_PROXY infra/compose/docker-compose.private.yml "$TARGET:$DEPLOY_PATH/docker-compose.private.yml"
-          scp $SSH_COMMON $SSH_PROXY infra/deploy/private/deploy.sh "$TARGET:$DEPLOY_PATH/deploy.sh"
-          ssh $SSH_COMMON $SSH_PROXY "$TARGET" "chmod +x '$DEPLOY_PATH/deploy.sh'"
+          ssh "${SSH_COMMON[@]}" -J "$JUMP_TARGET" "$TARGET" "mkdir -p '$DEPLOY_PATH'"
+          scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" infra/compose/docker-compose.private.yml "$TARGET:$DEPLOY_PATH/docker-compose.private.yml"
+          scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" infra/deploy/private/deploy.sh "$TARGET:$DEPLOY_PATH/deploy.sh"
+          ssh "${SSH_COMMON[@]}" -J "$JUMP_TARGET" "$TARGET" "chmod +x '$DEPLOY_PATH/deploy.sh'"
 
       - name: Render private runtime environment
         env:
@@ -53,8 +53,8 @@ jobs:
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |
-          SSH_COMMON="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
-          SSH_PROXY="-o ProxyCommand=ssh $SSH_COMMON $PUBLIC_USER@$PUBLIC_HOST -W %h:%p"
+          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519)
+          JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
           TARGET="$PRIVATE_USER@$PRIVATE_HOST"
           {
             echo "BACKEND_IMAGE=ghcr.io/janake/autoforge/backend"
@@ -64,7 +64,7 @@ jobs:
             echo "SPRING_PROFILES_ACTIVE=prod"
             echo "JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC"
           } > /tmp/autoforge-private.env
-          scp $SSH_COMMON $SSH_PROXY /tmp/autoforge-private.env "$TARGET:$DEPLOY_PATH/.env"
+          scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" /tmp/autoforge-private.env "$TARGET:$DEPLOY_PATH/.env"
 
       - name: Upload registry credentials
         env:
@@ -75,14 +75,14 @@ jobs:
           GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
         run: |
-          SSH_COMMON="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
-          SSH_PROXY="-o ProxyCommand=ssh $SSH_COMMON $PUBLIC_USER@$PUBLIC_HOST -W %h:%p"
+          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519)
+          JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
           TARGET="$PRIVATE_USER@$PRIVATE_HOST"
           {
             echo "GHCR_USERNAME=$GHCR_DEPLOY_USERNAME"
             echo "GHCR_TOKEN=$GHCR_DEPLOY_TOKEN"
           } > /tmp/autoforge-private.deploy.env
-          scp $SSH_COMMON $SSH_PROXY /tmp/autoforge-private.deploy.env "$TARGET:$DEPLOY_PATH/.deploy.env"
+          scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" /tmp/autoforge-private.deploy.env "$TARGET:$DEPLOY_PATH/.deploy.env"
 
       - name: Deploy private stack
         env:
@@ -91,7 +91,7 @@ jobs:
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |
-          SSH_COMMON="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
-          SSH_PROXY="-o ProxyCommand=ssh $SSH_COMMON $PUBLIC_USER@$PUBLIC_HOST -W %h:%p"
+          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519)
+          JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
           TARGET="$PRIVATE_USER@$PRIVATE_HOST"
-          ssh $SSH_COMMON $SSH_PROXY "$TARGET" "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"
+          ssh "${SSH_COMMON[@]}" -J "$JUMP_TARGET" "$TARGET" "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"
