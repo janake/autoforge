@@ -1,0 +1,12 @@
+{
+  admin off
+}
+
+{$GATEWAY_DOMAIN} {
+  encode zstd gzip
+
+  @backend path /api* /actuator*
+  reverse_proxy @backend {$BACKEND_UPSTREAM}
+
+  reverse_proxy {$WEB_UPSTREAM}
+}

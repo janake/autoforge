@@ -1,6 +1,37 @@
+name: autoforge-public
+
 services:
   web:
-    image: ghcr.io/janake/autoforge/web:latest
+    image: ${WEB_IMAGE:-ghcr.io/janake/autoforge/web}:${WEB_IMAGE_TAG:-main}
+    restart: unless-stopped
+    expose:
+      - "8080"
+    networks:
+      - public
 
   gateway:
-    image: ghcr.io/janake/autoforge/gateway:latest
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      - web
+    environment:
+      GATEWAY_DOMAIN: ${GATEWAY_DOMAIN}
+      BACKEND_UPSTREAM: ${BACKEND_UPSTREAM}
+      WEB_UPSTREAM: ${WEB_UPSTREAM:-web:8080}
+    ports:
+      - "${GATEWAY_HTTP_PORT:-80}:80"
+      - "${GATEWAY_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - public
+
+networks:
+  public:
+    name: autoforge-public
+
+volumes:
+  caddy_data:
+  caddy_config:
