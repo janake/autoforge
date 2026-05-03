@@ -1,8 +1,8 @@
 # AUTO-1 React frontend base
 
 - Statusz: in review
-- Branch: `codex/react-base`
-- PR: `https://github.com/janake/autoforge/pull/1`
+- Branch: `codex/AUTO-1-react-base`
+- PR: `https://github.com/janake/autoforge/pull/3`
 
 ## Cel
 
