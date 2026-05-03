@@ -22,7 +22,8 @@ autoforge/
 
 - A frontend React + Vite + TypeScript alappal scaffoldolva van.
 - A frontendhez alap GitHub Actions build workflow is elokeszitve van.
-- A backend Spring Boot + Maven alappal keszul.
+- A backend Spring Boot + Maven alappal scaffoldolva van.
+- A backendhez alap GitHub Actions build workflow is elokeszitve van.
 - A worker szolgaltatas helye elokeszitve.
 - A deployment Docker + GitHub Actions alapu lesz.
 - A public/backend szerepkiosztas es az OCI runbook kulon dokumentumban van rogzitve.
@@ -44,4 +45,4 @@ autoforge/
 
 ## Indulasi megjegyzes
 
- Ebben a fazisban a frontend alap mar letrejott, a backend Spring Boot iranyra valtott, a worker runtime valasztas meg kesobbi lepes.
+Ebben a fazisban a frontend alap mar letrejott, a backend Spring Boot iranyra valtott, a worker runtime valasztas meg kesobbi lepes.
