@@ -1,5 +1,8 @@
 services:
   backend:
+    build:
+      context: ../..
+      dockerfile: services/backend/Dockerfile
     image: ghcr.io/janake/autoforge/backend:latest
 
   worker:
