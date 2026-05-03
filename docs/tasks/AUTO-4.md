@@ -1,8 +1,8 @@
 # AUTO-4 Deploy workflow SSH fix
 
-- Statusz: in progress
+- Statusz: done
 - Branch: `AUTO-4-deploy-workflow-ssh-fix`
-- PR: `pending`
+- PR: `https://github.com/janake/autoforge/pull/7` (merged)
 
 ## Cel
 
@@ -29,3 +29,7 @@ Pelda:
 - `Deploy Private Host` workflow ujrafuttatasa
 - `Deploy Public Host` workflow futtatasa
 - tavoli `docker compose` deploy lepescsatorna sikeres lefutasa
+
+## Megjegyzes
+
+Az `AUTO-4` javitas utan a private deployben egy `ProxyCommand` word-splitting hiba maradt, ezt az `AUTO-5` task kezeli.
