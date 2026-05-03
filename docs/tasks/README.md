@@ -9,6 +9,8 @@ Itt kovetunk minden fejlesztesi feladatot.
 - A fajl neve egyezzen az azonositoval, peldaul: `AUTO-1.md`.
 - Minden feladathoz tartozo commit uzenete kezdodjon az azonositoval.
 - Az aktiv work branchek neve is tartalmazza az azonositot, peldaul: `AUTO-1-react-base`.
+- Minden task fajlban legyen `Lepesnaplo` szekcio, ahol a futtatott parancsok szerepelnek rovid leirassal.
+- A parancsokban secret/token erteket nem irunk ki, helyette placeholdert hasznalunk.
 
 Pelda:
 

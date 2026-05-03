@@ -1,8 +1,8 @@
 # AUTO-5 Private deploy jump fix
 
-- Statusz: in progress
+- Statusz: done-with-followup
 - Branch: `AUTO-5-deploy-private-jump-fix`
-- PR: `pending`
+- PR: `https://github.com/janake/autoforge/pull/8` (merged)
 
 ## Cel
 
@@ -26,7 +26,11 @@ Pelda:
 
 ## Validacio
 
-- `Deploy Private Host` workflow successful
-- `Deploy Public Host` workflow successful
+- `Deploy Private Host` workflow futasa tovabbra is hibazott a runner oldali SSH/SCP opcio parse miatt
+- fix merge-olve, de production deploy workaround kulon taskban dokumentalva
 - backend kontener fut a private hoston
 - web + gateway kontenerek futnak a public hoston
+
+## Megjegyzes
+
+- A workflow maradek hibajat es a manualis deploy/network javitasi lepeseit az `AUTO-6` task koveti.
