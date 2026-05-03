@@ -33,6 +33,12 @@ autoforge/
 - `infra/compose`: Docker Compose stackek
 - `docs`: projekt dokumentacio
 
+## Task tracking
+
+- Minden feladatot a `docs/tasks/` alatt kovetunk.
+- Minden feladat kulon Markdown fajlt kap egyedi azonosito alatt, peldaul `AUTO-1`.
+- Az adott feladathoz tartozo commitok uzenetei az azonosito prefixszel kezdodjenek, peldaul: `[AUTO-1] Add ...`
+
 ## Indulasi megjegyzes
 
 Ebben a fazisban a frontend alap mar letrejott, a backend es worker runtime valasztas meg kesobbi lepes.
