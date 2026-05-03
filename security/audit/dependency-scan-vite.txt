@@ -1,0 +1,7 @@
+Vite dependency scan summary (from validate_cves):
+
+- vite@5.4.10 has multiple CVEs. Recommended upgrade: vite@8.0.5 or higher.
+- Notable CVEs include path traversal and dev-server fs.deny bypasses that can expose local files when the dev server is exposed to the network.
+
+Recommendation: upgrade vite to ^8.0.5 and avoid exposing dev server to the network. When running dev server, set server.cors to false or to a limited set of origins.
+
