@@ -1,8 +1,8 @@
 # web
 
-Ide kerul majd a React frontend.
+Ide kerul a React frontend.
 
-Most csak a helye van eloallitva, telepites/scaffold meg nincs.
+Az alap scaffold Vite + TypeScript alapon elkeszult.
 
 Tervezett almappak:
 

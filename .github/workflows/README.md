@@ -1,8 +1,8 @@
 # workflows
 
-Ide kerulnek majd a GitHub Actions workflow-k:
+Ide kerulnek a GitHub Actions workflow-k:
 
-- build
+- frontend build
 - image push
 - deploy public gepre
 - deploy private gepre
