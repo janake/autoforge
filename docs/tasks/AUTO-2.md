@@ -1,8 +1,8 @@
 # AUTO-2 Spring backend base
 
-- Statusz: in review
+- Statusz: done
 - Branch: `AUTO-2-spring-backend`
-- PR: `https://github.com/janake/autoforge/pull/5`
+- PR: `https://github.com/janake/autoforge/pull/5` (merged)
 
 ## Cel
 

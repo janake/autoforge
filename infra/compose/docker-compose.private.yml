@@ -1,9 +1,18 @@
+name: autoforge-private
+
 services:
   backend:
-    build:
-      context: ../..
-      dockerfile: services/backend/Dockerfile
-    image: ghcr.io/janake/autoforge/backend:latest
+    image: ${BACKEND_IMAGE:-ghcr.io/janake/autoforge/backend}:${BACKEND_IMAGE_TAG:-main}
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: ${BACKEND_CONTAINER_PORT:-8080}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:-}
+    ports:
+      - "${BACKEND_HOST_PORT:-8080}:${BACKEND_CONTAINER_PORT:-8080}"
+    networks:
+      - private
 
-  worker:
-    image: ghcr.io/janake/autoforge/worker:latest
+networks:
+  private:
+    name: autoforge-private
