@@ -24,40 +24,38 @@ jobs:
 
       - name: Prepare SSH client
         env:
-          PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
-          PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
-          PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
-          PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
           SSH_KEY: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
         run: |
           install -m 700 -d ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          {
-            echo "Host oci-public"
-            echo "  HostName $PUBLIC_HOST"
-            echo "  User $PUBLIC_USER"
-            echo "  IdentityFile ~/.ssh/id_ed25519"
-            echo "  StrictHostKeyChecking accept-new"
-            echo "Host oci-private"
-            echo "  HostName $PRIVATE_HOST"
-            echo "  User $PRIVATE_USER"
-            echo "  IdentityFile ~/.ssh/id_ed25519"
-            echo "  ProxyJump oci-public"
-            echo "  StrictHostKeyChecking accept-new"
-          } > ~/.ssh/config
 
       - name: Upload private stack files
+        env:
+          PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
+          PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
+          PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |
-          ssh oci-private "mkdir -p '$DEPLOY_PATH'"
-          scp infra/compose/docker-compose.private.yml oci-private:"$DEPLOY_PATH/docker-compose.private.yml"
-          scp infra/deploy/private/deploy.sh oci-private:"$DEPLOY_PATH/deploy.sh"
-          ssh oci-private "chmod +x '$DEPLOY_PATH/deploy.sh'"
+          SSH_COMMON="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
+          SSH_PROXY="-o ProxyCommand=ssh $SSH_COMMON $PUBLIC_USER@$PUBLIC_HOST -W %h:%p"
+          TARGET="$PRIVATE_USER@$PRIVATE_HOST"
+          ssh $SSH_COMMON $SSH_PROXY "$TARGET" "mkdir -p '$DEPLOY_PATH'"
+          scp $SSH_COMMON $SSH_PROXY infra/compose/docker-compose.private.yml "$TARGET:$DEPLOY_PATH/docker-compose.private.yml"
+          scp $SSH_COMMON $SSH_PROXY infra/deploy/private/deploy.sh "$TARGET:$DEPLOY_PATH/deploy.sh"
+          ssh $SSH_COMMON $SSH_PROXY "$TARGET" "chmod +x '$DEPLOY_PATH/deploy.sh'"
 
       - name: Render private runtime environment
         env:
           IMAGE_TAG: ${{ inputs.image_tag }}
+          PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
+          PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
+          PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |
+          SSH_COMMON="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
+          SSH_PROXY="-o ProxyCommand=ssh $SSH_COMMON $PUBLIC_USER@$PUBLIC_HOST -W %h:%p"
+          TARGET="$PRIVATE_USER@$PRIVATE_HOST"
           {
             echo "BACKEND_IMAGE=ghcr.io/janake/autoforge/backend"
             echo "BACKEND_IMAGE_TAG=$IMAGE_TAG"
@@ -66,19 +64,34 @@ jobs:
             echo "SPRING_PROFILES_ACTIVE=prod"
             echo "JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC"
           } > /tmp/autoforge-private.env
-          scp /tmp/autoforge-private.env oci-private:"$DEPLOY_PATH/.env"
+          scp $SSH_COMMON $SSH_PROXY /tmp/autoforge-private.env "$TARGET:$DEPLOY_PATH/.env"
 
       - name: Upload registry credentials
         env:
+          PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
+          PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
+          PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
           GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
         run: |
+          SSH_COMMON="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
+          SSH_PROXY="-o ProxyCommand=ssh $SSH_COMMON $PUBLIC_USER@$PUBLIC_HOST -W %h:%p"
+          TARGET="$PRIVATE_USER@$PRIVATE_HOST"
           {
             echo "GHCR_USERNAME=$GHCR_DEPLOY_USERNAME"
             echo "GHCR_TOKEN=$GHCR_DEPLOY_TOKEN"
           } > /tmp/autoforge-private.deploy.env
-          scp /tmp/autoforge-private.deploy.env oci-private:"$DEPLOY_PATH/.deploy.env"
+          scp $SSH_COMMON $SSH_PROXY /tmp/autoforge-private.deploy.env "$TARGET:$DEPLOY_PATH/.deploy.env"
 
       - name: Deploy private stack
+        env:
+          PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
+          PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
+          PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |
-          ssh oci-private "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"
+          SSH_COMMON="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
+          SSH_PROXY="-o ProxyCommand=ssh $SSH_COMMON $PUBLIC_USER@$PUBLIC_HOST -W %h:%p"
+          TARGET="$PRIVATE_USER@$PRIVATE_HOST"
+          ssh $SSH_COMMON $SSH_PROXY "$TARGET" "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"

@@ -1,8 +1,8 @@
 # AUTO-3 Docker deploy foundation
 
-- Statusz: in review
+- Statusz: done
 - Branch: `AUTO-3-docker-deploy-foundation`
-- PR: `https://github.com/janake/autoforge/pull/6` (draft)
+- PR: `https://github.com/janake/autoforge/pull/6` (merged)
 
 ## Cel
 
