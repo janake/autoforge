@@ -1,8 +1,8 @@
 # AUTO-2 Spring backend base
 
-- Statusz: in progress
+- Statusz: in review
 - Branch: `codex/spring-backend`
-- PR: pending
+- PR: `https://github.com/janake/autoforge/pull/2`
 
 ## Cel
 
@@ -26,3 +26,11 @@ Pelda:
 ```text
 [AUTO-2] Add Spring backend scaffold
 ```
+
+## Validacio
+
+- `npm install`
+- `mvn -q -f services/backend/pom.xml test`
+- `mvn -q -DskipTests package -f services/backend/pom.xml`
+- GitHub Actions `Backend Build` workflow sikeresen lefutott a PR-on
+- GitHub Actions `Frontend Build` workflow sikeresen lefutott a stacked PR-on
