@@ -1,0 +1,34 @@
+name: Backend Build
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/backend-build.yml"
+      - "services/backend/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/backend-build.yml"
+      - "services/backend/**"
+
+permissions:
+  contents: read
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Run backend tests
+        run: mvn -B -q -f services/backend/pom.xml test

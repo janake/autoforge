@@ -22,14 +22,15 @@ autoforge/
 
 - A frontend React + Vite + TypeScript alappal scaffoldolva van.
 - A frontendhez alap GitHub Actions build workflow is elokeszitve van.
-- A backend es worker szolgaltatasok helye elokeszitve.
+- A backend Spring Boot + Maven alappal keszul.
+- A worker szolgaltatas helye elokeszitve.
 - A deployment Docker + GitHub Actions alapu lesz.
 - A public/backend szerepkiosztas es az OCI runbook kulon dokumentumban van rogzitve.
 
 ## Monorepo irany
 
 - `apps/web`: React frontend helye
-- `services/backend`: privat gepen futo backend szolgaltatas helye
+- `services/backend`: Spring Boot backend szolgaltatas helye
 - `services/worker`: AI altal vezerelt hatterfolyamatok helye
 - `infra/compose`: Docker Compose stackek
 - `docs`: projekt dokumentacio
@@ -42,4 +43,4 @@ autoforge/
 
 ## Indulasi megjegyzes
 
-Ebben a fazisban a frontend alap mar letrejott, a backend es worker runtime valasztas meg kesobbi lepes.
+ Ebben a fazisban a frontend alap mar letrejott, a backend Spring Boot iranyra valtott, a worker runtime valasztas meg kesobbi lepes.
