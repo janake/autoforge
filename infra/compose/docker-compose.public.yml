@@ -9,11 +9,26 @@ services:
     networks:
       - public
 
+  # API gateway (Spring Cloud Gateway) sits behind Caddy and proxies API requests
+  api:
+    image: ${API_IMAGE:-ghcr.io/janake/autoforge/api-gateway}:${API_IMAGE_TAG:-main}
+    restart: unless-stopped
+    environment:
+      # Backend upstream that the gateway should forward to (private backend address)
+      BACKEND_UPSTREAM: ${BACKEND_UPSTREAM}
+      # Optional: base context for the gateway (e.g. /api)
+      GATEWAY_CONTEXT: ${GATEWAY_CONTEXT:-/api}
+    expose:
+      - "8080"
+    networks:
+      - public
+
   gateway:
     image: caddy:2.10-alpine
     restart: unless-stopped
     depends_on:
       - web
+      - api
     environment:
       GATEWAY_DOMAIN: ${GATEWAY_DOMAIN}
       BACKEND_UPSTREAM: ${BACKEND_UPSTREAM}

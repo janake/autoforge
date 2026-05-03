@@ -1,0 +1,18 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: backend_route
+          uri: http://${BACKEND_UPSTREAM}
+          predicates:
+            - Path=${GATEWAY_CONTEXT:-/api}/**
+          filters:
+            - StripPrefix=1
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+
