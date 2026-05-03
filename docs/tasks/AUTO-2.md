@@ -1,8 +1,8 @@
 # AUTO-2 Spring backend base
 
-- Statusz: done
+- Statusz: in review
 - Branch: `AUTO-2-spring-backend`
-- PR: `https://github.com/janake/autoforge/pull/4` (merged)
+- PR: `pending main PR`
 
 ## Cel
 
@@ -34,3 +34,7 @@ Pelda:
 - `mvn -q -DskipTests package -f services/backend/pom.xml`
 - GitHub Actions `Backend Build` workflow sikeresen lefutott a PR-on
 - GitHub Actions `Frontend Build` workflow sikeresen lefutott a stacked PR-on
+
+## Megjegyzes
+
+Az eredeti backend PR a frontend branchre ment, nem a `main` branchre. Emiatt ehhez a taskhoz uj PR nyilik `main` ellen.
