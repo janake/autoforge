@@ -1,0 +1,84 @@
+name: Deploy Private Host
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: GHCR tag to deploy for the backend image
+        required: true
+        default: main
+
+permissions:
+  contents: read
+
+env:
+  DEPLOY_PATH: /opt/autoforge/private
+
+jobs:
+  deploy-private:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH client
+        env:
+          PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
+          PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
+          PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
+          SSH_KEY: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          {
+            echo "Host oci-public"
+            echo "  HostName $PUBLIC_HOST"
+            echo "  User $PUBLIC_USER"
+            echo "  IdentityFile ~/.ssh/id_ed25519"
+            echo "  StrictHostKeyChecking accept-new"
+            echo "Host oci-private"
+            echo "  HostName $PRIVATE_HOST"
+            echo "  User $PRIVATE_USER"
+            echo "  IdentityFile ~/.ssh/id_ed25519"
+            echo "  ProxyJump oci-public"
+            echo "  StrictHostKeyChecking accept-new"
+          } > ~/.ssh/config
+
+      - name: Upload private stack files
+        run: |
+          ssh oci-private "mkdir -p '$DEPLOY_PATH'"
+          scp infra/compose/docker-compose.private.yml oci-private:"$DEPLOY_PATH/docker-compose.private.yml"
+          scp infra/deploy/private/deploy.sh oci-private:"$DEPLOY_PATH/deploy.sh"
+          ssh oci-private "chmod +x '$DEPLOY_PATH/deploy.sh'"
+
+      - name: Render private runtime environment
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          {
+            echo "BACKEND_IMAGE=ghcr.io/janake/autoforge/backend"
+            echo "BACKEND_IMAGE_TAG=$IMAGE_TAG"
+            echo "BACKEND_HOST_PORT=8080"
+            echo "BACKEND_CONTAINER_PORT=8080"
+            echo "SPRING_PROFILES_ACTIVE=prod"
+            echo "JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC"
+          } > /tmp/autoforge-private.env
+          scp /tmp/autoforge-private.env oci-private:"$DEPLOY_PATH/.env"
+
+      - name: Upload registry credentials
+        env:
+          GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
+          GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
+        run: |
+          {
+            echo "GHCR_USERNAME=$GHCR_DEPLOY_USERNAME"
+            echo "GHCR_TOKEN=$GHCR_DEPLOY_TOKEN"
+          } > /tmp/autoforge-private.deploy.env
+          scp /tmp/autoforge-private.deploy.env oci-private:"$DEPLOY_PATH/.deploy.env"
+
+      - name: Deploy private stack
+        run: |
+          ssh oci-private "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"

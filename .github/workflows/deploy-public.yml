@@ -1,0 +1,80 @@
+name: Deploy Public Host
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: GHCR tag to deploy for the public web image
+        required: true
+        default: main
+
+permissions:
+  contents: read
+
+env:
+  DEPLOY_PATH: /opt/autoforge/public
+
+jobs:
+  deploy-public:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare SSH client
+        env:
+          PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
+          PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          SSH_KEY: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          {
+            echo "Host oci-public"
+            echo "  HostName $PUBLIC_HOST"
+            echo "  User $PUBLIC_USER"
+            echo "  IdentityFile ~/.ssh/id_ed25519"
+            echo "  StrictHostKeyChecking accept-new"
+          } > ~/.ssh/config
+
+      - name: Upload public stack files
+        run: |
+          ssh oci-public "mkdir -p '$DEPLOY_PATH'"
+          scp infra/compose/docker-compose.public.yml oci-public:"$DEPLOY_PATH/docker-compose.public.yml"
+          scp infra/compose/Caddyfile oci-public:"$DEPLOY_PATH/Caddyfile"
+          scp infra/deploy/public/deploy.sh oci-public:"$DEPLOY_PATH/deploy.sh"
+          ssh oci-public "chmod +x '$DEPLOY_PATH/deploy.sh'"
+
+      - name: Render public runtime environment
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          GATEWAY_DOMAIN: ${{ secrets.OCI_GATEWAY_DOMAIN }}
+          BACKEND_UPSTREAM: ${{ secrets.OCI_BACKEND_UPSTREAM }}
+        run: |
+          {
+            echo "WEB_IMAGE=ghcr.io/janake/autoforge/web"
+            echo "WEB_IMAGE_TAG=$IMAGE_TAG"
+            echo "GATEWAY_DOMAIN=$GATEWAY_DOMAIN"
+            echo "BACKEND_UPSTREAM=$BACKEND_UPSTREAM"
+            echo "WEB_UPSTREAM=web:8080"
+            echo "GATEWAY_HTTP_PORT=80"
+            echo "GATEWAY_HTTPS_PORT=443"
+          } > /tmp/autoforge-public.env
+          scp /tmp/autoforge-public.env oci-public:"$DEPLOY_PATH/.env"
+
+      - name: Upload registry credentials
+        env:
+          GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
+          GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
+        run: |
+          {
+            echo "GHCR_USERNAME=$GHCR_DEPLOY_USERNAME"
+            echo "GHCR_TOKEN=$GHCR_DEPLOY_TOKEN"
+          } > /tmp/autoforge-public.deploy.env
+          scp /tmp/autoforge-public.deploy.env oci-public:"$DEPLOY_PATH/.deploy.env"
+
+      - name: Deploy public stack
+        run: |
+          ssh oci-public "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"

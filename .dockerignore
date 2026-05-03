@@ -1,0 +1,11 @@
+.git
+.github
+.idea
+node_modules
+**/node_modules
+dist
+**/dist
+target
+**/target
+coverage
+*.log
