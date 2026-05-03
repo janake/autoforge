@@ -1,7 +1,7 @@
 # AUTO-2 Spring backend base
 
 - Statusz: in review
-- Branch: `codex/AUTO-2-spring-backend`
+- Branch: `AUTO-2-spring-backend`
 - PR: `https://github.com/janake/autoforge/pull/4`
 
 ## Cel

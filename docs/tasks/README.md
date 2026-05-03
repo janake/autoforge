@@ -8,7 +8,7 @@ Itt kovetunk minden fejlesztesi feladatot.
 - Az azonosito formatuma: `AUTO-<szam>`.
 - A fajl neve egyezzen az azonositoval, peldaul: `AUTO-1.md`.
 - Minden feladathoz tartozo commit uzenete kezdodjon az azonositoval.
-- Az aktiv work branchek neve is tartalmazza az azonositot, peldaul: `codex/AUTO-1-react-base`.
+- Az aktiv work branchek neve is tartalmazza az azonositot, peldaul: `AUTO-1-react-base`.
 
 Pelda:
 

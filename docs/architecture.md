@@ -23,4 +23,4 @@
 - Frontend build workflow prepared in GitHub Actions.
 - Backend selected: Spring Boot + Maven.
 - Worker runtime not selected yet.
-- Active work branch names include the task ID prefix.
+- Active work branch names include the task ID prefix without any extra namespace prefix.
