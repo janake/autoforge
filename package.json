@@ -5,13 +5,15 @@
   "description": "AI-assisted self-evolving application platform",
   "workspaces": [
     "apps/*",
-    "services/*"
+    "services/worker"
   ],
   "scripts": {
     "dev:web": "npm run dev --workspace @autoforge/web",
     "build:web": "npm run build --workspace @autoforge/web",
     "typecheck:web": "npm run typecheck --workspace @autoforge/web",
-    "dev:backend": "npm run dev --workspace @autoforge/backend",
+    "dev:backend": "mvn -f services/backend/pom.xml spring-boot:run",
+    "test:backend": "mvn -q -f services/backend/pom.xml test",
+    "build:backend": "mvn -q -f services/backend/pom.xml package",
     "dev:worker": "npm run dev --workspace @autoforge/worker"
   }
 }

@@ -6,7 +6,7 @@
   - React frontend
   - reverse proxy / API gateway
 - Private OCI instance:
-  - backend service
+  - Spring Boot backend service
   - worker service
 
 ## Delivery model
@@ -21,5 +21,7 @@
 - React chosen for frontend.
 - Frontend scaffolded with Vite + TypeScript.
 - Frontend build workflow prepared in GitHub Actions.
-- Backend runtime not selected yet.
+- Backend scaffolded with Spring Boot + Maven.
+- Backend build workflow prepared in GitHub Actions.
 - Worker runtime not selected yet.
+- Active work branch names include the task ID prefix without any extra namespace prefix.
