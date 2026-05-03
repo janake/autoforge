@@ -1,6 +1,6 @@
 # AUTO-1 React frontend base
 
-- Statusz: in progress
+- Statusz: in review
 - Branch: `codex/react-base`
 - PR: `https://github.com/janake/autoforge/pull/1`
 
@@ -35,3 +35,4 @@ A task tracking szabaly bevezetese elott ezen a branchen mar keszultek commitok.
 - `npm install`
 - `npm run typecheck:web`
 - `npm run build:web`
+- GitHub Actions `Frontend Build` workflow sikeresen lefutott a PR-on
