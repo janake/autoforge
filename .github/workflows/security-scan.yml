@@ -7,6 +7,9 @@ on:
       - 'apps/web/**'
       - 'package.json'
       - 'package-lock.json'
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
