@@ -1,0 +1,6 @@
+services:
+  web:
+    image: ghcr.io/janake/autoforge/web:latest
+
+  gateway:
+    image: ghcr.io/janake/autoforge/gateway:latest

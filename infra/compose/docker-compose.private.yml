@@ -1,0 +1,6 @@
+services:
+  backend:
+    image: ghcr.io/janake/autoforge/backend:latest
+
+  worker:
+    image: ghcr.io/janake/autoforge/worker:latest
