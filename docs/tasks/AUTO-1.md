@@ -1,8 +1,8 @@
 # AUTO-1 React frontend base
 
-- Statusz: in review
+- Statusz: done
 - Branch: `AUTO-1-react-base`
-- PR: `https://github.com/janake/autoforge/pull/3`
+- PR: `https://github.com/janake/autoforge/pull/3` (merged)
 
 ## Cel
 
