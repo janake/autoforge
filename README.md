@@ -21,9 +21,11 @@ autoforge/
 ## Jelenlegi allapot
 
 - A frontend React + Vite + TypeScript alappal scaffoldolva van.
+- A frontendhez deployolhato Docker image definicio is keszult.
 - A frontendhez alap GitHub Actions build workflow is elokeszitve van.
 - A backend Spring Boot + Maven alappal scaffoldolva van.
 - A backendhez alap GitHub Actions build workflow is elokeszitve van.
+- A ket OCI gephez tartozo Compose stackek es deploy workflow-k alapjai elokeszitve vannak.
 - A worker szolgaltatas helye elokeszitve.
 - A deployment Docker + GitHub Actions alapu lesz.
 - A public/backend szerepkiosztas es az OCI runbook kulon dokumentumban van rogzitve.
@@ -34,6 +36,7 @@ autoforge/
 - `services/backend`: Spring Boot backend szolgaltatas helye
 - `services/worker`: AI altal vezerelt hatterfolyamatok helye
 - `infra/compose`: Docker Compose stackek
+- `infra/deploy`: tavoli deploy scriptek
 - `docs`: projekt dokumentacio
 
 ## Task tracking
@@ -45,4 +48,4 @@ autoforge/
 
 ## Indulasi megjegyzes
 
-Ebben a fazisban a frontend alap mar letrejott, a backend Spring Boot iranyra valtott, a worker runtime valasztas meg kesobbi lepes.
+Ebben a fazisban a frontend es a backend alap mar letrejott, a ket hostos Docker deploy foundation elokeszitve van, a worker runtime valasztas meg kesobbi lepes.
