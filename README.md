@@ -21,6 +21,7 @@ autoforge/
 ## Jelenlegi allapot
 
 - A frontend React + Vite + TypeScript alappal scaffoldolva van.
+- A frontendhez alap GitHub Actions build workflow is elokeszitve van.
 - A backend es worker szolgaltatasok helye elokeszitve.
 - A deployment Docker + GitHub Actions alapu lesz.
 - A public/backend szerepkiosztas es az OCI runbook kulon dokumentumban van rogzitve.

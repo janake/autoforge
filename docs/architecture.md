@@ -20,5 +20,6 @@
 
 - React chosen for frontend.
 - Frontend scaffolded with Vite + TypeScript.
+- Frontend build workflow prepared in GitHub Actions.
 - Backend runtime not selected yet.
 - Worker runtime not selected yet.
