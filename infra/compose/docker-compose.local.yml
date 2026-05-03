@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  api:
+    image: autoforge-api-gateway:local
+    environment:
+      BACKEND_UPSTREAM: backend:8080
+      GATEWAY_CONTEXT: /api
+    expose:
+      - "8080"
+    networks:
+      - public
+  gateway:
+    image: caddy:2.10-alpine
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+    volumes:
+      - ./infra/compose/Caddyfile:/etc/caddy/Caddyfile:ro
+    networks:
+      - public
+  backend:
+    image: autoforge-backend:local
+    restart: unless-stopped
+    # DO NOT publish backend port to host — keep it internal only
+    expose:
+      - "8080"
+    networks:
+      - private
+networks:
+  public:
+  private:

@@ -19,3 +19,7 @@ coverage/
 *.tsbuildinfo
 target/
 *.class
+
+# ignore built gateway jar
+infra/gateway/gateway.jar
+
