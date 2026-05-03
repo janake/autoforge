@@ -19,6 +19,6 @@
 ## Current status
 
 - React chosen for frontend.
-- Frontend not scaffolded yet.
+- Frontend scaffolded with Vite + TypeScript.
 - Backend runtime not selected yet.
 - Worker runtime not selected yet.

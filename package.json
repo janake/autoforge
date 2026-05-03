@@ -8,8 +8,10 @@
     "services/*"
   ],
   "scripts": {
-    "dev:web": "npm --workspace @autoforge/web run dev",
-    "dev:backend": "npm --workspace @autoforge/backend run dev",
-    "dev:worker": "npm --workspace @autoforge/worker run dev"
+    "dev:web": "npm run dev --workspace @autoforge/web",
+    "build:web": "npm run build --workspace @autoforge/web",
+    "typecheck:web": "npm run typecheck --workspace @autoforge/web",
+    "dev:backend": "npm run dev --workspace @autoforge/backend",
+    "dev:worker": "npm run dev --workspace @autoforge/worker"
   }
 }
