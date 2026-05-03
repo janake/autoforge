@@ -40,7 +40,7 @@ autoforge/
 - Minden feladatot a `docs/tasks/` alatt kovetunk.
 - Minden feladat kulon Markdown fajlt kap egyedi azonosito alatt, peldaul `AUTO-1`.
 - Az adott feladathoz tartozo commitok uzenetei az azonosito prefixszel kezdodjenek, peldaul: `[AUTO-1] Add ...`
-- Az aktiv work branchek neve is tartalmazza az azonositot, peldaul: `codex/AUTO-1-react-base`.
+- Az aktiv work branchek neve is tartalmazza az azonositot, peldaul: `AUTO-1-react-base`.
 
 ## Indulasi megjegyzes
 
