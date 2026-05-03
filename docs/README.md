@@ -13,6 +13,10 @@ Itt lesznek majd:
 - local dev megjegyzesek
 - task tracking
 
+Biztonsági vizsgálatok és PR-specifikus runbookok:
+
+- `docs/security/` alatt tároljuk a PR-enkénti audit és image-scan jelentéseket és útmutatókat (például: `docs/security/pr-10-audit-and-scan.md`).
+
 ## Task tracking szabaly
 
 - Minden feladatot a `docs/tasks/` alatt kovetunk.
