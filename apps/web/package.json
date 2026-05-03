@@ -1,0 +1,11 @@
+{
+  "name": "@autoforge/web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "React frontend for Autoforge. Scaffold pending.",
+  "scripts": {
+    "dev": "echo \"React frontend is not scaffolded yet\" && exit 1",
+    "build": "echo \"React frontend is not scaffolded yet\" && exit 1",
+    "test": "echo \"React frontend tests are not configured yet\" && exit 1"
+  }
+}

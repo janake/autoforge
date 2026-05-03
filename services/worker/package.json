@@ -1,0 +1,11 @@
+{
+  "name": "@autoforge/worker",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Worker service for Autoforge. Runtime pending.",
+  "scripts": {
+    "dev": "echo \"Worker runtime is not selected yet\" && exit 1",
+    "build": "echo \"Worker runtime is not selected yet\" && exit 1",
+    "test": "echo \"Worker tests are not configured yet\" && exit 1"
+  }
+}

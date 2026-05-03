@@ -1,0 +1,15 @@
+{
+  "name": "autoforge",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI-assisted self-evolving application platform",
+  "workspaces": [
+    "apps/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace @autoforge/web run dev",
+    "dev:backend": "npm --workspace @autoforge/backend run dev",
+    "dev:worker": "npm --workspace @autoforge/worker run dev"
+  }
+}
