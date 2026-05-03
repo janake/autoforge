@@ -2,7 +2,7 @@
 
 - Statusz: done
 - Branch: `AUTO-6-manual-deploy-network-fix`
-- PR: `pending`
+- PR: `https://github.com/janake/autoforge/pull/9`
 
 ## Cel
 
@@ -121,4 +121,3 @@ ssh -i <redacted-home>/.ssh/ssh-key-2025-09-21.key ubuntu@144.24.176.5 "docker l
 - `oci.prodet.org`: elerheto HTTPS-en
 - `api.oci.prodet.org/actuator/health`: `{"status":"UP",...}`
 - Caddy Let's Encrypt cert sikeresen kiadva mindket domainre
-
