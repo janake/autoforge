@@ -95,6 +95,36 @@ Magyarazat:
 - letrehozza a ket deploy konyvtarat
 - az aktualis SSH user tulajdonaba adja oket
 
+## Halozati elofeltetelek
+
+A public host kulso HTTPS eleresehez ket retegen is nyitva kell lennie a portoknak:
+
+1. OCI subnet security list:
+- `22/tcp` (SSH)
+- `80/tcp` (HTTP, ACME challenge)
+- `443/tcp` (HTTPS)
+
+2. Public host iptables:
+- INPUT chainben engedni kell `80/tcp` es `443/tcp` bejovo kapcsolatokat.
+
+Gyors ellenorzes:
+
+```bash
+sudo iptables -S | grep -E 'dport (22|80|443)'
+```
+
+Ha Oracle image default szabaly miatt csak `22` nyitott, akkor a `rules.v4`-et boviteni kell es persistalni:
+
+```bash
+sudo sed -i '/--dport 22 -j ACCEPT/a -A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT\n-A INPUT -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT' /etc/iptables/rules.v4
+sudo iptables-restore < /etc/iptables/rules.v4
+sudo netfilter-persistent save
+```
+
+Megjegyzes:
+
+- `iptables-restore` utan Docker chain-ek hianyozhatnak; ilyenkor `sudo systemctl restart docker`, majd compose `up -d --remove-orphans` kell.
+
 ## Kezi frissitesi parancsok
 
 Publikus host:
