@@ -42,6 +42,7 @@ jobs:
           TARGET="$PRIVATE_USER@$PRIVATE_HOST"
           ssh "${SSH_COMMON[@]}" -J "$JUMP_TARGET" "$TARGET" "mkdir -p '$DEPLOY_PATH'"
           scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" infra/compose/docker-compose.private.yml "$TARGET:$DEPLOY_PATH/docker-compose.private.yml"
+          scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" infra/compose/opencode.json "$TARGET:$DEPLOY_PATH/opencode.json"
           scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" infra/deploy/private/deploy.sh "$TARGET:$DEPLOY_PATH/deploy.sh"
           ssh "${SSH_COMMON[@]}" -J "$JUMP_TARGET" "$TARGET" "chmod +x '$DEPLOY_PATH/deploy.sh'"
 
@@ -52,6 +53,8 @@ jobs:
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
+          OPENCODE_SERVER_PASSWORD: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OCI_OPENAI_API_KEY }}
         run: |
           SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
@@ -63,6 +66,13 @@ jobs:
             echo "BACKEND_CONTAINER_PORT=8080"
             echo "SPRING_PROFILES_ACTIVE=prod"
             echo "JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC"
+            echo "OPENCODE_IMAGE=ghcr.io/anomalyco/opencode"
+            echo "OPENCODE_IMAGE_TAG=latest"
+            echo "OPENCODE_SERVER_URL=http://opencode:4096"
+            echo "OPENCODE_SERVER_USERNAME=opencode"
+            echo "OPENCODE_SERVER_PASSWORD=$OPENCODE_SERVER_PASSWORD"
+            echo "OPENCODE_SERVER_PORT=4096"
+            echo "OPENAI_API_KEY=$OPENAI_API_KEY"
           } > /tmp/autoforge-private.env
           scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" /tmp/autoforge-private.env "$TARGET:$DEPLOY_PATH/.env"
 

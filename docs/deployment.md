@@ -16,6 +16,7 @@ A `Container Images` workflow ezeket az image-eket kezeli:
 - `ghcr.io/<registry-owner>/autoforge/web`
 - `ghcr.io/<registry-owner>/autoforge/api-gateway`
 - `ghcr.io/<registry-owner>/autoforge/backend`
+- `ghcr.io/anomalyco/opencode` a private stackben közvetlenül használva van, ezt nem ez a workflow építi
 
 A workflow a `main` es `sha-<commit>` tageket kesziti el.
 
@@ -32,8 +33,11 @@ Publikus host:
 Privat host:
 
 - fajl: `infra/compose/docker-compose.private.yml`
-- szolgaltatasok: `backend`
+- szolgaltatasok: `backend`, `opencode`
 - host port: `8080`
+- plusz config: `infra/compose/opencode.json`
+- opencode server: belso REST endpoint a backendhez, auth-vedett
+- opencode image: `ghcr.io/anomalyco/opencode`
 
 ## Host konyvtarak
 
@@ -49,6 +53,7 @@ A tipikus tartalom:
 - `.deploy.env`
 - `deploy.sh`
 - publikus hoston plusz `Caddyfile`
+- privat hoston plusz `opencode.json`
 
 ## Workflow-k
 
@@ -56,7 +61,7 @@ A tipikus tartalom:
 - `Backend Build`: PR es main test a Spring Boot apphoz
 - `Container Images`: web es backend image build + push GHCR-be
 - `Deploy Public Host`: manual workflow a publikus stack frissitesere
-- `Deploy Private Host`: manual workflow a privat stack frissitesere ProxyJump-pal
+- `Deploy Private Host`: manual workflow a privat stack frissitesere ProxyJump-pal, beleertve a backendet es az opencode REST AI service-et
 
 ## Szukseges GitHub secret-ek
 
@@ -67,6 +72,8 @@ A tipikus tartalom:
 - `OCI_PRIVATE_USER`: a privat host SSH felhasznaloja
 - `OCI_GATEWAY_DOMAIN`: peldaul `oci.prodet.org, api.oci.prodet.org`
 - `OCI_BACKEND_UPSTREAM`: peldaul `10.42.0.91:8080`
+- `OCI_OPENCODE_SERVER_PASSWORD`: az opencode REST szerver HTTP basic auth jelszava
+- `OCI_OPENAI_API_KEY`: az opencode alap provider API kulcsa
 - `GHCR_DEPLOY_USERNAME`: GHCR olvasasi jogosultsagu usernev
 - `GHCR_DEPLOY_TOKEN`: GHCR olvasasi jogu token
 
