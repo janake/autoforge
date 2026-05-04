@@ -3,11 +3,11 @@ Feladat leírása
 A hátsó OCI gépen egy Dockerben futó OpenCode REST AI szolgáltatást kell bevezetni, amelyet a backend belső hálózaton tud hívni. A szolgáltatás nem kap publikus host portot, csak a private compose stack részeként fut.
 
 Statusz
-- in-progress
+- done
 Branch
 - `AUTO-9-opencode-rest-ai`
 PR
-- pending
+- merged
 
 Acceptance criteria
 - A `infra/compose/docker-compose.private.yml` tartalmaz `opencode` szolgáltatást.
@@ -34,7 +34,7 @@ Dokumentumok és fájlok
 Biztonsági megfontolások
 - Az opencode szolgáltatás nem kap publikus portot.
 - Az opencode HTTP felületét jelszó védi.
-- Az AI provider API kulcsa nem kerül gitbe, csak GitHub secretből és runtime `.env` fájlból érkezik.
+- Az AI provider API kulcsa nem kerül gitbe.
 - A backend és az opencode közötti kommunikáció csak a private Docker networkön történik.
 
 Lepesnaplo
@@ -43,4 +43,4 @@ Lepesnaplo
 3. Felmértem a private deploy workflow-t, hogy az opencode config és secret-ek is felkerülhessenek a hostra.
 
 Eredmény
-- pending
+- merged. A Vault-alapu secret betoltes es a private deploy javitas kulon `AUTO-10` feladatban folytatodik.

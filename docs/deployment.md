@@ -16,7 +16,7 @@ A `Container Images` workflow ezeket az image-eket kezeli:
 - `ghcr.io/<registry-owner>/autoforge/web`
 - `ghcr.io/<registry-owner>/autoforge/api-gateway`
 - `ghcr.io/<registry-owner>/autoforge/backend`
-- `ghcr.io/anomalyco/opencode` a private stackben közvetlenül használva van, ezt nem ez a workflow építi
+- `ghcr.io/anomalyco/opencode` hivatalos OpenCode image-kent fut a private stackben, ezt nem ez a workflow epiti
 
 A workflow a `main` es `sha-<commit>` tageket kesziti el.
 
@@ -27,7 +27,7 @@ Publikus host:
 - fajl: `infra/compose/docker-compose.public.yml`
 - szolgaltatasok: `web`, `api`, `gateway`
 - gateway domain: `oci.prodet.org`, `api.oci.prodet.org`
-- backend upstream: a privat host belso cime, jelenleg varhatoan `10.42.0.91:8080`
+- backend upstream: a privat host belso cime, peldaul `<private-backend-ip>:8080`
 - API image: `ghcr.io/<registry-owner>/autoforge/api-gateway`
 
 Privat host:
@@ -38,6 +38,7 @@ Privat host:
 - plusz config: `infra/compose/opencode.json`
 - opencode server: belso REST endpoint a backendhez, auth-vedett
 - opencode image: `ghcr.io/anomalyco/opencode`
+- opencode secret ertekek: OCI Vaultbol, instance principal-lal olvasva a private hoston
 
 ## Host konyvtarak
 
@@ -65,24 +66,56 @@ A tipikus tartalom:
 
 ## Szukseges GitHub secret-ek
 
+Kapcsolati es registry secret-ek:
+
 - `OCI_SSH_PRIVATE_KEY`: a deploy SSH kulcs privat fele
 - `OCI_PUBLIC_HOST`: a publikus host DNS neve vagy IP-je
 - `OCI_PUBLIC_USER`: a publikus host SSH felhasznaloja
 - `OCI_PRIVATE_HOST`: a privat host belso IP-je
 - `OCI_PRIVATE_USER`: a privat host SSH felhasznaloja
 - `OCI_GATEWAY_DOMAIN`: peldaul `oci.prodet.org, api.oci.prodet.org`
-- `OCI_BACKEND_UPSTREAM`: peldaul `10.42.0.91:8080`
-- `OCI_OPENCODE_SERVER_PASSWORD`: az opencode REST szerver HTTP basic auth jelszava
-- `OCI_OPENAI_API_KEY`: az opencode alap provider API kulcsa
+- `OCI_BACKEND_UPSTREAM`: peldaul `<private-backend-ip>:8080`
 - `GHCR_DEPLOY_USERNAME`: GHCR olvasasi jogosultsagu usernev
 - `GHCR_DEPLOY_TOKEN`: GHCR olvasasi jogu token
+
+Vault secret azonosito GitHub secret-ek:
+
+- `OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-opencode-server-password` secret OCID-ja
+- `OCI_OPENAI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-openai-api-key` secret OCID-ja
+
+Fontos:
+
+- A GitHub secret-ekben csak a Vault secret OCID-k szerepelnek, nem az OpenCode jelszo vagy provider API kulcs ertekei.
+- A deploy workflow ezeket az OCID-ket masolja a private host `.env` fajljaba.
+- A private host `deploy.sh` scriptje olvassa ki a konkret secret ertekeket OCI Vaultbol, `--auth instance_principal` hasznalataval.
+
+## Szükséges OCI Vault secret-ek
+
+- `autoforge-opencode-server-password`: az OpenCode REST szerver HTTP basic auth jelszava. Legalabb 32 karakteres, veletlen, newline nelkuli ertek legyen.
+- `autoforge-openai-api-key`: az OpenAI API kulcs, amelyet az OpenCode provider hasznal. Newline nelkuli ertek legyen.
+
+## Szükséges OCI jogosultság
+
+A private compute instance-nek instance principalon keresztul kell tudnia olvasni a Vault secret bundle-ok tartalmat.
+
+Minimum elofeltetelek:
+
+- A private instance legyen benne egy OCI Dynamic Groupban.
+- Legyen policy, amely engedi a Dynamic Groupnak a secret bundle olvasast abban a compartmentben vagy vaultban, ahol a ket secret van.
+- A private hoston legyen telepitve az OCI CLI.
+
+Pelda policy minta:
+
+```text
+Allow dynamic-group <dynamic-group-name> to read secret-bundles in compartment prodet-new
+```
 
 ## Erzekeny adatok kezelese
 
 - Gitbe nem kerulhet privat kulcs, kulcsfajl-nev, abszolut lokalis path, szemelyes felhasznalonev, email, token vagy cloud credential.
 - Deploy parancsokban szemelyes path helyett env valtozot kell hasznalni, peldaul `${AUTOFORGE_SSH_KEY}`.
 - Registry owner, repo owner es account nev csak placeholderkent vagy GitHub Actions runtime valtozokent szerepelhet.
-- Konkreten hasznalt secret ertekek csak GitHub Secretsben vagy a celgepek `.env` fajljaiban lehetnek, gitelt fajlban nem.
+- Konkreten hasznalt secret ertekek gitelt fajlban nem lehetnek; OpenCode runtime secret ertekek OCI Vaultban vannak, es csak deploy futaskor kerulnek at ideiglenes runtime env fajlba.
 
 ## Szerver bootstrap minimum
 
@@ -146,11 +179,18 @@ docker compose --env-file .env -f docker-compose.public.yml up -d --remove-orpha
 Privat host:
 
 ```bash
-docker compose --env-file .env -f docker-compose.private.yml pull
-docker compose --env-file .env -f docker-compose.private.yml up -d --remove-orphans
+APP_DIR=/opt/autoforge/private bash /opt/autoforge/private/deploy.sh
 ```
 
-Ha a hoston nincs `docker compose` plugin, ugyanennek a standalone megfeleloje:
+Magyarazat:
+
+- a private deploy script beolvassa a Vault secret ertekeket;
+- letrehoz egy ideiglenes runtime env fajlt;
+- ezzel futtatja a private Docker Compose stack frissiteset.
+
+Ha a hoston nincs `docker compose` plugin, a script automatikusan standalone `docker-compose` parancsra valt.
+
+Publikus host standalone compose pelda:
 
 ```bash
 docker-compose --env-file .env -f docker-compose.public.yml pull

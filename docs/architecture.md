@@ -32,6 +32,7 @@
 - Docker Compose stacks are defined for the public and private OCI hosts.
 - Manual GitHub Actions deploy workflows are prepared for both hosts.
 - The private host now also runs an OpenCode REST AI service for backend-driven AI tasks.
+- OpenCode runtime secrets are stored in OCI Vault and read by the private compute instance with instance principal authorization.
 - Worker runtime not selected yet.
 - Active work branch names include the task ID prefix without any extra namespace prefix.
 

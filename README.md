@@ -27,7 +27,7 @@ autoforge/
 - A backend Spring Boot + Maven alappal scaffoldolva van.
 - A backendhez alap GitHub Actions build workflow is elokeszitve van.
 - A ket OCI gephez tartozo Compose stackek es deploy workflow-k alapjai elokeszitve vannak.
-- A privat hoston egy OpenCode REST AI szolgaltatas is fut a backend hivasaihoz.
+- A privat stack tartalmaz egy OpenCode REST AI szolgaltatast a backend hivasaihoz, Vaultbol betoltott runtime secret-ekkel.
 - A worker szolgaltatas helye elokeszitve.
 - A deployment Docker + GitHub Actions alapu lesz.
 - A public/backend szerepkiosztas es az OCI runbook kulon dokumentumban van rogzitve.

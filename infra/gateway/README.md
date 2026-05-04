@@ -14,4 +14,4 @@ Files:
 Usage:
 1. Build and push the Docker image through the `Container Images` workflow, or build locally from this directory.
 2. Set `API_IMAGE`/`API_IMAGE_TAG` if you want to deploy a non-default registry image.
-3. Set `BACKEND_UPSTREAM` in the public host `.env` to the private backend address (e.g. `10.42.0.91:8080`).
+3. Set `BACKEND_UPSTREAM` in the public host `.env` to the private backend address (e.g. `<private-backend-ip>:8080`).
