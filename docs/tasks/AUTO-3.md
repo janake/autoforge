@@ -2,7 +2,7 @@
 
 - Statusz: done
 - Branch: `AUTO-3-docker-deploy-foundation`
-- PR: `https://github.com/janake/autoforge/pull/6` (merged)
+- PR: `PR #6` (merged)
 
 ## Cel
 

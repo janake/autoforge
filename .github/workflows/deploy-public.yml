@@ -54,9 +54,9 @@ jobs:
           SSH_OPTS="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
           TARGET="$PUBLIC_USER@$PUBLIC_HOST"
           {
-            echo "WEB_IMAGE=ghcr.io/janake/autoforge/web"
+            echo "WEB_IMAGE=ghcr.io/${{ github.repository_owner }}/autoforge/web"
             echo "WEB_IMAGE_TAG=$IMAGE_TAG"
-            echo "API_IMAGE=ghcr.io/janake/autoforge/api-gateway"
+            echo "API_IMAGE=ghcr.io/${{ github.repository_owner }}/autoforge/api-gateway"
             echo "API_IMAGE_TAG=$IMAGE_TAG"
             echo "GATEWAY_DOMAIN=$GATEWAY_DOMAIN"
             echo "BACKEND_UPSTREAM=$BACKEND_UPSTREAM"

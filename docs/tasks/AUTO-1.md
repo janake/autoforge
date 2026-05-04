@@ -2,7 +2,7 @@
 
 - Statusz: done
 - Branch: `AUTO-1-react-base`
-- PR: `https://github.com/janake/autoforge/pull/3` (merged)
+- PR: `PR #3` (merged)
 
 ## Cel
 

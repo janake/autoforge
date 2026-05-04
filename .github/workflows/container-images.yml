@@ -39,7 +39,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/janake/autoforge/web
+          images: ghcr.io/${{ github.repository_owner }}/autoforge/web
           tags: |
             type=raw,value=main,enable={{is_default_branch}}
             type=sha,prefix=sha-
@@ -74,7 +74,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/janake/autoforge/backend
+          images: ghcr.io/${{ github.repository_owner }}/autoforge/backend
           tags: |
             type=raw,value=main,enable={{is_default_branch}}
             type=sha,prefix=sha-
@@ -109,7 +109,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/janake/autoforge/api-gateway
+          images: ghcr.io/${{ github.repository_owner }}/autoforge/api-gateway
           tags: |
             type=raw,value=main,enable={{is_default_branch}}
             type=sha,prefix=sha-

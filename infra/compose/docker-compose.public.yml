@@ -2,7 +2,7 @@ name: autoforge-public
 
 services:
   web:
-    image: ${WEB_IMAGE:-ghcr.io/janake/autoforge/web}:${WEB_IMAGE_TAG:-main}
+    image: ${WEB_IMAGE:?WEB_IMAGE is required}:${WEB_IMAGE_TAG:-main}
     restart: unless-stopped
     expose:
       - "8080"
@@ -11,7 +11,7 @@ services:
 
   # API gateway (Spring Cloud Gateway) sits behind Caddy and proxies API requests
   api:
-    image: ${API_IMAGE:-ghcr.io/janake/autoforge/api-gateway}:${API_IMAGE_TAG:-main}
+    image: ${API_IMAGE:?API_IMAGE is required}:${API_IMAGE_TAG:-main}
     restart: unless-stopped
     environment:
       # Backend upstream that the gateway should forward to (private backend address)

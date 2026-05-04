@@ -13,8 +13,8 @@ A GitHub Actions workflow-k GHCR image-eket hasznalnak, majd SSH-n keresztul fri
 
 A `Container Images` workflow ezeket az image-eket kezeli:
 
-- `ghcr.io/janake/autoforge/web`
-- `ghcr.io/janake/autoforge/backend`
+- `ghcr.io/<registry-owner>/autoforge/web`
+- `ghcr.io/<registry-owner>/autoforge/backend`
 
 A workflow a `main` es `sha-<commit>` tageket kesziti el.
 
@@ -67,6 +67,13 @@ A tipikus tartalom:
 - `OCI_BACKEND_UPSTREAM`: peldaul `10.42.0.91:8080`
 - `GHCR_DEPLOY_USERNAME`: GHCR olvasasi jogosultsagu usernev
 - `GHCR_DEPLOY_TOKEN`: GHCR olvasasi jogu token
+
+## Erzekeny adatok kezelese
+
+- Gitbe nem kerulhet privat kulcs, kulcsfajl-nev, abszolut lokalis path, szemelyes felhasznalonev, email, token vagy cloud credential.
+- Deploy parancsokban szemelyes path helyett env valtozot kell hasznalni, peldaul `${AUTOFORGE_SSH_KEY}`.
+- Registry owner, repo owner es account nev csak placeholderkent vagy GitHub Actions runtime valtozokent szerepelhet.
+- Konkreten hasznalt secret ertekek csak GitHub Secretsben vagy a celgepek `.env` fajljaiban lehetnek, gitelt fajlban nem.
 
 ## Szerver bootstrap minimum
 

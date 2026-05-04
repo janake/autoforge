@@ -2,7 +2,7 @@
 
 - Statusz: done
 - Branch: `AUTO-4-deploy-workflow-ssh-fix`
-- PR: `https://github.com/janake/autoforge/pull/7` (merged)
+- PR: `PR #7` (merged)
 
 ## Cel
 
