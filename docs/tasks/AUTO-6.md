@@ -117,7 +117,7 @@ ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@144.24.176.5 "docker logs --tail 50 autoforge
 ## Eredmeny
 
 - Private backend: fut (`ghcr.io/<registry-owner>/autoforge/backend:main`), health: `UP`
-- Public web + gateway: fut (`ghcr.io/<registry-owner>/autoforge/web:main` + `caddy:2.10-alpine`)
+- Public web + api + gateway: fut (`ghcr.io/<registry-owner>/autoforge/web:main` + `ghcr.io/<registry-owner>/autoforge/api-gateway:main` + `caddy:2.10-alpine`)
 - `oci.prodet.org`: elerheto HTTPS-en
 - `api.oci.prodet.org/actuator/health`: `{"status":"UP",...}`
 - Caddy Let's Encrypt cert sikeresen kiadva mindket domainre

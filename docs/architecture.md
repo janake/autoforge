@@ -4,7 +4,8 @@
 
 - Public OCI instance:
   - React frontend
-  - reverse proxy / API gateway
+  - Spring Cloud API gateway
+  - reverse proxy / Caddy
 - Private OCI instance:
   - Spring Boot backend service
   - worker service
@@ -13,7 +14,7 @@
 
 - Every component runs in Docker.
 - Build and deployment flow will be driven by GitHub Actions.
-- The public host serves as the external entry point.
+- The public host serves as the external entry point via Caddy, which routes `/api` to the API gateway and everything else to the web frontend.
 - The private host serves internal application workloads.
 
 ## Current status
