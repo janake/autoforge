@@ -3,13 +3,13 @@ Feladat leírása
 A private OpenCode REST AI service deploy hibáit javítani kell úgy, hogy a secret értékek ne GitHubból és ne gitelt fájlból érkezzenek, hanem OCI Vaultból, a private compute instance instance principal jogosultságával.
 
 Statusz
-- in-progress
+- review
 
 Branch
 - `AUTO-10-opencode-vault-fix`
 
 PR
-- pending
+- PR #14
 
 Acceptance criteria
 - A private deploy workflow nem ír OpenCode jelszót vagy provider API kulcsot a host `.env` fájljába.
@@ -70,4 +70,4 @@ Lepesnaplo
    ```
 
 Eredmény
-- pending
+- PR #14 megnyitva review-ra.
