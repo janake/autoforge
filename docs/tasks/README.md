@@ -14,6 +14,7 @@ Itt kovetunk minden fejlesztesi feladatot.
 - Gitbe nem irunk szemelyes vagy erzekeny adatot: privat kulcsot, kulcsfajl-nevet, abszolut lokalis pathot, felhasznalonevet, emailt, tokent, cloud credentialt, tenancy/user OCID-t.
 - Szemelyes azonositok helyett placeholdert, GitHub secretet vagy env valtozot kell hasznalni, peldaul `${AUTOFORGE_SSH_KEY}`, `<registry-owner>`, `<repo-url>`.
 - PR vagy issue hivatkozasnal teljes URL helyett belso azonositot hasznalunk, peldaul `PR #9`.
+- Ha az architektura valtozik, a diagramot is ugyanabban a valtozasban frissiteni kell.
 
 Pelda:
 

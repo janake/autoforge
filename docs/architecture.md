@@ -34,3 +34,7 @@
 - The private host now also runs an OpenCode REST AI service for backend-driven AI tasks.
 - Worker runtime not selected yet.
 - Active work branch names include the task ID prefix without any extra namespace prefix.
+
+## Diagram Rule
+
+- If the architecture changes, update this diagram in the same change set.
