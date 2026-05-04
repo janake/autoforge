@@ -35,13 +35,13 @@ jobs:
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
         run: |
-          SSH_OPTS="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
+          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           TARGET="$PUBLIC_USER@$PUBLIC_HOST"
-          ssh $SSH_OPTS "$TARGET" "mkdir -p '$DEPLOY_PATH'"
-          scp $SSH_OPTS infra/compose/docker-compose.public.yml "$TARGET:$DEPLOY_PATH/docker-compose.public.yml"
-          scp $SSH_OPTS infra/compose/Caddyfile "$TARGET:$DEPLOY_PATH/Caddyfile"
-          scp $SSH_OPTS infra/deploy/public/deploy.sh "$TARGET:$DEPLOY_PATH/deploy.sh"
-          ssh $SSH_OPTS "$TARGET" "chmod +x '$DEPLOY_PATH/deploy.sh'"
+          ssh "${SSH_COMMON[@]}" "$TARGET" "mkdir -p '$DEPLOY_PATH'"
+          scp "${SSH_COMMON[@]}" infra/compose/docker-compose.public.yml "$TARGET:$DEPLOY_PATH/docker-compose.public.yml"
+          scp "${SSH_COMMON[@]}" infra/compose/Caddyfile "$TARGET:$DEPLOY_PATH/Caddyfile"
+          scp "${SSH_COMMON[@]}" infra/deploy/public/deploy.sh "$TARGET:$DEPLOY_PATH/deploy.sh"
+          ssh "${SSH_COMMON[@]}" "$TARGET" "chmod +x '$DEPLOY_PATH/deploy.sh'"
 
       - name: Render public runtime environment
         env:
@@ -65,7 +65,7 @@ jobs:
             echo "GATEWAY_HTTP_PORT=80"
             echo "GATEWAY_HTTPS_PORT=443"
           } > /tmp/autoforge-public.env
-          scp $SSH_OPTS /tmp/autoforge-public.env "$TARGET:$DEPLOY_PATH/.env"
+          scp "${SSH_COMMON[@]}" /tmp/autoforge-public.env "$TARGET:$DEPLOY_PATH/.env"
 
       - name: Upload registry credentials
         env:
@@ -74,19 +74,19 @@ jobs:
           GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
         run: |
-          SSH_OPTS="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
+          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           TARGET="$PUBLIC_USER@$PUBLIC_HOST"
           {
             echo "GHCR_USERNAME=$GHCR_DEPLOY_USERNAME"
             echo "GHCR_TOKEN=$GHCR_DEPLOY_TOKEN"
           } > /tmp/autoforge-public.deploy.env
-          scp $SSH_OPTS /tmp/autoforge-public.deploy.env "$TARGET:$DEPLOY_PATH/.deploy.env"
+          scp "${SSH_COMMON[@]}" /tmp/autoforge-public.deploy.env "$TARGET:$DEPLOY_PATH/.deploy.env"
 
       - name: Deploy public stack
         env:
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
         run: |
-          SSH_OPTS="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
+          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           TARGET="$PUBLIC_USER@$PUBLIC_HOST"
-          ssh $SSH_OPTS "$TARGET" "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"
+          ssh "${SSH_COMMON[@]}" "$TARGET" "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"
