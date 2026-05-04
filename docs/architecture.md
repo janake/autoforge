@@ -1,5 +1,7 @@
 # Architecture
 
+![Autoforge OCI architecture](assets/autoforge-oci-architecture.png)
+
 ## Deployment shape
 
 - Public OCI instance:
