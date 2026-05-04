@@ -11,6 +11,9 @@ Itt kovetunk minden fejlesztesi feladatot.
 - Az aktiv work branchek neve is tartalmazza az azonositot, peldaul: `AUTO-1-react-base`.
 - Minden task fajlban legyen `Lepesnaplo` szekcio, ahol a futtatott parancsok szerepelnek rovid leirassal.
 - A parancsokban secret/token erteket nem irunk ki, helyette placeholdert hasznalunk.
+- Gitbe nem irunk szemelyes vagy erzekeny adatot: privat kulcsot, kulcsfajl-nevet, abszolut lokalis pathot, felhasznalonevet, emailt, tokent, cloud credentialt, tenancy/user OCID-t.
+- Szemelyes azonositok helyett placeholdert, GitHub secretet vagy env valtozot kell hasznalni, peldaul `${AUTOFORGE_SSH_KEY}`, `<registry-owner>`, `<repo-url>`.
+- PR vagy issue hivatkozasnal teljes URL helyett belso azonositot hasznalunk, peldaul `PR #9`.
 
 Pelda:
 

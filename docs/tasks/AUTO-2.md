@@ -2,7 +2,7 @@
 
 - Statusz: done
 - Branch: `AUTO-2-spring-backend`
-- PR: `https://github.com/janake/autoforge/pull/5` (merged)
+- PR: `PR #5` (merged)
 
 ## Cel
 
@@ -38,5 +38,5 @@ Pelda:
 ## Megjegyzes
 
 Az eredeti backend PR a frontend branchre ment, nem a `main` branchre.
-Az eredeti stacked PR: `https://github.com/janake/autoforge/pull/4`
-Az aktualis `main` elleni PR: `https://github.com/janake/autoforge/pull/5`
+Az eredeti stacked PR: `PR #4`
+Az aktualis `main` elleni PR: `PR #5`

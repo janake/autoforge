@@ -6,7 +6,9 @@
   encode zstd gzip
 
   @backend path /api* /actuator*
-  reverse_proxy @backend {$BACKEND_UPSTREAM}
+  # Proxy API requests to the Spring Cloud API Gateway running as `api` service
+  reverse_proxy @backend {$API_UPSTREAM:api:8080}
 
+  # All other requests go to the web upstream
   reverse_proxy {$WEB_UPSTREAM}
 }

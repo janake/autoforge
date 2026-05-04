@@ -2,7 +2,7 @@
 
 - Statusz: done-with-followup
 - Branch: `AUTO-5-deploy-private-jump-fix`
-- PR: `https://github.com/janake/autoforge/pull/8` (merged)
+- PR: `PR #8` (merged)
 
 ## Cel
 

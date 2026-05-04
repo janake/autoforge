@@ -20,5 +20,5 @@ Testing performed
 
 - Static scans and quick code inspection; no full CI runs were executed in this branch.
 
-Suggested reviewers: @janake
+Suggested reviewers: <redacted>
 
