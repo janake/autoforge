@@ -8,11 +8,10 @@ Design notes:
 - The gateway is expected to accept requests under a base context (e.g. `/api`) and forward them to the backend upstream configured via `BACKEND_UPSTREAM`.
 
 Files:
-- `application.yml` — example Spring Cloud Gateway configuration showing a route that forwards `/api/**` to the backend upstream and strips the prefix.
-- `Dockerfile` — template to build the gateway image from a Spring Boot fat jar.
+- `application.yml` — Spring Cloud Gateway configuration forwarding `/api/**` and `/actuator/**` to the backend upstream.
+- `Dockerfile` — multi-stage image build that compiles the gateway app and runs the resulting Spring Boot jar.
 
 Usage:
-1. Build your Spring Cloud Gateway app into a fat jar (e.g. `gateway.jar`).
-2. Build the Docker image and push to your registry, or adjust `docker-compose.public.yml` to `build:` this directory.
+1. Build and push the Docker image through the `Container Images` workflow, or build locally from this directory.
+2. Set `API_IMAGE`/`API_IMAGE_TAG` if you want to deploy a non-default registry image.
 3. Set `BACKEND_UPSTREAM` in the public host `.env` to the private backend address (e.g. `10.42.0.91:8080`).
-

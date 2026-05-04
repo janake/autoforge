@@ -73,7 +73,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: pr-${{ github.event.number }}-security-scan
+          name: security-scan-${{ github.run_id }}
           path: |
             npm-audit.json
             npm-audit-summary.txt
@@ -82,6 +82,7 @@ jobs:
             trivy-unique-vuln-count.txt
 
       - name: Post PR comment with short summary
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v6
         with:
           script: |
@@ -89,10 +90,10 @@ jobs:
             const npmSummary = fs.existsSync('npm-audit-summary.txt') ? fs.readFileSync('npm-audit-summary.txt','utf8') : 'no npm-audit-summary';
             const trivySummary = fs.existsSync('trivy-summary.txt') ? fs.readFileSync('trivy-summary.txt','utf8') : 'no trivy-summary';
             const trivyCount = fs.existsSync('trivy-unique-vuln-count.txt') ? fs.readFileSync('trivy-unique-vuln-count.txt','utf8') : '0';
+            const artifactName = `security-scan-${context.runId}`;
             const body = `**Security scan for PR #${context.payload.pull_request.number}**\n\n**npm audit vulnerabilities:**\n```
 ${npmSummary}
 ```\n\n**Trivy image vulnerabilities (per target):**\n```
 ${trivySummary}
-```\n\nUnique Trivy vuln IDs: ${trivyCount}\n\nArtifacts uploaded: \`pr-${context.payload.pull_request.number}-security-scan\` (npm-audit.json, trivy-image.json and summaries).`;
+```\n\nUnique Trivy vuln IDs: ${trivyCount}\n\nArtifacts uploaded: \`${artifactName}\` (npm-audit.json, trivy-image.json and summaries).`;
             await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.pull_request.number, body});
-

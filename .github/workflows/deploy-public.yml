@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: GHCR tag to deploy for the public web image
+        description: GHCR tag to deploy for the public web and API gateway images
         required: true
         default: main
 
@@ -56,8 +56,11 @@ jobs:
           {
             echo "WEB_IMAGE=ghcr.io/janake/autoforge/web"
             echo "WEB_IMAGE_TAG=$IMAGE_TAG"
+            echo "API_IMAGE=ghcr.io/janake/autoforge/api-gateway"
+            echo "API_IMAGE_TAG=$IMAGE_TAG"
             echo "GATEWAY_DOMAIN=$GATEWAY_DOMAIN"
             echo "BACKEND_UPSTREAM=$BACKEND_UPSTREAM"
+            echo "API_UPSTREAM=api:8080"
             echo "WEB_UPSTREAM=web:8080"
             echo "GATEWAY_HTTP_PORT=80"
             echo "GATEWAY_HTTPS_PORT=443"

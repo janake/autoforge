@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   api:
     image: autoforge-api-gateway:local
@@ -9,14 +8,19 @@ services:
       - "8080"
     networks:
       - public
+      - private
   gateway:
     image: caddy:2.10-alpine
     depends_on:
       - api
+    environment:
+      GATEWAY_DOMAIN: :80
+      API_UPSTREAM: api:8080
+      WEB_UPSTREAM: api:8080
     ports:
       - "8080:80"
     volumes:
-      - ./infra/compose/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
     networks:
       - public
   backend:

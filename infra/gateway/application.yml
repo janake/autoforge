@@ -5,15 +5,15 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: backend_route
+        - id: backend_api_route
           uri: http://${BACKEND_UPSTREAM}
           predicates:
             - Path=${GATEWAY_CONTEXT:-/api}/**
-          filters:
-                  # Do not strip the /api prefix so backend receives full path (e.g. /api/v1/status)
-                  # If you want to remove the /api prefix before forwarding, enable StripPrefix=1
+        - id: backend_actuator_route
+          uri: http://${BACKEND_UPSTREAM}
+          predicates:
+            - Path=/actuator/**
 
 logging:
   level:
     org.springframework.cloud.gateway: INFO
-

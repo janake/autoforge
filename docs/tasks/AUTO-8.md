@@ -7,7 +7,7 @@ Acceptance criteria
 - A backend port nincs publikus hoston kitéve (host-port mapping NINCS), csak a belső hálózaton elérhető.
 - Dokumentáció (`docs/` alatt) tartalmazza a telepítési lépéseket, a tesztelési lépéseket és a biztonsági megfontolásokat.
 Munkalépések / tesztelés
-1. Buildeld le és pushold a gateway image-t (`infra/gateway` mappában a `mvn package` után `docker build`), vagy állítsd be a CI-építést.
+1. A `Container Images` workflow buildelje és pusholja a gateway image-et (`ghcr.io/janake/autoforge/api-gateway`), vagy lokálisan buildeld az `infra/gateway` mappából.
 2. Állítsd be a publikus host `.env`-jében a `BACKEND_UPSTREAM` változót a privát backend belső címére (pl. `10.42.0.91:8080`).
 3. Futtasd a publikus stack-et (deploy script vagy `docker compose` a publikus hoston). Ellenőrizd, hogy a publikusan elérhető Caddy a `/api/v1/status` kérést továbbítja a backend-nek, és a backend válasza megjelenik.
 4. Próbáld meg elérni a backend `8080` portját közvetlenül egy külső gépről: a közvetlen hozzáférésnek nem szabad működnie.
