@@ -53,9 +53,11 @@ jobs:
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
-          OPENCODE_SERVER_PASSWORD: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD }}
-          OPENAI_API_KEY: ${{ secrets.OCI_OPENAI_API_KEY }}
+          OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
+          OPENAI_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENAI_API_KEY_SECRET_OCID }}
         run: |
+          : "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:?OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID is required}"
+          : "${OPENAI_API_KEY_SECRET_OCID:?OCI_OPENAI_API_KEY_SECRET_OCID is required}"
           SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
           TARGET="$PRIVATE_USER@$PRIVATE_HOST"
@@ -70,9 +72,9 @@ jobs:
             echo "OPENCODE_IMAGE_TAG=latest"
             echo "OPENCODE_SERVER_URL=http://opencode:4096"
             echo "OPENCODE_SERVER_USERNAME=opencode"
-            echo "OPENCODE_SERVER_PASSWORD=$OPENCODE_SERVER_PASSWORD"
             echo "OPENCODE_SERVER_PORT=4096"
-            echo "OPENAI_API_KEY=$OPENAI_API_KEY"
+            echo "OPENCODE_SERVER_PASSWORD_SECRET_OCID=$OPENCODE_SERVER_PASSWORD_SECRET_OCID"
+            echo "OPENAI_API_KEY_SECRET_OCID=$OPENAI_API_KEY_SECRET_OCID"
           } > /tmp/autoforge-private.env
           scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" /tmp/autoforge-private.env "$TARGET:$DEPLOY_PATH/.env"
 

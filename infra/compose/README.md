@@ -7,7 +7,7 @@ Itt vannak a ket OCI gephez tartozo Compose stackek.
 - `Caddyfile`: publikus gateway szabalyok
 - `opencode.json`: az opencode server alap konfiguracioja
 - `.env.public.example`: publikus stack valtozoi
-- `.env.private.example`: privat stack valtozoi
+- `.env.private.example`: privat stack valtozoi es OCI Vault secret OCID placeholder-ek
 
 A workflow-k ezeket a fajlokat masoljak ki a szerverekre:
 

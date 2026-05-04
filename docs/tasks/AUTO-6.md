@@ -35,33 +35,33 @@ TOKEN="$(gh auth token)"
 Leiras: Compose fajl, deploy script, env fajlok feltoltese a private hostra SSH jump-pal, majd deploy script futtatasa.
 Parancs:
 ```bash
-ssh -i ${AUTOFORGE_SSH_KEY} -J ubuntu@144.24.176.5 ubuntu@10.42.0.91 "mkdir -p /opt/autoforge/private"
-scp -i ${AUTOFORGE_SSH_KEY} -J ubuntu@144.24.176.5 infra/compose/docker-compose.private.yml ubuntu@10.42.0.91:/opt/autoforge/private/docker-compose.private.yml
-scp -i ${AUTOFORGE_SSH_KEY} -J ubuntu@144.24.176.5 infra/deploy/private/deploy.sh ubuntu@10.42.0.91:/opt/autoforge/private/deploy.sh
-scp -i ${AUTOFORGE_SSH_KEY} -J ubuntu@144.24.176.5 /tmp/autoforge-private.env ubuntu@10.42.0.91:/opt/autoforge/private/.env
-scp -i ${AUTOFORGE_SSH_KEY} -J ubuntu@144.24.176.5 /tmp/autoforge-private.deploy.env ubuntu@10.42.0.91:/opt/autoforge/private/.deploy.env
-ssh -i ${AUTOFORGE_SSH_KEY} -J ubuntu@144.24.176.5 ubuntu@10.42.0.91 "chmod +x /opt/autoforge/private/deploy.sh && APP_DIR=/opt/autoforge/private bash /opt/autoforge/private/deploy.sh"
+ssh -i ${AUTOFORGE_SSH_KEY} -J ubuntu@<public-host> ubuntu@<private-host> "mkdir -p /opt/autoforge/private"
+scp -i ${AUTOFORGE_SSH_KEY} -J ubuntu@<public-host> infra/compose/docker-compose.private.yml ubuntu@<private-host>:/opt/autoforge/private/docker-compose.private.yml
+scp -i ${AUTOFORGE_SSH_KEY} -J ubuntu@<public-host> infra/deploy/private/deploy.sh ubuntu@<private-host>:/opt/autoforge/private/deploy.sh
+scp -i ${AUTOFORGE_SSH_KEY} -J ubuntu@<public-host> /tmp/autoforge-private.env ubuntu@<private-host>:/opt/autoforge/private/.env
+scp -i ${AUTOFORGE_SSH_KEY} -J ubuntu@<public-host> /tmp/autoforge-private.deploy.env ubuntu@<private-host>:/opt/autoforge/private/.deploy.env
+ssh -i ${AUTOFORGE_SSH_KEY} -J ubuntu@<public-host> ubuntu@<private-host> "chmod +x /opt/autoforge/private/deploy.sh && APP_DIR=/opt/autoforge/private bash /opt/autoforge/private/deploy.sh"
 ```
 
 3. Private backend health check.
 Leiras: Backend container status es lokalis health endpoint ellenorzes.
 Parancs:
 ```bash
-ssh -i ${AUTOFORGE_SSH_KEY} -J ubuntu@144.24.176.5 ubuntu@10.42.0.91 "docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'"
-ssh -i ${AUTOFORGE_SSH_KEY} -J ubuntu@144.24.176.5 ubuntu@10.42.0.91 "curl -fsS http://127.0.0.1:8080/actuator/health"
+ssh -i ${AUTOFORGE_SSH_KEY} -J ubuntu@<public-host> ubuntu@<private-host> "docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'"
+ssh -i ${AUTOFORGE_SSH_KEY} -J ubuntu@<public-host> ubuntu@<private-host> "curl -fsS http://127.0.0.1:8080/actuator/health"
 ```
 
 4. Public stack feltoltes es deploy.
 Leiras: Public compose/Caddy/deploy fajlok es env feltoltese, majd deploy script futtatasa.
 Parancs:
 ```bash
-ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@144.24.176.5 "mkdir -p /opt/autoforge/public"
-scp -i ${AUTOFORGE_SSH_KEY} infra/compose/docker-compose.public.yml ubuntu@144.24.176.5:/opt/autoforge/public/docker-compose.public.yml
-scp -i ${AUTOFORGE_SSH_KEY} infra/compose/Caddyfile ubuntu@144.24.176.5:/opt/autoforge/public/Caddyfile
-scp -i ${AUTOFORGE_SSH_KEY} infra/deploy/public/deploy.sh ubuntu@144.24.176.5:/opt/autoforge/public/deploy.sh
-scp -i ${AUTOFORGE_SSH_KEY} /tmp/autoforge-public.env ubuntu@144.24.176.5:/opt/autoforge/public/.env
-scp -i ${AUTOFORGE_SSH_KEY} /tmp/autoforge-public.deploy.env ubuntu@144.24.176.5:/opt/autoforge/public/.deploy.env
-ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@144.24.176.5 "chmod +x /opt/autoforge/public/deploy.sh && APP_DIR=/opt/autoforge/public bash /opt/autoforge/public/deploy.sh"
+ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@<public-host> "mkdir -p /opt/autoforge/public"
+scp -i ${AUTOFORGE_SSH_KEY} infra/compose/docker-compose.public.yml ubuntu@<public-host>:/opt/autoforge/public/docker-compose.public.yml
+scp -i ${AUTOFORGE_SSH_KEY} infra/compose/Caddyfile ubuntu@<public-host>:/opt/autoforge/public/Caddyfile
+scp -i ${AUTOFORGE_SSH_KEY} infra/deploy/public/deploy.sh ubuntu@<public-host>:/opt/autoforge/public/deploy.sh
+scp -i ${AUTOFORGE_SSH_KEY} /tmp/autoforge-public.env ubuntu@<public-host>:/opt/autoforge/public/.env
+scp -i ${AUTOFORGE_SSH_KEY} /tmp/autoforge-public.deploy.env ubuntu@<public-host>:/opt/autoforge/public/.deploy.env
+ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@<public-host> "chmod +x /opt/autoforge/public/deploy.sh && APP_DIR=/opt/autoforge/public bash /opt/autoforge/public/deploy.sh"
 ```
 
 5. Hibaazonositas: domain timeout.
@@ -70,7 +70,7 @@ Parancs:
 ```bash
 curl -m 20 https://oci.prodet.org
 curl -m 20 https://api.oci.prodet.org/actuator/health
-ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@144.24.176.5 "docker logs --tail 80 autoforge-public-gateway-1"
+ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@<public-host> "docker logs --tail 80 autoforge-public-gateway-1"
 ```
 
 6. OCI security list ingress javitas.
@@ -87,21 +87,21 @@ oci network security-list update \
 Leiras: public host INPUT lancban csak `22/tcp` volt engedett, `80/443` REJECT-re futott.
 Parancs:
 ```bash
-ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@144.24.176.5 "sudo iptables -S | head -n 20"
+ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@<public-host> "sudo iptables -S | head -n 20"
 ```
 
 8. Host tuzfal fix es persistalas.
 Leiras: `/etc/iptables/rules.v4` modositasa, `80/443` engedelyezese, majd `iptables-restore` es `netfilter-persistent save`.
 Parancs:
 ```bash
-ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@144.24.176.5 "sudo sed -i '/--dport 22 -j ACCEPT/a -A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT\\n-A INPUT -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT' /etc/iptables/rules.v4 && sudo iptables-restore < /etc/iptables/rules.v4 && sudo netfilter-persistent save"
+ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@<public-host> "sudo sed -i '/--dport 22 -j ACCEPT/a -A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT\\n-A INPUT -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT' /etc/iptables/rules.v4 && sudo iptables-restore < /etc/iptables/rules.v4 && sudo netfilter-persistent save"
 ```
 
 9. Docker halozati lanc helyreallitas.
 Leiras: `iptables-restore` utan a Docker chain-eket daemon restarttal vissza kellett epiteni.
 Parancs:
 ```bash
-ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@144.24.176.5 "sudo systemctl restart docker && cd /opt/autoforge/public && docker compose --env-file .env -f docker-compose.public.yml up -d --remove-orphans"
+ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@<public-host> "sudo systemctl restart docker && cd /opt/autoforge/public && docker compose --env-file .env -f docker-compose.public.yml up -d --remove-orphans"
 ```
 
 10. Vegso validacio.
@@ -111,7 +111,7 @@ Parancs:
 curl -I http://oci.prodet.org
 curl https://oci.prodet.org | head -n 5
 curl https://api.oci.prodet.org/actuator/health
-ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@144.24.176.5 "docker logs --tail 50 autoforge-public-gateway-1"
+ssh -i ${AUTOFORGE_SSH_KEY} ubuntu@<public-host> "docker logs --tail 50 autoforge-public-gateway-1"
 ```
 
 ## Eredmeny
