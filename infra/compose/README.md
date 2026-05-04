@@ -2,7 +2,7 @@
 
 Itt vannak a ket OCI gephez tartozo Compose stackek.
 
-- `docker-compose.public.yml`: frontend + gateway a publikus gepre
+- `docker-compose.public.yml`: frontend + API gateway + Caddy a publikus gepre
 - `docker-compose.private.yml`: backend a privat gepre
 - `Caddyfile`: publikus gateway szabalyok
 - `.env.public.example`: publikus stack valtozoi

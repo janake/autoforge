@@ -23,6 +23,7 @@ autoforge/
 - A frontend React + Vite + TypeScript alappal scaffoldolva van.
 - A frontendhez deployolhato Docker image definicio is keszult.
 - A frontendhez alap GitHub Actions build workflow is elokeszitve van.
+- A publikus hoston a React frontend + Spring Cloud API gateway + Caddy routing lancolat elokeszitett.
 - A backend Spring Boot + Maven alappal scaffoldolva van.
 - A backendhez alap GitHub Actions build workflow is elokeszitve van.
 - A ket OCI gephez tartozo Compose stackek es deploy workflow-k alapjai elokeszitve vannak.
@@ -35,7 +36,7 @@ autoforge/
 - `apps/web`: React frontend helye
 - `services/backend`: Spring Boot backend szolgaltatas helye
 - `services/worker`: AI altal vezerelt hatterfolyamatok helye
-- `infra/compose`: Docker Compose stackek
+- `infra/compose`: Docker Compose stackek es publikus/private host konfiguraciok
 - `infra/deploy`: tavoli deploy scriptek
 - `docs`: projekt dokumentacio
 

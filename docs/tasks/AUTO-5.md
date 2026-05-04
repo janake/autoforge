@@ -29,7 +29,7 @@ Pelda:
 - `Deploy Private Host` workflow futasa tovabbra is hibazott a runner oldali SSH/SCP opcio parse miatt
 - fix merge-olve, de production deploy workaround kulon taskban dokumentalva
 - backend kontener fut a private hoston
-- web + gateway kontenerek futnak a public hoston
+- web + api + gateway kontenerek futnak a public hoston
 
 ## Megjegyzes
 

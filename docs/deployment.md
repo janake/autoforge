@@ -4,7 +4,7 @@
 
 Az Autoforge jelenlegi deploy modellje ket OCI geppel szamol:
 
-- publikus host: React frontend + Caddy gateway
+- publikus host: React frontend + Spring Cloud API gateway + Caddy gateway
 - privat host: Spring Boot backend
 
 A GitHub Actions workflow-k GHCR image-eket hasznalnak, majd SSH-n keresztul frissitik a ket hostot.
@@ -14,6 +14,7 @@ A GitHub Actions workflow-k GHCR image-eket hasznalnak, majd SSH-n keresztul fri
 A `Container Images` workflow ezeket az image-eket kezeli:
 
 - `ghcr.io/<registry-owner>/autoforge/web`
+- `ghcr.io/<registry-owner>/autoforge/api-gateway`
 - `ghcr.io/<registry-owner>/autoforge/backend`
 
 A workflow a `main` es `sha-<commit>` tageket kesziti el.
@@ -23,9 +24,10 @@ A workflow a `main` es `sha-<commit>` tageket kesziti el.
 Publikus host:
 
 - fajl: `infra/compose/docker-compose.public.yml`
-- szolgaltatasok: `web`, `gateway`
+- szolgaltatasok: `web`, `api`, `gateway`
 - gateway domain: `oci.prodet.org`, `api.oci.prodet.org`
 - backend upstream: a privat host belso cime, jelenleg varhatoan `10.42.0.91:8080`
+- API image: `ghcr.io/<registry-owner>/autoforge/api-gateway`
 
 Privat host:
 
