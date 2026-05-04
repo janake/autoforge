@@ -1,6 +1,12 @@
 # AUTO-8: Spring Cloud API Gateway behind Caddy (make backend only reachable via gateway)
 Feladat leírása
 Hozzunk létre és deploy-oljunk egy Spring Cloud Gateway alapú `api` szolgáltatást, amely a publikus Caddy gateway mögött fut. A backend (Spring Boot) csak ezen az API gateway-en keresztül legyen elérhető — ne legyen közvetlen, publikus elérés a backend felé.
+Statusz
+- done
+Branch
+- `AUTO-8-api-gateway-behind-caddy`
+PR
+- `PR #12` (merged)
 Acceptance criteria
 - A `infra/compose/docker-compose.public.yml` tartalmaz `api` szolgáltatást és a `Caddyfile` a `/api` útvonalakat az `api` szolgáltatás felé irányítja.
 - A `api` szolgáltatás továbbítja a kéréseket a privát backend `BACKEND_UPSTREAM` URL-re.
@@ -19,3 +25,9 @@ Dokumentumok és fájlok
 Biztonsági megfontolások
 - Győződj meg róla, hogy a privát backend nem rendelkezik publikus port-nyitással a cloud/szerver konfigurációban.
 - javasolt: mTLS vagy egyéb biztonságos csatorna a gateway és a backend között, illetve tűzfal szabály, amely csak a gateway-től enged be forgalmat a backend felé.
+
+Eredmény
+- A publikus hoston a `web`, `api` és `gateway` konténerek futnak Dockerben.
+- A `https://api.oci.prodet.org/actuator/health` végpont `UP` választ ad.
+- A `https://oci.prodet.org` frontend továbbra is elérhető.
+- A deploy dokumentáció és a compose minta összhangban van a tényleges `web -> api -> backend` útvonallal.
