@@ -32,6 +32,7 @@ autoforge/
 - A worker szolgaltatas helye elokeszitve.
 - A deployment Docker + GitHub Actions alapu lesz.
 - A public/backend szerepkiosztas es az OCI runbook kulon dokumentumban van rogzitve.
+- A feature flag es personalization irany kulon dokumentumban van osszefoglalva, kesobbi OCI Always Free DB opciokkal.
 
 ## Monorepo irany
 
@@ -41,6 +42,12 @@ autoforge/
 - `infra/compose`: Docker Compose stackek es publikus/private host konfiguraciok
 - `infra/deploy`: tavoli deploy scriptek
 - `docs`: projekt dokumentacio
+
+## Dokumentumok
+
+- `docs/architecture.md`: OCI topologia es architektura
+- `docs/deployment.md`: deploy modell es host elofeltetelek
+- `docs/feature-flags.md`: feature flag, personalization es kesobbi OCI Always Free DB opciok
 
 ## Task tracking
 
