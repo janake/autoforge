@@ -44,27 +44,6 @@ function PublicHero({ onSignIn }: { onSignIn: () => void }) {
           <span className="hero-note">Identity provider: {config.keycloak.url}</span>
         </div>
       </div>
-
-      <div className="hero-panel">
-        <div className="hero-panel-header">
-          <span className="status-dot" />
-          <span>Public entry</span>
-        </div>
-        <div className="hero-panel-body">
-          <div>
-            <p className="panel-label">Flow</p>
-            <p className="panel-value">Anonymous landing with optional sign in</p>
-          </div>
-          <div>
-            <p className="panel-label">Auth mode</p>
-            <p className="panel-value">OIDC PKCE</p>
-          </div>
-          <div>
-            <p className="panel-label">Protected area</p>
-            <p className="panel-value">Workspace + private API</p>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }
