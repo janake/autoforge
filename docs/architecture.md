@@ -47,3 +47,9 @@
 ## Diagram Rule
 
 - If the architecture changes, update this diagram in the same change set.
+
+## Versioning Rule
+
+- Every architecture change must be assigned to a target version in the task file.
+- Update `docs/releases.md` in the same change set so the architecture change is traceable to a release.
+- Follow `docs/versioning.md` when deciding whether the change is `MAJOR`, `MINOR`, or `PATCH`.

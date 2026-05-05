@@ -26,16 +26,18 @@ For any non-trivial code, infra, workflow, or documentation task, do the followi
 
 1. Pick the next unused task ID from `docs/tasks/`.
 2. Create a task file under `docs/tasks/` named exactly `<ID>.md`.
-3. Create a dedicated branch from the current `origin/main` unless the user explicitly asks to continue an existing branch.
-4. Use branch names in this format:
+3. Assign the task to a target version before editing code or docs.
+4. Add the task to `docs/releases.md` under the target version.
+5. Create a dedicated branch from the current `origin/main` unless the user explicitly asks to continue an existing branch.
+6. Use branch names in this format:
    - `feature/AUTO-<number>-short-description`
    - `bug/BUG-<number>-short-description`
-5. Make only changes that belong to that task.
-6. Update the task file as work progresses.
-7. Run the relevant verification commands.
-8. Commit with a message that starts with the task ID.
-9. Push the branch.
-10. Open or update a PR with a title that starts with the task ID.
+7. Make only changes that belong to that task.
+8. Update the task file as work progresses.
+9. Run the relevant verification commands.
+10. Commit with a message that starts with the task ID.
+11. Push the branch.
+12. Open or update a PR with a title that starts with the task ID and body that includes the target version.
 
 ## Task File Minimum Content
 
@@ -44,6 +46,7 @@ Every task file must include:
 - Title with ID and short name.
 - `Feladat leírása`.
 - `Statusz`.
+- `Verzió`.
 - `Branch`.
 - `PR`.
 - `Acceptance criteria`.
@@ -53,10 +56,19 @@ Every task file must include:
 
 Use internal references like `PR #26` in task files instead of full URLs when possible.
 
+## Versioning
+
+- Every `AUTO-*` and `BUG-*` task must have a target version.
+- The canonical task-to-version mapping is `docs/releases.md`.
+- Versioning rules are documented in `docs/versioning.md`.
+- Do not open a PR if the task file has no `Verzió` section.
+- Do not merge task documentation that disagrees with `docs/releases.md`.
+
 ## Commit And PR Naming
 
 - Commit messages must start with the task ID, for example `[AUTO-15] Remove public entry panel`.
 - PR titles must start with the task ID, for example `[AUTO-15] Landing page cleanup`.
+- PR bodies must include a `Version` section with the target version.
 - Do not use generic-only titles like `fix:` or `docs:` without the task ID.
 - Keep commits focused and do not include unrelated cleanup.
 

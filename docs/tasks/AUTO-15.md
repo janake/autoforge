@@ -6,6 +6,9 @@ A publikus landing oldalról el kell távolítani a felesleges "Public entry" in
 Statusz
 - in progress
 
+Verzió
+- `0.1.1`
+
 Branch
 - `feature/AUTO-15-landing-cleanup`
 

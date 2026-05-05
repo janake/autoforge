@@ -12,6 +12,12 @@ Itt lesznek majd:
 - deploy folyamat
 - local dev megjegyzesek
 - task tracking
+- verziozas es release manifest
+
+Verziozasi szabalyok:
+
+- `docs/versioning.md`: hogyan valasztunk celverziot uj feladathoz
+- `docs/releases.md`: melyik `AUTO-*` vagy `BUG-*` melyik verziohoz tartozik
 
 Biztonsági vizsgálatok és PR-specifikus runbookok:
 
@@ -22,3 +28,4 @@ Biztonsági vizsgálatok és PR-specifikus runbookok:
 - Minden feladatot a `docs/tasks/` alatt kovetunk.
 - Minden feladat kulon fajlt kap egyedi azonosito alatt.
 - Az adott feladathoz tartozo commitok uzenetei az azonositoval kezdodjenek.
+- Minden feladatnak kotelezo `Verzió` mezot adni, es szerepelnie kell a `docs/releases.md` manifestben.

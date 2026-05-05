@@ -27,3 +27,9 @@ Megjegyzés: `OCI_GATEWAY_DOMAIN` nem szükséges - a domain be van égetve a do
 - `CLOUDFLARE_SSL_MODE` is optional; if set, the deploy flow updates the zone SSL setting too.
 
 Ha a Cloudflare secret-ek elérhetők, a public deploy flow a webes rekordokat is frissíti az origin IP-re.
+
+## Verziózás
+
+- Minden workflow vagy deploy szabaly valtozas celverziohoz kotott.
+- A task fajlban kotelezo a `Verzió` mezo.
+- A valtozast fel kell venni a `docs/releases.md` manifestbe.

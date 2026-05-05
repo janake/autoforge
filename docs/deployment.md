@@ -21,6 +21,12 @@ A `Container Images` workflow ezeket az image-eket kezeli:
 
 A workflow a `main` es `sha-<commit>` tageket kesziti el.
 
+## Verziózás
+
+- Minden deploy vagy workflow valtozasnak legyen celverzioja a task fajlban.
+- A valtozast fel kell venni a `docs/releases.md` manifestbe.
+- A verzios besorolast a `docs/versioning.md` alapjan kell eldonteni.
+
 ## Compose stackek
 
 Publikus host:
