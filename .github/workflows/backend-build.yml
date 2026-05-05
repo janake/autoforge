@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - main
+      - "feature/**"
+      - "bug/**"
     paths:
       - ".github/workflows/backend-build.yml"
       - "services/backend/**"
