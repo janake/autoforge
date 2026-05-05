@@ -28,6 +28,7 @@ autoforge/
 - A backendhez alap GitHub Actions build workflow is elokeszitve van.
 - A ket OCI gephez tartozo Compose stackek es deploy workflow-k alapjai elokeszitve vannak.
 - A privat stack tartalmaz egy OpenCode REST AI szolgaltatast a backend hivasaihoz, Vaultbol betoltott runtime secret-ekkel.
+- A privat hosthoz tartozik egy 100 GB-os OCI Block Volume workspace `/mnt/autoforge-workspace` mounttal.
 - A worker szolgaltatas helye elokeszitve.
 - A deployment Docker + GitHub Actions alapu lesz.
 - A public/backend szerepkiosztas es az OCI runbook kulon dokumentumban van rogzitve.
