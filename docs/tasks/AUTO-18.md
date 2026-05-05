@@ -13,7 +13,7 @@ Branch
 - `feature/AUTO-18-version-tracking`
 
 PR
-- pending
+- PR #28
 
 Acceptance criteria
 - Van `docs/versioning.md` verziozasi szabalyzat.
@@ -42,6 +42,7 @@ Lepesnaplo
 3. Letrehoztam a release manifestet.
 4. Frissitettem a kozos folyamatdokumentaciot, hogy a verzio kotelezo legyen.
 5. Frissitettem a top-level projekt- es workflow-doksikat verziozasi hivatkozassal.
+6. Megnyitottam a kapcsolodo PR-t.
 
 Eredmény
-- pending
+- A verziozasi szabalyzat es release manifest dokumentalva lett.
