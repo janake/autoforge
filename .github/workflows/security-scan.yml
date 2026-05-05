@@ -16,6 +16,7 @@ on:
 permissions:
   contents: read
   issues: write
+  pull-requests: write
 
 jobs:
   security-scan:
@@ -110,4 +111,4 @@ jobs:
               '',
               `Artifacts uploaded: \`${artifactName}\` (npm-audit.json, trivy-image.json and summaries).`
             ].join('\n');
-            await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.pull_request.number, body});
+            await github.rest.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.pull_request.number, body});
