@@ -6,6 +6,9 @@ set -euo pipefail
 cd "$APP_DIR"
 
 ENV_FILE="$APP_DIR/.env"
+BACKEND_IMAGE_ARCHIVE="$APP_DIR/autoforge-backend-image.tar.gz"
+OPENCODE_IMAGE_ARCHIVE="$APP_DIR/autoforge-opencode-image.tar.gz"
+PRIVATE_IMAGES_PRELOADED="${PRIVATE_IMAGES_PRELOADED:-false}"
 
 if [ -f .deploy.env ]; then
   set -a
@@ -14,8 +17,6 @@ if [ -f .deploy.env ]; then
 fi
 
 : "${ENV_FILE:?ENV_FILE is required}"
-: "${GHCR_USERNAME:?GHCR_USERNAME is required}"
-: "${GHCR_TOKEN:?GHCR_TOKEN is required}"
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "Runtime environment file is missing: $ENV_FILE" >&2
@@ -107,7 +108,22 @@ else
   append_secret_env "OPENCODE_SERVER_PASSWORD" "disabled-until-vault-secrets-are-configured"
 fi
 
-echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
-"${COMPOSE_CMD[@]}" "${COMPOSE_ARGS[@]}" pull
+if [ -f "$BACKEND_IMAGE_ARCHIVE" ]; then
+  docker load --input "$BACKEND_IMAGE_ARCHIVE"
+  rm -f "$BACKEND_IMAGE_ARCHIVE"
+fi
+
+if [ -f "$OPENCODE_IMAGE_ARCHIVE" ]; then
+  docker load --input "$OPENCODE_IMAGE_ARCHIVE"
+  rm -f "$OPENCODE_IMAGE_ARCHIVE"
+fi
+
+if [ "$PRIVATE_IMAGES_PRELOADED" != "true" ]; then
+  : "${GHCR_USERNAME:?GHCR_USERNAME is required}"
+  : "${GHCR_TOKEN:?GHCR_TOKEN is required}"
+  echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+  "${COMPOSE_CMD[@]}" "${COMPOSE_ARGS[@]}" pull
+fi
+
 "${COMPOSE_CMD[@]}" "${COMPOSE_ARGS[@]}" up -d --remove-orphans
 docker image prune -f
