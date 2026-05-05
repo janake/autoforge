@@ -35,11 +35,15 @@ jobs:
 
       - name: Upload public stack files
         env:
+          PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
         run: |
           SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
-          TARGET="$PUBLIC_USER@$PUBLIC_HOST"
+          PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
+          : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
+          : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
+          TARGET="$PUBLIC_USER@$PUBLIC_SSH_HOST"
           ssh "${SSH_COMMON[@]}" "$TARGET" "mkdir -p '$DEPLOY_PATH'"
           scp "${SSH_COMMON[@]}" infra/compose/docker-compose.public.yml "$TARGET:$DEPLOY_PATH/docker-compose.public.yml"
           scp "${SSH_COMMON[@]}" infra/compose/Caddyfile "$TARGET:$DEPLOY_PATH/Caddyfile"
@@ -49,6 +53,7 @@ jobs:
       - name: Render public runtime environment
         env:
           IMAGE_TAG: main
+          PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
           GATEWAY_DOMAIN: ${{ secrets.OCI_GATEWAY_DOMAIN }}
@@ -57,8 +62,11 @@ jobs:
           KEYCLOAK_REALM: ${{ secrets.OCI_KEYCLOAK_REALM }}
           KEYCLOAK_CLIENT_ID: ${{ secrets.OCI_KEYCLOAK_CLIENT_ID }}
         run: |
-          SSH_OPTS="-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_ed25519"
-          TARGET="$PUBLIC_USER@$PUBLIC_HOST"
+          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
+          PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
+          : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
+          : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
+          TARGET="$PUBLIC_USER@$PUBLIC_SSH_HOST"
           KEYCLOAK_URL="${KEYCLOAK_URL:-https://kc.prodet.org}"
           KEYCLOAK_REALM="${KEYCLOAK_REALM:-autoforge}"
           KEYCLOAK_CLIENT_ID="${KEYCLOAK_CLIENT_ID:-autoforge-web}"
@@ -81,13 +89,17 @@ jobs:
 
       - name: Upload registry credentials
         env:
+          PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
           GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
         run: |
           SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
-          TARGET="$PUBLIC_USER@$PUBLIC_HOST"
+          PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
+          : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
+          : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
+          TARGET="$PUBLIC_USER@$PUBLIC_SSH_HOST"
           {
             echo "GHCR_USERNAME=$GHCR_DEPLOY_USERNAME"
             echo "GHCR_TOKEN=$GHCR_DEPLOY_TOKEN"
@@ -96,9 +108,13 @@ jobs:
 
       - name: Deploy public stack
         env:
+          PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
         run: |
           SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
-          TARGET="$PUBLIC_USER@$PUBLIC_HOST"
+          PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
+          : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
+          : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
+          TARGET="$PUBLIC_USER@$PUBLIC_SSH_HOST"
           ssh "${SSH_COMMON[@]}" "$TARGET" "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"

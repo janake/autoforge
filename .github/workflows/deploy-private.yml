@@ -28,17 +28,25 @@ jobs:
       - name: Prepare SSH client
         env:
           SSH_KEY: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+          PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          PRIVATE_SSH_HOST: ${{ secrets.OCI_PRIVATE_SSH_HOST }}
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |
+          PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
+          PRIVATE_SSH_HOST="${PRIVATE_SSH_HOST:-${PRIVATE_HOST:-}}"
+          : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
+          : "${PRIVATE_SSH_HOST:?OCI_PRIVATE_SSH_HOST or OCI_PRIVATE_HOST is required}"
+          : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
+          : "${PRIVATE_USER:?OCI_PRIVATE_USER is required}"
           install -m 700 -d ~/.ssh
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           cat > ~/.ssh/config <<EOF
           Host autoforge-jump
-            HostName $PUBLIC_HOST
+            HostName $PUBLIC_SSH_HOST
             User $PUBLIC_USER
             IdentityFile ~/.ssh/id_ed25519
             BatchMode yes
@@ -46,7 +54,7 @@ jobs:
             UserKnownHostsFile /dev/null
 
           Host autoforge-private
-            HostName $PRIVATE_HOST
+            HostName $PRIVATE_SSH_HOST
             User $PRIVATE_USER
             IdentityFile ~/.ssh/id_ed25519
             BatchMode yes
@@ -67,8 +75,10 @@ jobs:
       - name: Render private runtime environment
         env:
           IMAGE_TAG: main
+          PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          PRIVATE_SSH_HOST: ${{ secrets.OCI_PRIVATE_SSH_HOST }}
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
           OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
@@ -100,8 +110,10 @@ jobs:
 
       - name: Upload registry credentials
         env:
+          PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          PRIVATE_SSH_HOST: ${{ secrets.OCI_PRIVATE_SSH_HOST }}
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
           GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
@@ -115,8 +127,10 @@ jobs:
 
       - name: Deploy private stack
         env:
+          PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          PRIVATE_SSH_HOST: ${{ secrets.OCI_PRIVATE_SSH_HOST }}
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |

@@ -97,9 +97,11 @@ A tipikus tartalom:
 Kapcsolati es registry secret-ek:
 
 - `OCI_SSH_PRIVATE_KEY`: a deploy SSH kulcs privat fele
-- `OCI_PUBLIC_HOST`: a publikus host DNS neve vagy IP-je
+- `OCI_PUBLIC_HOST`: a publikus host webes DNS neve, peldaul `oci.prodet.org`
+- `OCI_PUBLIC_SSH_HOST`: a publikus host SSH-celja, azaz a valos routolhato IP vagy SSH DNS nev; nem a Cloudflare-kezelt web hostname
 - `OCI_PUBLIC_USER`: a publikus host SSH felhasznaloja
 - `OCI_PRIVATE_HOST`: a privat host belso IP-je
+- `OCI_PRIVATE_SSH_HOST`: a privat host SSH-celja, ha nem egyezik az `OCI_PRIVATE_HOST` ertekevel
 - `OCI_PRIVATE_USER`: a privat host SSH felhasznaloja
 - `OCI_GATEWAY_DOMAIN`: peldaul `oci.prodet.org, api.oci.prodet.org`
 - `OCI_BACKEND_UPSTREAM`: peldaul `<private-backend-ip>:8080`
@@ -119,6 +121,7 @@ Fontos:
 - A GitHub secret-ekben csak a Vault secret OCID-k szerepelnek, nem az OpenCode jelszo vagy provider API kulcs ertekei.
 - A deploy workflow ezeket az OCID-ket masolja a private host `.env` fajljaba.
 - A private host `deploy.sh` scriptje olvassa ki a konkret secret ertekeket OCI Vaultbol, `--auth instance_principal` hasznalataval.
+- A webes hostname es az SSH-cel nem ugyanaz: a Cloudflare-kezelt publikus domain nem alkalmas SSH deploy celra, ehhez kulon SSH host kell.
 
 ## Szükséges OCI Vault secret-ek
 
