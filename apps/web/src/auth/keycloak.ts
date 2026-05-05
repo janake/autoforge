@@ -19,19 +19,21 @@ function createKeycloak(): Keycloak {
 export async function initializeKeycloak(onLoad?: "check-sso" | "login-required"): Promise<Keycloak> {
   const client = createKeycloak();
 
-  await client.init({
-    ...(onLoad ? { onLoad } : {}),
-    pkceMethod: "S256",
-    checkLoginIframe: false,
-    enableLogging: false,
-  });
-
-  client.onTokenExpired = () => {
-    client.updateToken(30).catch(async () => {
-      const loginUrl = await client.createLoginUrl({ redirectUri: window.location.origin });
-      window.location.assign(loginUrl);
+  if (!client.didInitialize) {
+    await client.init({
+      ...(onLoad ? { onLoad } : {}),
+      pkceMethod: "S256",
+      checkLoginIframe: false,
+      enableLogging: false,
     });
-  };
+
+    client.onTokenExpired = () => {
+      client.updateToken(30).catch(async () => {
+        const loginUrl = await client.createLoginUrl({ redirectUri: window.location.origin });
+        window.location.assign(loginUrl);
+      });
+    };
+  }
 
   return client;
 }
