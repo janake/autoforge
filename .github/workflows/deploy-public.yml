@@ -1,6 +1,14 @@
 name: Deploy Public Host
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/web/**"
+      - "infra/compose/**"
+      - "infra/deploy/public/**"
+      - ".github/workflows/deploy-public.yml"
   workflow_dispatch:
     inputs:
       image_tag:
@@ -45,7 +53,7 @@ jobs:
 
       - name: Render public runtime environment
         env:
-          IMAGE_TAG: ${{ inputs.image_tag }}
+          IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag || 'main' }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
           GATEWAY_DOMAIN: ${{ secrets.OCI_GATEWAY_DOMAIN }}
