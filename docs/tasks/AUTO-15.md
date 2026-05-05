@@ -10,7 +10,7 @@ Branch
 - `feature/AUTO-15-landing-cleanup`
 
 PR
-- https://github.com/janake/autoforge/pull/25
+- https://github.com/janake/autoforge/pull/26
 
 Acceptance criteria
 - A publikus landing oldal nem tartalmaz "Public entry" panelt.
