@@ -27,7 +27,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Read project version
-        run: echo "PROJECT_VERSION=$(node -p \"require('./package.json').version\")" >> "$GITHUB_ENV"
+        run: |
+          PROJECT_VERSION=$(node -p 'require("./package.json").version')
+          echo "PROJECT_VERSION=$PROJECT_VERSION" >> "$GITHUB_ENV"
 
       - name: Prepare private images
         env:
