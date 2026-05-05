@@ -1,10 +1,10 @@
-# BUG-3: Follow-up CI/CD deploy and security workflow fixes
+# BUG-3: Caddy GATEWAY_DOMAIN hiányzik a docker-compose configban
 
-Feladat leirasa
-A `BUG-2` merge utan a public deploy tovabbra is hibasan futott, mert a workflow SSH/SCP hivasai torott opciofeladassal mentek, a public deploy nem toltotte fel a Cloudflare sync scriptet, es a security scan PR comment lepes hibas GitHub API objektumot hasznalt.
+Feladat leírása
+A Caddy nem kap érvényes domain nevet a GATEWAY_DOMAIN environment variable-ból, emiatt nem tud SSL tanúsítványt szerezni a Let's Encrypt-től. A containerben `GATEWAY_DOMAIN=-` volt beállítva, ami érvénytelen domain.
 
 Statusz
-- in progress
+- pending
 
 Branch
 - `bug/BUG-3`
@@ -13,27 +13,18 @@ PR
 - pending
 
 Acceptance criteria
-- A public deploy workflow ervenyes `ssh` es `scp` opciohivassal fut.
-- A public deploy a `cloudflare_sync.py` scriptet is feltolti a hosztra.
-- A security scan PR comment lepes nem bukik el a GitHub API hivason.
-- A repo secret-ek tartalmazzak az SSH deploy hostokat a tenyleges OCI IP-kkel.
-- A private deploy OpenCode Vault secret hianyaban sem blokkolja a backend deployt.
+- A docker-compose.public.yml tartalmazza a GATEWAY_DOMAIN értéket.
+- A Caddy sikeresen szerzi meg az SSL tanúsítványt.
+- A frontend és API elérhető HTTPS-en.
 
-Dokumentumok es fajlok
-- `.github/workflows/deploy-public.yml`
-- `.github/workflows/security-scan.yml`
-- `docs/tasks/BUG-3.md`
+Dokumentumok és fájlok
+- `infra/compose/docker-compose.public.yml`
+- `docs/deployment.md`
 
-Biztonsagi megfontolasok
-- Erzekeny host/IP/secret ertek nem kerul gitelt fajlba.
-- A GitHub secret-ekben marad a tenyleges SSH deploy host.
+Biztonsági megfontolások
+- A domain név nem érzékeny adat, nyilvánosan is ismert.
 
 Lepesnaplo
-1. Megneztem a merge utani main workflow logokat.
-2. Azonositottam a public deploy SSH/SCP hivasi hibat.
-3. Javítottam a security scan commentelo lepes GitHub API hasznalatat.
-4. Ellenoriztem az OCI instance IP-ket, hogy a GitHub secret-eket valos deploy celokra allitsam.
-5. A private deployt ugy modositottam, hogy OpenCode secret nelkul backend-only modban fusson tovabb.
-
-Eredmeny
-- A koveto workflow-hibak kulon bug ticket ala kerultek, a javitasok e feladatban kovethetok.
+1. Ellenőriztem a futó container-eket SSH-n.
+2. Megtaláltam a hibás GATEWAY_DOMAIN=- értéket a Caddy container env-jében.
+3. Javítsam a docker-compose.public.yml-t a domain beépítésével.

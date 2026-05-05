@@ -30,7 +30,7 @@ services:
       - web
       - api
     environment:
-      GATEWAY_DOMAIN: ${GATEWAY_DOMAIN}
+      GATEWAY_DOMAIN: oci.prodet.org
       BACKEND_UPSTREAM: ${BACKEND_UPSTREAM}
       API_UPSTREAM: ${API_UPSTREAM:-api:8080}
       WEB_UPSTREAM: ${WEB_UPSTREAM:-web:8080}
