@@ -10,7 +10,7 @@ Branch
 - `feature/AUTO-16-agent-guidelines`
 
 PR
-- pending
+- PR #27
 
 Acceptance criteria
 - Van repo gyökérben agent szabályfájl.
@@ -28,6 +28,7 @@ Lepesnaplo
 2. Elolvastam a meglévő task és branching szabályokat.
 3. Létrehoztam az `AGENT.md` repo-szintű operating rules fájlt.
 4. Létrehoztam az `AUTO-16` task dokumentációt.
+5. Megnyitottam a kapcsolódó PR-t.
 
 Eredmény
 - Az AI agentek számára kötelező munkafolyamat dokumentálva lett.
