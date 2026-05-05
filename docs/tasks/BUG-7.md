@@ -7,13 +7,13 @@ Statusz
 - in progress
 
 Verzió
-- `0.1.2`
+- `0.1.3`
 
 Branch
 - `bug/BUG-7-signin-button-visible`
 
 PR
-- 
+- PR #36 
 
 Acceptance criteria
 - A bejelentkezett felhasználók számára NEM jelenik meg a sign-in gomb
@@ -26,6 +26,8 @@ Dokumentumok és fájlok
 Lepesnaplo
 1. Megtaláltam a hibát - a kód csak callback esetén ellenőrzi a Keycloak session-t
 2. Javítottam a logikát - most mindig inicializálja a Keycloak-ot és ellenőrzi az authenticated státuszt
+3. Javítottam a Keycloak init többszöri hívását (didInitialize check)
+4. Javítottam az error üzenetet 404 API route hiba esetén (Auth init failed helyett "API route failed")
 
 Eredmény
 - Javítva az App.tsx bootstrap logikája

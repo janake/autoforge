@@ -192,6 +192,8 @@ function PrivateWorkspace({
 
 function App() {
   const [session, setSession] = useState<SessionState>({ status: "loading" });
+  const apiRouteError =
+    session.status === "error" && /Request failed with 404/.test(session.message);
 
   useEffect(() => {
     let cancelled = false;
@@ -274,10 +276,12 @@ function App() {
           <section className="workspace-grid">
             <article className="workspace-panel">
               <div className="section-head">
-                <h2>Auth init failed</h2>
+                <h2>{apiRouteError ? "API route failed" : "Auth init failed"}</h2>
                 <span className="pill">error</span>
               </div>
-              <p className="error-title">Unable to initialize Keycloak.</p>
+              <p className="error-title">
+                {apiRouteError ? "Backend API route is not available." : "Unable to initialize Keycloak."}
+              </p>
               <p className="muted">{session.message}</p>
             </article>
           </section>
