@@ -1,0 +1,74 @@
+import Keycloak from "keycloak-js";
+import { getRuntimeConfig } from "../runtime-config";
+
+let keycloak: Keycloak | null = null;
+
+function createKeycloak(): Keycloak {
+  if (!keycloak) {
+    const runtimeConfig = getRuntimeConfig();
+    keycloak = new Keycloak({
+      url: runtimeConfig.keycloak.url,
+      realm: runtimeConfig.keycloak.realm,
+      clientId: runtimeConfig.keycloak.clientId,
+    });
+  }
+
+  return keycloak;
+}
+
+export async function initializeKeycloak(onLoad: "check-sso" | "login-required" = "check-sso"): Promise<Keycloak> {
+  const client = createKeycloak();
+
+  await client.init({
+    onLoad,
+    pkceMethod: "S256",
+    checkLoginIframe: false,
+    enableLogging: false,
+  });
+
+  client.onTokenExpired = () => {
+    client.updateToken(30).catch(async () => {
+      const loginUrl = await client.createLoginUrl({ redirectUri: window.location.origin });
+      window.location.assign(loginUrl);
+    });
+  };
+
+  return client;
+}
+
+export function getKeycloak(): Keycloak {
+  return createKeycloak();
+}
+
+export async function signIn(): Promise<void> {
+  const client = await initializeKeycloak();
+  await client.login({ redirectUri: window.location.origin });
+}
+
+export async function signOut(): Promise<void> {
+  const client = await initializeKeycloak();
+  await client.logout({ redirectUri: window.location.origin });
+}
+
+export async function loadAuthedJson<T>(path: string): Promise<T> {
+  const client = createKeycloak();
+  const runtimeConfig = getRuntimeConfig();
+  const url = `${runtimeConfig.apiBaseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+
+  if (client.isTokenExpired(30)) {
+    await client.updateToken(30);
+  }
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${client.token ?? ""}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with ${response.status}`);
+  }
+
+  return (await response.json()) as T;
+}

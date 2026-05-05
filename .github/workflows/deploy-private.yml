@@ -55,12 +55,16 @@ jobs:
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
           OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
           OPENAI_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENAI_API_KEY_SECRET_OCID }}
+          KEYCLOAK_URL: ${{ secrets.OCI_KEYCLOAK_URL }}
+          KEYCLOAK_REALM: ${{ secrets.OCI_KEYCLOAK_REALM }}
         run: |
           : "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:?OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID is required}"
           : "${OPENAI_API_KEY_SECRET_OCID:?OCI_OPENAI_API_KEY_SECRET_OCID is required}"
           SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
           TARGET="$PRIVATE_USER@$PRIVATE_HOST"
+          KEYCLOAK_URL="${KEYCLOAK_URL:-https://kc.prodet.org}"
+          KEYCLOAK_REALM="${KEYCLOAK_REALM:-autoforge}"
           {
             echo "BACKEND_IMAGE=ghcr.io/${{ github.repository_owner }}/autoforge/backend"
             echo "BACKEND_IMAGE_TAG=$IMAGE_TAG"
@@ -75,6 +79,7 @@ jobs:
             echo "OPENCODE_SERVER_PORT=4096"
             echo "OPENCODE_SERVER_PASSWORD_SECRET_OCID=$OPENCODE_SERVER_PASSWORD_SECRET_OCID"
             echo "OPENAI_API_KEY_SECRET_OCID=$OPENAI_API_KEY_SECRET_OCID"
+            echo "KEYCLOAK_ISSUER_URI=$KEYCLOAK_URL/realms/$KEYCLOAK_REALM"
           } > /tmp/autoforge-private.env
           scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" /tmp/autoforge-private.env "$TARGET:$DEPLOY_PATH/.env"
 
