@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-9-gateway-route-config`
 
 PR
--
+- PR #38
 
 Acceptance criteria
 - A gateway image tartalmazza az application.yml route konfigurációt.
