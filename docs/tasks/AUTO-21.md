@@ -13,7 +13,7 @@ Branch
 - `feature/AUTO-21-auto-version-bump`
 
 PR
-- pending
+- PR #33
 
 Acceptance criteria
 - A versioning doksi kimondja, hogy nem-MAJOR tasknál a bump automatikus.
@@ -38,6 +38,7 @@ Lepesnaplo
 2. Átírtam a versioning szabályokat, hogy nem-MAJOR tasknál automatikus legyen a bump.
 3. Frissítettem az agent, branching, task, docs és release manifest dokumentációt.
 4. A root projektverziót `0.1.2`-re emeltem.
+5. Megnyitottam a kapcsolodo PR-t.
 
 Eredmény
-- pending
+- A non-MAJOR version bump szabaly dokumentalva lett.
