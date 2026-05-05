@@ -59,9 +59,15 @@ Use internal references like `PR #26` in task files instead of full URLs when po
 ## Versioning
 
 - Every `AUTO-*` and `BUG-*` task must have a target version.
+- Automatic version bump policy:
+  - For non-major tasks (AUTO-*, BUG-*), the version is automatically incremented according to the protocol (using MAJOR.MINOR.PATCH format). Typically, a PATCH or MINOR bump occurs, with the specific bump determined by the task type (see docs/versioning.md). For MAJOR changes, user confirmation is required for the version increment, and this is recorded in the PR/Release manifest.
+  - The root package.json version and container image tags are updated accordingly during CI/CD.
+  - Version changes are reflected in all related documents: `docs/releases.md`, `docs/versioning.md`, and the `Version` field in task files.
+  - The `Version` field in task files remains mandatory and must appear in the release manifest.
+  - Always display the appropriate version in the AUTO-/BUG banner in documentation so it can be easily traced during audits.
 - For non-major tasks, choose the next version automatically; only ask the user before a `MAJOR` bump.
 - The canonical task-to-version mapping is `docs/releases.md`.
-- Versioning rules are documented in `docs/versioning.md`.
+ - Versioning rules are documented in `docs/versioning.md`.
 - Project-owned Docker images must be tagged with the root `package.json` version by the container image workflow.
 - Do not open a PR if the task file has no `Verzió` section.
 - Do not merge task documentation that disagrees with `docs/releases.md`.
