@@ -31,11 +31,6 @@ else
   exit 1
 fi
 
-if ! command -v oci >/dev/null 2>&1; then
-  echo "OCI CLI is required on the private host to read OpenCode secrets from OCI Vault." >&2
-  exit 1
-fi
-
 get_env_value() {
   local key="$1"
   local line
@@ -86,6 +81,11 @@ printf '\n' >> "$RUNTIME_ENV"
 COMPOSE_ARGS=(--env-file "$RUNTIME_ENV" -f docker-compose.private.yml)
 
 if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] && [ -n "$OPENAI_API_KEY_SECRET_OCID" ]; then
+  if ! command -v oci >/dev/null 2>&1; then
+    echo "OCI CLI is required on the private host to read OpenCode secrets from OCI Vault." >&2
+    exit 1
+  fi
+
   if ! OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret "$OPENCODE_SERVER_PASSWORD_SECRET_OCID")"; then
     echo "Failed to read OPENCODE_SERVER_PASSWORD from OCI Vault." >&2
     exit 1
