@@ -41,6 +41,14 @@ Privat host:
 - opencode secret ertekek: OCI Vaultbol, instance principal-lal olvasva a private hoston
 - workspace storage: 100 GB OCI Block Volume, ext4, mount point: `/mnt/autoforge-workspace`
 
+Keycloak / OIDC:
+
+- a web frontend kulso OIDC providerhoz csatlakozik PKCE flow-val
+- a public stack runtime envje tartalmazza a Keycloak URL-t, a realm helykitoltot es a public client azonositot
+- a private stack runtime envje az issuer URI-t kapja, amely a provider URL-bol es a realm helykitoltobol epul fel
+- jelenlegi modellben public clientet hasznalunk, ezert nincs külön client secret
+- ha kesobb confidential client vagy tovabbi auth secret kell, azt OCI Vaultban kell tarolni
+
 ## Private workspace storage
 
 A private hosthoz egy kulon 100 GB-os OCI Block Volume van csatolva az Autoforge workspace celjara.
@@ -96,6 +104,9 @@ Kapcsolati es registry secret-ek:
 - `OCI_BACKEND_UPSTREAM`: peldaul `<private-backend-ip>:8080`
 - `GHCR_DEPLOY_USERNAME`: GHCR olvasasi jogosultsagu usernev
 - `GHCR_DEPLOY_TOKEN`: GHCR olvasasi jogu token
+- `OCI_KEYCLOAK_URL`: Keycloak base URL-je, peldaul `https://kc.prodet.org`
+- `OCI_KEYCLOAK_REALM`: a realm neve helyett hasznalt deploy-time helykitolto, amelybol az issuer URI epul
+- `OCI_KEYCLOAK_CLIENT_ID`: a public web client azonositoja
 
 Vault secret azonosito GitHub secret-ek:
 
@@ -112,6 +123,11 @@ Fontos:
 
 - `autoforge-opencode-server-password`: az OpenCode REST szerver HTTP basic auth jelszava. Legalabb 32 karakteres, veletlen, newline nelkuli ertek legyen.
 - `autoforge-openai-api-key`: az OpenAI API kulcs, amelyet az OpenCode provider hasznal. Newline nelkuli ertek legyen.
+
+Megjegyzes:
+
+- a mostani Keycloak integraciohoz nem kell tovabbi secret; a login public client + PKCE alapon mukodik
+- ha kesobb confidential clientet vezetunk be, annak secretje is OCI Vaultba kerul
 
 ## Szükséges OCI jogosultság
 

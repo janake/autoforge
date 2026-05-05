@@ -13,12 +13,16 @@
   - OpenCode REST AI service
   - worker service
   - attached OCI Block Volume for the shared Autoforge workspace
+- External identity provider:
+  - Keycloak OIDC login with PKCE
+  - public client for the web app
 
 ## Delivery model
 
 - Every component runs in Docker.
 - Build and deployment flow will be driven by GitHub Actions.
 - The public host serves as the external entry point via Caddy, which routes `/api` to the API gateway and everything else to the web frontend.
+- The web frontend delegates authentication to an external Keycloak OIDC provider and uses bearer tokens for API calls.
 - The private host serves internal application workloads.
 - The private host has a dedicated 100 GB OCI Block Volume mounted as an ext4 workspace at `/mnt/autoforge-workspace`.
 
@@ -28,6 +32,7 @@
 - Frontend scaffolded with Vite + TypeScript.
 - Frontend now has a deployable Docker image definition.
 - Frontend build workflow prepared in GitHub Actions.
+- Frontend authentication now uses an external Keycloak OIDC provider with PKCE.
 - Backend scaffolded with Spring Boot + Maven.
 - Backend deploys from a registry image in the private stack.
 - Backend build workflow prepared in GitHub Actions.

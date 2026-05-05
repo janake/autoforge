@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
   <title id="title">Autoforge OCI architecture</title>
-  <desc id="desc">Autoforge deployment on Oracle Cloud Infrastructure with public and private compute instances, OCI Vault, GHCR, GitHub Actions, and a 100 GB OCI Block Volume workspace attached to the private instance.</desc>
+  <desc id="desc">Autoforge deployment on Oracle Cloud Infrastructure with public and private compute instances, external Keycloak OIDC authentication, OCI Vault, GHCR, GitHub Actions, and a 100 GB OCI Block Volume workspace attached to the private instance.</desc>
   <defs>
     <style>
       .bg { fill: #f8fafc; }
@@ -11,6 +11,7 @@
       .service { fill: #ffffff; stroke: #64748b; stroke-width: 1.5; rx: 6; }
       .storage { fill: #fff7ed; stroke: #ea580c; stroke-width: 2; rx: 8; }
       .vault { fill: #fef2f2; stroke: #b91c1c; stroke-width: 2; rx: 8; }
+      .oidc { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 2; rx: 8; }
       .text { font-family: Arial, sans-serif; fill: #111827; }
       .title { font-size: 34px; font-weight: 700; }
       .h1 { font-size: 24px; font-weight: 700; }
@@ -43,6 +44,10 @@
   <rect x="980" y="75" width="270" height="95" class="vault"/>
   <text x="1025" y="113" class="text h1">OCI Vault</text>
   <text x="1025" y="142" class="text body">Runtime secrets</text>
+
+  <rect x="1280" y="75" width="180" height="95" class="oidc"/>
+  <text x="1305" y="110" class="text h2">Keycloak</text>
+  <text x="1305" y="138" class="text body">OIDC / PKCE</text>
 
   <rect x="45" y="225" width="1410" height="600" class="oci"/>
   <text x="75" y="270" class="text h1">OCI Tenancy</text>
@@ -92,6 +97,8 @@
 
   <path d="M390 122 H520" class="mgmt"/>
   <text x="425" y="105" class="text small">Push images</text>
+  <path d="M1360 170 V225 H610" class="mgmt"/>
+  <text x="1180" y="205" class="text small">External login / bearer tokens</text>
   <path d="M255 170 V335" class="mgmt"/>
   <path d="M650 170 V335 H415" class="mgmt"/>
   <path d="M780 170 V260 H1090 V410" class="mgmt"/>

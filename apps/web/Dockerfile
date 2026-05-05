@@ -13,5 +13,7 @@ RUN npm run build --workspace @autoforge/web
 FROM nginx:1.27-alpine
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /workspace/apps/web/dist /usr/share/nginx/html
+COPY apps/web/docker-entrypoint.sh /docker-entrypoint.d/10-autoforge-config.sh
+RUN chmod +x /docker-entrypoint.d/10-autoforge-config.sh
 
 EXPOSE 8080

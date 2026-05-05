@@ -47,6 +47,7 @@ autoforge/
 
 - `docs/architecture.md`: OCI topologia es architektura
 - `docs/deployment.md`: deploy modell es host elofeltetelek
+- `docs/authentication.md`: OIDC / Keycloak integracio
 - `docs/feature-flags.md`: feature flag, personalization es kesobbi OCI Always Free DB opciok
 
 ## Task tracking
