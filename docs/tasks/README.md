@@ -7,8 +7,9 @@ Itt kovetunk minden fejlesztesi feladatot.
 - Minden feladat kulon Markdown fajlt kap.
 - Az azonosito formatuma: `AUTO-<szam>`.
 - A fajl neve egyezzen az azonositoval, peldaul: `AUTO-1.md`.
+- Bug ticketekhez `BUG-<szam>` formatumot hasznalunk, feature ticketekhez maradhat az `AUTO-<szam>`.
 - Minden feladathoz tartozo commit uzenete kezdodjon az azonositoval.
-- Az aktiv work branchek neve is tartalmazza az azonositot, peldaul: `AUTO-1-react-base`.
+- Az aktiv work branchek neve `feature/<azonosito>` vagy `bug/<azonosito>` formatumot kovessen, peldaul: `feature/AUTO-1` vagy `bug/BUG-2`.
 - Minden task fajlban legyen `Lepesnaplo` szekcio, ahol a futtatott parancsok szerepelnek rovid leirassal.
 - A parancsokban secret/token erteket nem irunk ki, helyette placeholdert hasznalunk.
 - Gitbe nem irunk szemelyes vagy erzekeny adatot: privat kulcsot, kulcsfajl-nevet, abszolut lokalis pathot, felhasznalonevet, emailt, tokent, cloud credentialt, tenancy/user OCID-t.

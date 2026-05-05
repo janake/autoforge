@@ -49,13 +49,14 @@ autoforge/
 - `docs/deployment.md`: deploy modell es host elofeltetelek
 - `docs/authentication.md`: OIDC / Keycloak integracio
 - `docs/feature-flags.md`: feature flag, personalization es kesobbi OCI Always Free DB opciok
+- `docs/branching.md`: feature/bug branch policy es CI/CD szabalyok
 
 ## Task tracking
 
 - Minden feladatot a `docs/tasks/` alatt kovetunk.
 - Minden feladat kulon Markdown fajlt kap egyedi azonosito alatt, peldaul `AUTO-1`.
 - Az adott feladathoz tartozo commitok uzenetei az azonosito prefixszel kezdodjenek, peldaul: `[AUTO-1] Add ...`
-- Az aktiv work branchek neve is tartalmazza az azonositot, peldaul: `AUTO-1-react-base`.
+- Az aktiv work branchek neve `feature/<azonosito>` vagy `bug/<azonosito>` formatumot kovessen.
 
 ## Indulasi megjegyzes
 
