@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-6-version-quoting-fix`
 
 PR
-- pending
+- PR #32
 
 Acceptance criteria
 - A `Read project version` step minden workflow-ban shell quoting hiba nelkul fut.
@@ -30,6 +30,7 @@ Dokumentumok és fájlok
 Lepesnaplo
 1. Azonosítottam, hogy a GitHub Actions hiba a `node -p` beágyazott quotingja miatt történt.
 2. A problémás `Read project version` lépéseket multiline shell blokkra cseréltem.
+3. Megnyitottam a kapcsolodo PR-t.
 
 Eredmény
-- pending
+- A workflow version reading hiba javitva.
