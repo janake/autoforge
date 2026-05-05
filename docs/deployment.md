@@ -90,6 +90,7 @@ A tipikus tartalom:
 - `Container Images`: web es backend image build + push GHCR-be
 - `Deploy Public Host`: manual workflow a publikus stack frissitesere
 - `Deploy Private Host`: manual workflow a privat stack frissitesere ProxyJump-pal, beleertve a backendet es az opencode REST AI service-et
+- ugyanazok a workflow-k `main`-re merge-elt, relevans fájlokat erinto pushokra is lefutnak, hogy a deploy automatikusan meginduljon
 
 ## Szukseges GitHub secret-ek
 
