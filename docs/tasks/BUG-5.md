@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-5-keycloak-fragment-callback`
 
 PR
-- pending
+- PR #31
 
 Acceptance criteria
 - A frontend felismeri a Keycloak callbacket query stringbol es hash fragmentbol is.
@@ -33,6 +33,7 @@ Lepesnaplo
 2. Ellenoriztem, hogy a frontend csak `window.location.search` alapjan detektalta az auth callbacket.
 3. Hozzaadtam a hash fragment callback felismereset.
 4. Lefuttattam a frontend buildet: `npm run build:web` sikeres.
+5. Megnyitottam a kapcsolodo PR-t.
 
 Eredmény
 - A frontend mar query es hash callback formatumot is felismer.
