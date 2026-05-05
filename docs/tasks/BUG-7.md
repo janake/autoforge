@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-7-signin-button-visible`
 
 PR
-- PR #36 
+- PR #36
 
 Acceptance criteria
 - A bejelentkezett felhasználók számára NEM jelenik meg a sign-in gomb
