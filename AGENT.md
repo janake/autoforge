@@ -61,6 +61,7 @@ Use internal references like `PR #26` in task files instead of full URLs when po
 - Every `AUTO-*` and `BUG-*` task must have a target version.
 - The canonical task-to-version mapping is `docs/releases.md`.
 - Versioning rules are documented in `docs/versioning.md`.
+- Project-owned Docker images must be tagged with the root `package.json` version by the container image workflow.
 - Do not open a PR if the task file has no `Verzió` section.
 - Do not merge task documentation that disagrees with `docs/releases.md`.
 

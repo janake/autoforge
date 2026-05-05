@@ -33,3 +33,5 @@ Ha a Cloudflare secret-ek elérhetők, a public deploy flow a webes rekordokat i
 - Minden workflow vagy deploy szabaly valtozas celverziohoz kotott.
 - A task fajlban kotelezo a `Verzió` mezo.
 - A valtozast fel kell venni a `docs/releases.md` manifestbe.
+- A `Container Images` workflow a sajat image-eket `main`, `<version>` es `sha-<commit>` tagekkel publikálja.
+- A public/private deploy workflow-k a sajat image-ekhez a `<version>` taget hasznaljak.

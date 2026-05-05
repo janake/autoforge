@@ -51,6 +51,35 @@ A `docs/releases.md` minden verzional tartalmazza:
 - task lista ID-val es rovid cimmel
 - release megjegyzes
 
+## Docker image verziozas
+
+A sajat Docker image-ek kotelezoen kapjanak verzios taget az aktualis root `package.json` `version` mezoje alapjan.
+
+A `Container Images` workflow minden sajat image-re legalabb ezeket a tageket kesziti:
+
+- `main`, csak a default branch buildnel
+- `<version>`, peldaul `0.1.1`
+- `sha-<commit>`
+
+Erintett image-ek:
+
+- `ghcr.io/<registry-owner>/autoforge/web:<version>`
+- `ghcr.io/<registry-owner>/autoforge/backend:<version>`
+- `ghcr.io/<registry-owner>/autoforge/api-gateway:<version>`
+
+Kulsos upstream image-eket, peldaul az OpenCode image-et, nem tagelunk at sajat projektverziora.
+
+## Deploy verziozas
+
+A deploy workflow-k a sajat image-ekbol a `<version>` taget hasznaljak, nem a mozgó `main` taget.
+
+- Public deploy: `WEB_IMAGE_TAG=<version>` es `API_IMAGE_TAG=<version>`.
+- Private deploy: `BACKEND_IMAGE_TAG=<version>`.
+
+Ez biztosítja, hogy a futó Docker containerbol is latszik, melyik projektverzio van kint.
+
+Deploy elott a workflow-knak ellenorizniuk kell, hogy a szukseges verzios image tag mar elerheto GHCR-ben. Ez megelozi, hogy a deploy a container builddel parhuzamosan, meg nem letezo vagy stale image-re fusson ra.
+
 ## PR kovetelmeny
 
 Minden PR body tartalmazza a celverziot.

@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 env:
   DEPLOY_PATH: /opt/autoforge/public
@@ -24,6 +25,29 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Read project version
+        run: echo "PROJECT_VERSION=$(node -p \"require('./package.json').version\")" >> "$GITHUB_ENV"
+
+      - name: Wait for versioned public images
+        env:
+          GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
+          GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
+        run: |
+          IMAGE_TAG="${PROJECT_VERSION:?PROJECT_VERSION is required}"
+          echo "$GHCR_DEPLOY_TOKEN" | docker login ghcr.io -u "$GHCR_DEPLOY_USERNAME" --password-stdin
+          for image in "ghcr.io/${{ github.repository_owner }}/autoforge/web:$IMAGE_TAG" "ghcr.io/${{ github.repository_owner }}/autoforge/api-gateway:$IMAGE_TAG"; do
+            for attempt in $(seq 1 20); do
+              if docker manifest inspect "$image" >/dev/null 2>&1; then
+                break
+              fi
+              if [ "$attempt" -eq 20 ]; then
+                echo "Versioned image is not available: $image" >&2
+                exit 1
+              fi
+              sleep 15
+            done
+          done
 
       - name: Prepare SSH client
         env:
@@ -52,7 +76,6 @@ jobs:
 
       - name: Render public runtime environment
         env:
-          IMAGE_TAG: main
           PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
@@ -62,6 +85,7 @@ jobs:
           KEYCLOAK_REALM: ${{ secrets.OCI_KEYCLOAK_REALM }}
           KEYCLOAK_CLIENT_ID: ${{ secrets.OCI_KEYCLOAK_CLIENT_ID }}
         run: |
+          IMAGE_TAG="${PROJECT_VERSION:?PROJECT_VERSION is required}"
           PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
           : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
           : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
