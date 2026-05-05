@@ -8,6 +8,7 @@ Az Autoforge jelenlegi deploy modellje ket OCI geppel szamol:
 - privat host: Spring Boot backend
 
 A GitHub Actions workflow-k GHCR image-eket hasznalnak, majd SSH-n keresztul frissitik a ket hostot.
+A publikus host deployja opcionálisan Cloudflare DNS rekordokat is frissit a webes domainhez.
 
 ## Kontenerkepek
 
@@ -107,6 +108,9 @@ Kapcsolati es registry secret-ek:
 - `OCI_BACKEND_UPSTREAM`: peldaul `<private-backend-ip>:8080`
 - `GHCR_DEPLOY_USERNAME`: GHCR olvasasi jogosultsagu usernev
 - `GHCR_DEPLOY_TOKEN`: GHCR olvasasi jogu token
+- `CLOUDFLARE_API_TOKEN`: Cloudflare API token DNS write joggal
+- `CLOUDFLARE_ZONE_ID`: a `prodet.org` zone id-ja
+- `CLOUDFLARE_SSL_MODE`: optional, ha be van allitva, a zone SSL setting is frissul
 - `OCI_KEYCLOAK_URL`: Keycloak base URL-je, peldaul `https://kc.prodet.org`
 - `OCI_KEYCLOAK_REALM`: a realm neve helyett hasznalt deploy-time helykitolto, amelybol az issuer URI epul
 - `OCI_KEYCLOAK_CLIENT_ID`: a public web client azonositoja
@@ -122,6 +126,8 @@ Fontos:
 - A deploy workflow ezeket az OCID-ket masolja a private host `.env` fajljaba.
 - A private host `deploy.sh` scriptje olvassa ki a konkret secret ertekeket OCI Vaultbol, `--auth instance_principal` hasznalataval.
 - A webes hostname es az SSH-cel nem ugyanaz: a Cloudflare-kezelt publikus domain nem alkalmas SSH deploy celra, ehhez kulon SSH host kell.
+- Ha a Cloudflare token es zone id rendelkezésre all, a public deploy script automatikusan az `oci.prodet.org` es `api.oci.prodet.org` rekordokat a publikus origin IP-re allitja, proxied rekordokkal.
+- Ha külön `CLOUDFLARE_SSL_MODE` is meg van adva, a zone SSL setting is frissul.
 
 ## Szükséges OCI Vault secret-ek
 

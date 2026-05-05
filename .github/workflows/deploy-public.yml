@@ -87,13 +87,16 @@ jobs:
           } > /tmp/autoforge-public.env
           scp "${SSH_COMMON[@]}" /tmp/autoforge-public.env "$TARGET:$DEPLOY_PATH/.env"
 
-      - name: Upload registry credentials
+      - name: Upload registry and Cloudflare credentials
         env:
           PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
           GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          CLOUDFLARE_SSL_MODE: ${{ secrets.CLOUDFLARE_SSL_MODE }}
         run: |
           SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
@@ -103,6 +106,14 @@ jobs:
           {
             echo "GHCR_USERNAME=$GHCR_DEPLOY_USERNAME"
             echo "GHCR_TOKEN=$GHCR_DEPLOY_TOKEN"
+            if [ -n "${CLOUDFLARE_API_TOKEN:-}" ] && [ -n "${CLOUDFLARE_ZONE_ID:-}" ]; then
+              echo "CLOUDFLARE_API_TOKEN=$CLOUDFLARE_API_TOKEN"
+              echo "CLOUDFLARE_ZONE_ID=$CLOUDFLARE_ZONE_ID"
+              echo "CLOUDFLARE_ORIGIN_HOST=$PUBLIC_SSH_HOST"
+              if [ -n "${CLOUDFLARE_SSL_MODE:-}" ]; then
+                echo "CLOUDFLARE_SSL_MODE=$CLOUDFLARE_SSL_MODE"
+              fi
+            fi
           } > /tmp/autoforge-public.deploy.env
           scp "${SSH_COMMON[@]}" /tmp/autoforge-public.deploy.env "$TARGET:$DEPLOY_PATH/.deploy.env"
 

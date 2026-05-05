@@ -16,12 +16,14 @@ Acceptance criteria
 - A public deploy workflow külön SSH host secretet használ.
 - A private deploy workflow külön SSH host secretet használ a jump hosthoz, és ha kell, a private hosthoz is.
 - A dokumentáció külön kezeli a web hostot és az SSH hostot.
+- A public deploy workflow opcionálisan Cloudflare DNS rekordokat is frissít.
 - A CI továbbra is fut `feature/*` és `bug/*` ágakon, a deploy pedig csak `main`-en.
 
 Dokumentumok és fájlok
 - `.github/workflows/deploy-public.yml`
 - `.github/workflows/deploy-private.yml`
 - `.github/workflows/README.md`
+- `infra/deploy/public/cloudflare_sync.py`
 - `docs/deployment.md`
 - `docs/tasks/BUG-2.md`
 
@@ -33,6 +35,7 @@ Lepesnaplo
 1. Megnéztem a GitHub Actions logot és a hibás SSH hostname feloldást.
 2. Szétválasztottam a web host és az SSH host használatát a workflow-kban.
 3. Frissítettem a deploy dokumentációt a külön SSH host secret-ekkel.
+4. Beépítettem a Cloudflare DNS rekord syncet a public deploy flow-ba.
 
 Eredmény
 - A deploy hostok már külön kezelhetők webes és SSH célokra.
