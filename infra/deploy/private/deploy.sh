@@ -6,6 +6,9 @@ set -euo pipefail
 cd "$APP_DIR"
 
 ENV_FILE="$APP_DIR/.env"
+BACKEND_IMAGE_ARCHIVE="$APP_DIR/autoforge-backend-image.tar.gz"
+OPENCODE_IMAGE_ARCHIVE="$APP_DIR/autoforge-opencode-image.tar.gz"
+PRIVATE_IMAGES_PRELOADED="${PRIVATE_IMAGES_PRELOADED:-false}"
 
 if [ -f .deploy.env ]; then
   set -a
@@ -14,8 +17,6 @@ if [ -f .deploy.env ]; then
 fi
 
 : "${ENV_FILE:?ENV_FILE is required}"
-: "${GHCR_USERNAME:?GHCR_USERNAME is required}"
-: "${GHCR_TOKEN:?GHCR_TOKEN is required}"
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "Runtime environment file is missing: $ENV_FILE" >&2
@@ -28,11 +29,6 @@ elif command -v docker-compose >/dev/null 2>&1; then
   COMPOSE_CMD=(docker-compose)
 else
   echo "Docker Compose is not installed on the target host." >&2
-  exit 1
-fi
-
-if ! command -v oci >/dev/null 2>&1; then
-  echo "OCI CLI is required on the private host to read OpenCode secrets from OCI Vault." >&2
   exit 1
 fi
 
@@ -77,32 +73,57 @@ append_secret_env() {
 OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_OCID || true)"
 OPENAI_API_KEY_SECRET_OCID="$(get_env_value OPENAI_API_KEY_SECRET_OCID || true)"
 
-: "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:?OPENCODE_SERVER_PASSWORD_SECRET_OCID is required in .env}"
-: "${OPENAI_API_KEY_SECRET_OCID:?OPENAI_API_KEY_SECRET_OCID is required in .env}"
-
 RUNTIME_ENV="$(mktemp "$APP_DIR/.runtime.env.XXXXXX")"
 trap 'rm -f "$APP_DIR/.deploy.env" "${RUNTIME_ENV:-}"' EXIT
 chmod 600 "$RUNTIME_ENV"
 cp "$ENV_FILE" "$RUNTIME_ENV"
 printf '\n' >> "$RUNTIME_ENV"
 
-if ! OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret "$OPENCODE_SERVER_PASSWORD_SECRET_OCID")"; then
-  echo "Failed to read OPENCODE_SERVER_PASSWORD from OCI Vault." >&2
-  exit 1
+COMPOSE_ARGS=(--env-file "$RUNTIME_ENV" -f docker-compose.private.yml)
+
+if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] && [ -n "$OPENAI_API_KEY_SECRET_OCID" ]; then
+  if ! command -v oci >/dev/null 2>&1; then
+    echo "OCI CLI is required on the private host to read OpenCode secrets from OCI Vault." >&2
+    exit 1
+  fi
+
+  if ! OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret "$OPENCODE_SERVER_PASSWORD_SECRET_OCID")"; then
+    echo "Failed to read OPENCODE_SERVER_PASSWORD from OCI Vault." >&2
+    exit 1
+  fi
+
+  if ! OPENAI_API_KEY_VALUE="$(get_vault_secret "$OPENAI_API_KEY_SECRET_OCID")"; then
+    echo "Failed to read OPENAI_API_KEY from OCI Vault." >&2
+    exit 1
+  fi
+
+  : "${OPENCODE_SERVER_PASSWORD_VALUE:?OPENCODE_SERVER_PASSWORD secret value is empty}"
+  : "${OPENAI_API_KEY_VALUE:?OPENAI_API_KEY secret value is empty}"
+
+  append_secret_env "OPENCODE_SERVER_PASSWORD" "$OPENCODE_SERVER_PASSWORD_VALUE"
+  append_secret_env "OPENAI_API_KEY" "$OPENAI_API_KEY_VALUE"
+  COMPOSE_ARGS+=(--profile opencode)
+else
+  echo "OpenCode secrets are not configured; deploying backend without the opencode profile." >&2
+  append_secret_env "OPENCODE_SERVER_PASSWORD" "disabled-until-vault-secrets-are-configured"
 fi
 
-if ! OPENAI_API_KEY_VALUE="$(get_vault_secret "$OPENAI_API_KEY_SECRET_OCID")"; then
-  echo "Failed to read OPENAI_API_KEY from OCI Vault." >&2
-  exit 1
+if [ -f "$BACKEND_IMAGE_ARCHIVE" ]; then
+  docker load --input "$BACKEND_IMAGE_ARCHIVE"
+  rm -f "$BACKEND_IMAGE_ARCHIVE"
 fi
 
-: "${OPENCODE_SERVER_PASSWORD_VALUE:?OPENCODE_SERVER_PASSWORD secret value is empty}"
-: "${OPENAI_API_KEY_VALUE:?OPENAI_API_KEY secret value is empty}"
+if [ -f "$OPENCODE_IMAGE_ARCHIVE" ]; then
+  docker load --input "$OPENCODE_IMAGE_ARCHIVE"
+  rm -f "$OPENCODE_IMAGE_ARCHIVE"
+fi
 
-append_secret_env "OPENCODE_SERVER_PASSWORD" "$OPENCODE_SERVER_PASSWORD_VALUE"
-append_secret_env "OPENAI_API_KEY" "$OPENAI_API_KEY_VALUE"
+if [ "$PRIVATE_IMAGES_PRELOADED" != "true" ]; then
+  : "${GHCR_USERNAME:?GHCR_USERNAME is required}"
+  : "${GHCR_TOKEN:?GHCR_TOKEN is required}"
+  echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+  "${COMPOSE_CMD[@]}" "${COMPOSE_ARGS[@]}" pull
+fi
 
-echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
-"${COMPOSE_CMD[@]}" --env-file "$RUNTIME_ENV" -f docker-compose.private.yml pull
-"${COMPOSE_CMD[@]}" --env-file "$RUNTIME_ENV" -f docker-compose.private.yml up -d --remove-orphans
+"${COMPOSE_CMD[@]}" "${COMPOSE_ARGS[@]}" up -d --remove-orphans
 docker image prune -f

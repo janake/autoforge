@@ -39,16 +39,16 @@ jobs:
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
         run: |
-          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
           : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
           : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
           TARGET="$PUBLIC_USER@$PUBLIC_SSH_HOST"
-          ssh "${SSH_COMMON[@]}" "$TARGET" "mkdir -p '$DEPLOY_PATH'"
-          scp "${SSH_COMMON[@]}" infra/compose/docker-compose.public.yml "$TARGET:$DEPLOY_PATH/docker-compose.public.yml"
-          scp "${SSH_COMMON[@]}" infra/compose/Caddyfile "$TARGET:$DEPLOY_PATH/Caddyfile"
-          scp "${SSH_COMMON[@]}" infra/deploy/public/deploy.sh "$TARGET:$DEPLOY_PATH/deploy.sh"
-          ssh "${SSH_COMMON[@]}" "$TARGET" "chmod +x '$DEPLOY_PATH/deploy.sh'"
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519" "$TARGET" "mkdir -p '$DEPLOY_PATH'"
+          scp -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519" infra/compose/docker-compose.public.yml "$TARGET:$DEPLOY_PATH/docker-compose.public.yml"
+          scp -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519" infra/compose/Caddyfile "$TARGET:$DEPLOY_PATH/Caddyfile"
+          scp -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519" infra/deploy/public/deploy.sh "$TARGET:$DEPLOY_PATH/deploy.sh"
+          scp -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519" infra/deploy/public/cloudflare_sync.py "$TARGET:$DEPLOY_PATH/cloudflare_sync.py"
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519" "$TARGET" "chmod +x '$DEPLOY_PATH/deploy.sh' '$DEPLOY_PATH/cloudflare_sync.py'"
 
       - name: Render public runtime environment
         env:
@@ -62,7 +62,6 @@ jobs:
           KEYCLOAK_REALM: ${{ secrets.OCI_KEYCLOAK_REALM }}
           KEYCLOAK_CLIENT_ID: ${{ secrets.OCI_KEYCLOAK_CLIENT_ID }}
         run: |
-          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
           : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
           : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
@@ -85,7 +84,7 @@ jobs:
             echo "KEYCLOAK_REALM=$KEYCLOAK_REALM"
             echo "KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID"
           } > /tmp/autoforge-public.env
-          scp "${SSH_COMMON[@]}" /tmp/autoforge-public.env "$TARGET:$DEPLOY_PATH/.env"
+          scp -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519" /tmp/autoforge-public.env "$TARGET:$DEPLOY_PATH/.env"
 
       - name: Upload registry and Cloudflare credentials
         env:
@@ -98,7 +97,6 @@ jobs:
           CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
           CLOUDFLARE_SSL_MODE: ${{ secrets.CLOUDFLARE_SSL_MODE }}
         run: |
-          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
           : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
           : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
@@ -115,7 +113,7 @@ jobs:
               fi
             fi
           } > /tmp/autoforge-public.deploy.env
-          scp "${SSH_COMMON[@]}" /tmp/autoforge-public.deploy.env "$TARGET:$DEPLOY_PATH/.deploy.env"
+          scp -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519" /tmp/autoforge-public.deploy.env "$TARGET:$DEPLOY_PATH/.deploy.env"
 
       - name: Deploy public stack
         env:
@@ -123,9 +121,8 @@ jobs:
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
         run: |
-          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
           PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
           : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
           : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
           TARGET="$PUBLIC_USER@$PUBLIC_SSH_HOST"
-          ssh "${SSH_COMMON[@]}" "$TARGET" "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519" "$TARGET" "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"

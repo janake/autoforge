@@ -17,8 +17,9 @@ Szukseges secret-ek:
 - `OCI_PRIVATE_HOST`
 - `OCI_PRIVATE_SSH_HOST`
 - `OCI_PRIVATE_USER`
-- `OCI_GATEWAY_DOMAIN`
 - `OCI_BACKEND_UPSTREAM`
+
+Megjegyzés: `OCI_GATEWAY_DOMAIN` nem szükséges - a domain be van égetve a docker-compose-ban.
 - `GHCR_DEPLOY_USERNAME`
 - `GHCR_DEPLOY_TOKEN`
 - `CLOUDFLARE_API_TOKEN`

@@ -25,6 +25,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Prepare private images
+        env:
+          IMAGE_TAG: main
+          GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
+          GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
+          OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
+          OPENAI_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENAI_API_KEY_SECRET_OCID }}
+        run: |
+          echo "$GHCR_DEPLOY_TOKEN" | docker login ghcr.io -u "$GHCR_DEPLOY_USERNAME" --password-stdin
+          docker pull "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG"
+          docker save "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG" | gzip -1 > /tmp/autoforge-backend-image.tar.gz
+          if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ] && [ -n "${OPENAI_API_KEY_SECRET_OCID:-}" ]; then
+            docker pull ghcr.io/anomalyco/opencode:latest
+            docker save ghcr.io/anomalyco/opencode:latest | gzip -1 > /tmp/autoforge-opencode-image.tar.gz
+          else
+            rm -f /tmp/autoforge-opencode-image.tar.gz
+          fi
+
       - name: Prepare SSH client
         env:
           SSH_KEY: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
@@ -72,6 +90,13 @@ jobs:
           scp -F ~/.ssh/config infra/deploy/private/deploy.sh autoforge-private:"$DEPLOY_PATH/deploy.sh"
           ssh -F ~/.ssh/config autoforge-private "chmod +x '$DEPLOY_PATH/deploy.sh'"
 
+      - name: Upload private images
+        run: |
+          scp -F ~/.ssh/config /tmp/autoforge-backend-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-backend-image.tar.gz"
+          if [ -f /tmp/autoforge-opencode-image.tar.gz ]; then
+            scp -F ~/.ssh/config /tmp/autoforge-opencode-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-opencode-image.tar.gz"
+          fi
+
       - name: Render private runtime environment
         env:
           IMAGE_TAG: main
@@ -86,8 +111,6 @@ jobs:
           KEYCLOAK_URL: ${{ secrets.OCI_KEYCLOAK_URL }}
           KEYCLOAK_REALM: ${{ secrets.OCI_KEYCLOAK_REALM }}
         run: |
-          : "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:?OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID is required}"
-          : "${OPENAI_API_KEY_SECRET_OCID:?OCI_OPENAI_API_KEY_SECRET_OCID is required}"
           KEYCLOAK_URL="${KEYCLOAK_URL:-https://kc.prodet.org}"
           KEYCLOAK_REALM="${KEYCLOAK_REALM:-autoforge}"
           {
@@ -102,8 +125,12 @@ jobs:
             echo "OPENCODE_SERVER_URL=http://opencode:4096"
             echo "OPENCODE_SERVER_USERNAME=opencode"
             echo "OPENCODE_SERVER_PORT=4096"
-            echo "OPENCODE_SERVER_PASSWORD_SECRET_OCID=$OPENCODE_SERVER_PASSWORD_SECRET_OCID"
-            echo "OPENAI_API_KEY_SECRET_OCID=$OPENAI_API_KEY_SECRET_OCID"
+            if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ]; then
+              echo "OPENCODE_SERVER_PASSWORD_SECRET_OCID=$OPENCODE_SERVER_PASSWORD_SECRET_OCID"
+            fi
+            if [ -n "${OPENAI_API_KEY_SECRET_OCID:-}" ]; then
+              echo "OPENAI_API_KEY_SECRET_OCID=$OPENAI_API_KEY_SECRET_OCID"
+            fi
             echo "KEYCLOAK_ISSUER_URI=$KEYCLOAK_URL/realms/$KEYCLOAK_REALM"
           } > /tmp/autoforge-private.env
           scp -F ~/.ssh/config /tmp/autoforge-private.env autoforge-private:"$DEPLOY_PATH/.env"
@@ -120,8 +147,7 @@ jobs:
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
         run: |
           {
-            echo "GHCR_USERNAME=$GHCR_DEPLOY_USERNAME"
-            echo "GHCR_TOKEN=$GHCR_DEPLOY_TOKEN"
+            echo "PRIVATE_IMAGES_PRELOADED=true"
           } > /tmp/autoforge-private.deploy.env
           scp -F ~/.ssh/config /tmp/autoforge-private.deploy.env autoforge-private:"$DEPLOY_PATH/.deploy.env"
 
