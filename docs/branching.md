@@ -13,6 +13,8 @@ Az Autoforge fejlesztési ágai két csoportra oszlanak:
 - A commit üzenet kezdődjön az azonosítóval.
 - A task dokumentum a `docs/tasks/` alatt él.
 - A bug ticketek neve `BUG-<szám>`, a feature ticketek neve `AUTO-<szám>`.
+- A task dokumentum tartalmazzon `Verzió` mezőt.
+- A task szerepeljen a `docs/releases.md` manifestben a célverzió alatt.
 
 ## CI/CD viselkedés
 
@@ -20,6 +22,7 @@ Az Autoforge fejlesztési ágai két csoportra oszlanak:
 - `main` ágra merge után a CD/deploy fut.
 - Deploy workflow csak `main` pushra fusson.
 - Ha workflowt módosítunk, a branch policy dokumentációt is frissíteni kell.
+- Ha verziózási vagy release folyamatot módosítunk, a `docs/versioning.md`, `docs/releases.md` és `AGENT.md` dokumentumokat is frissíteni kell.
 
 ## Megjegyzés
 

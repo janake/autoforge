@@ -6,6 +6,9 @@ Repo-szintű agent szabályfájlt kell létrehozni, amely minden AI számára eg
 Statusz
 - in progress
 
+Verzió
+- `0.1.1`
+
 Branch
 - `feature/AUTO-16-agent-guidelines`
 

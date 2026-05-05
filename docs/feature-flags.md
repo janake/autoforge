@@ -12,6 +12,12 @@ Jelenlegi stack:
 - GitHub Actions deploy
 - OCI private host belso workloadokra
 
+## Verziózás
+
+- Minden feature flag, rollout vagy personalization valtozas celverziohoz kotott.
+- A kapcsolodo task fajlban kotelezo a `Verzió` mezo.
+- A valtozast fel kell venni a `docs/releases.md` manifestbe a megfelelo verzio alatt.
+
 ## Mit akarunk szemelyre szabni?
 
 A feature flag nem csak `true/false` kapcsolo lehet. Az Autoforge-ban hasznalhatjuk runtime konfiguraciokent is.

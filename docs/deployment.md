@@ -19,7 +19,16 @@ A `Container Images` workflow ezeket az image-eket kezeli:
 - `ghcr.io/<registry-owner>/autoforge/backend`
 - `ghcr.io/anomalyco/opencode` hivatalos OpenCode image-kent fut a private stackben, ezt nem ez a workflow epiti
 
-A workflow a `main` es `sha-<commit>` tageket kesziti el.
+A workflow a `main`, `<version>` es `sha-<commit>` tageket kesziti el. A `<version>` tag a root `package.json` `version` mezojebol jon, peldaul `0.1.1`.
+Deploy soran a sajat image-eknel a `<version>` tag kerul a Compose env fajlba, nem a mozgó `main` tag.
+
+## Verziózás
+
+- Minden deploy vagy workflow valtozasnak legyen celverzioja a task fajlban.
+- A valtozast fel kell venni a `docs/releases.md` manifestbe.
+- A verzios besorolast a `docs/versioning.md` alapjan kell eldonteni.
+- A sajat Docker image-eknek tartalmazniuk kell a projektverzio taget is.
+- A deploy workflow-knak a projektverzio taget kell hasznalniuk a sajat image-ekhez.
 
 ## Compose stackek
 

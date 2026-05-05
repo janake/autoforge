@@ -14,6 +14,12 @@ Az Autoforge webes felülete külső OIDC szolgáltatóval hitelesít, a backend
 - külön client secret jelenleg nem szükséges
 - ha később confidential client kell, annak secretje OCI Vaultba kerüljön
 
+## Verziózás
+
+- Minden auth flow, Keycloak, token vagy jogosultsag valtozasnak legyen celverzioja.
+- A valtozast a task fajl `Verzió` mezojeben es a `docs/releases.md` manifestben is rogziteni kell.
+- Breaking auth valtozasnal a `docs/versioning.md` szerint legalabb `MINOR`, inkompatibilis API/deploy hatasnal `MAJOR` verzio szukseges.
+
 ## Konfigurációs változók
 
 - `KEYCLOAK_URL`: az OIDC szolgáltató base URL-je

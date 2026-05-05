@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 env:
   DEPLOY_PATH: /opt/autoforge/private
@@ -25,16 +26,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Read project version
+        run: echo "PROJECT_VERSION=$(node -p \"require('./package.json').version\")" >> "$GITHUB_ENV"
+
       - name: Prepare private images
         env:
-          IMAGE_TAG: main
           GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
           OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
           OPENAI_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENAI_API_KEY_SECRET_OCID }}
         run: |
+          IMAGE_TAG="${PROJECT_VERSION:?PROJECT_VERSION is required}"
           echo "$GHCR_DEPLOY_TOKEN" | docker login ghcr.io -u "$GHCR_DEPLOY_USERNAME" --password-stdin
-          docker pull "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG"
+          for attempt in $(seq 1 20); do
+            if docker pull "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG"; then
+              break
+            fi
+            if [ "$attempt" -eq 20 ]; then
+              echo "Versioned backend image is not available: $IMAGE_TAG" >&2
+              exit 1
+            fi
+            sleep 15
+          done
           docker save "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG" | gzip -1 > /tmp/autoforge-backend-image.tar.gz
           if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ] && [ -n "${OPENAI_API_KEY_SECRET_OCID:-}" ]; then
             docker pull ghcr.io/anomalyco/opencode:latest
@@ -99,7 +112,6 @@ jobs:
 
       - name: Render private runtime environment
         env:
-          IMAGE_TAG: main
           PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
@@ -111,6 +123,7 @@ jobs:
           KEYCLOAK_URL: ${{ secrets.OCI_KEYCLOAK_URL }}
           KEYCLOAK_REALM: ${{ secrets.OCI_KEYCLOAK_REALM }}
         run: |
+          IMAGE_TAG="${PROJECT_VERSION:?PROJECT_VERSION is required}"
           KEYCLOAK_URL="${KEYCLOAK_URL:-https://kc.prodet.org}"
           KEYCLOAK_REALM="${KEYCLOAK_REALM:-autoforge}"
           {
