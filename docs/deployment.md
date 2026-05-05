@@ -116,6 +116,9 @@ Kapcsolati es registry secret-ek:
 - `OCI_KEYCLOAK_REALM`: a realm neve helyett hasznalt deploy-time helykitolto, amelybol az issuer URI epul
 - `OCI_KEYCLOAK_CLIENT_ID`: a public web client azonositoja
 
+Megjegyzések:
+- `OCI_GATEWAY_DOMAIN` nem szükséges - a domain (`oci.prodet.org`) be van égetve a `docker-compose.public.yml`-be (BUG-3).
+
 Vault secret azonosito GitHub secret-ek:
 
 - `OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-opencode-server-password` secret OCID-ja
