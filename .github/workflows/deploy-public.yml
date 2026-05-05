@@ -10,11 +10,6 @@ on:
       - "infra/deploy/public/**"
       - ".github/workflows/deploy-public.yml"
   workflow_dispatch:
-    inputs:
-      image_tag:
-        description: GHCR tag to deploy for the public web and API gateway images
-        required: true
-        default: main
 
 permissions:
   contents: read
@@ -53,7 +48,7 @@ jobs:
 
       - name: Render public runtime environment
         env:
-          IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag || 'main' }}
+          IMAGE_TAG: main
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
           GATEWAY_DOMAIN: ${{ secrets.OCI_GATEWAY_DOMAIN }}
