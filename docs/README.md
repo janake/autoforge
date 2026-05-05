@@ -18,6 +18,7 @@ Verziozasi szabalyok:
 
 - `docs/versioning.md`: hogyan valasztunk celverziot uj feladathoz
 - `docs/releases.md`: melyik `AUTO-*` vagy `BUG-*` melyik verziohoz tartozik
+- Nem-MAJOR feladatnal a version bump automatikus; MAJOR elott jovahagyast kerunk.
 
 Biztonsági vizsgálatok és PR-specifikus runbookok:
 

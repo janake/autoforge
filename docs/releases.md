@@ -45,3 +45,14 @@ Taskok
 
 Megjegyzes
 - Processz es UI tisztitas: agent szabalyok, release manifest, landing cleanup es deployment sorrend tanulsagok.
+
+## 0.1.2
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-21`: Automatic version bump rule
+
+Megjegyzes
+- Nem-MAJOR taskoknal a verzio bump automatikus; csak MAJOR emelesnel kerunk kulon jovahagyast.
