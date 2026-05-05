@@ -39,6 +39,7 @@ Taskok
 - `AUTO-15`: Landing page cleanup
 - `AUTO-16`: Agent operating rules
 - `AUTO-18`: Version tracking
+- `AUTO-19`: Playwright MCP setup
 
 Megjegyzes
 - Processz es UI tisztitas: agent szabalyok, release manifest, landing cleanup es deployment sorrend tanulsagok.

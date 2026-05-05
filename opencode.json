@@ -1,7 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "openai/gpt-4.1",
-  "share": "disabled",
   "mcp": {
     "playwright": {
       "type": "local",
@@ -17,9 +15,5 @@
       "enabled": true,
       "timeout": 30000
     }
-  },
-  "server": {
-    "hostname": "0.0.0.0",
-    "port": 4096
   }
 }

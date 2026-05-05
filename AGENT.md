@@ -98,6 +98,14 @@ Record the commands and outcomes in the task file `Lepesnaplo` section. Do not r
 - Do not start or stop OCI services unless the user explicitly asks for that action.
 - Main branch merges may trigger deploy workflows; verify workflow triggers before claiming deploy behavior.
 
+## Browser Verification With Playwright MCP
+
+- Use the configured `playwright` MCP server for browser-based checks when the task requires UI or deployed frontend verification.
+- Playwright MCP configuration lives in `opencode.json` and `infra/compose/opencode.json`.
+- Do not start local frontend/backend services just to use Playwright; use deployed public URLs unless the user explicitly asks for local verification.
+- Do not enter secrets, tokens, passwords, or private data into pages through Playwright.
+- Record Playwright MCP checks in the task `Lepesnaplo` section.
+
 ## Documentation Rules
 
 - If architecture, deploy behavior, workflow behavior, auth flow, or public UI behavior changes, update the relevant docs in the same task.

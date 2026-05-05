@@ -18,6 +18,7 @@ Verziozasi szabalyok:
 
 - `docs/versioning.md`: hogyan valasztunk celverziot uj feladathoz
 - `docs/releases.md`: melyik `AUTO-*` vagy `BUG-*` melyik verziohoz tartozik
+- `docs/mcp.md`: MCP szerverek es Playwright MCP hasznalat
 
 Biztonsági vizsgálatok és PR-specifikus runbookok:
 
