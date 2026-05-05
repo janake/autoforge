@@ -4,13 +4,13 @@ Feladat leírása
 A belső OCI szerverhez egy 100 GB-os Always Free keretbe illeszkedő block volume alapú filesystemet kell csatolni, amely tartós workspace-ként használható az OpenCode, backend és későbbi worker komponensek számára.
 
 Statusz
-- done
+- review
 
 Branch
 - `AUTO-11-private-workspace-volume`
 
 PR
-- pending
+- PR #15
 
 Acceptance criteria
 - A belső szerverhez csatolva van egy 100 GB-os OCI Block Volume.
@@ -107,3 +107,4 @@ Eredmény
 - A 100 GB-os OCI Block Volume csatolva és mountolva van a private hoston.
 - Mount point: `/mnt/autoforge-workspace`
 - Elérhető méret: kb. 98 GB ext4 filesystem, kb. 93 GB szabad terület friss formázás után.
+- PR #15 megnyitva review-ra.
