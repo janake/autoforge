@@ -28,26 +28,41 @@ jobs:
       - name: Prepare SSH client
         env:
           SSH_KEY: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
-        run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-
-      - name: Upload private stack files
-        env:
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |
-          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
-          JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
-          TARGET="$PRIVATE_USER@$PRIVATE_HOST"
-          ssh "${SSH_COMMON[@]}" -J "$JUMP_TARGET" "$TARGET" "mkdir -p '$DEPLOY_PATH'"
-          scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" infra/compose/docker-compose.private.yml "$TARGET:$DEPLOY_PATH/docker-compose.private.yml"
-          scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" infra/compose/opencode.json "$TARGET:$DEPLOY_PATH/opencode.json"
-          scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" infra/deploy/private/deploy.sh "$TARGET:$DEPLOY_PATH/deploy.sh"
-          ssh "${SSH_COMMON[@]}" -J "$JUMP_TARGET" "$TARGET" "chmod +x '$DEPLOY_PATH/deploy.sh'"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          cat > ~/.ssh/config <<EOF
+          Host autoforge-jump
+            HostName $PUBLIC_HOST
+            User $PUBLIC_USER
+            IdentityFile ~/.ssh/id_ed25519
+            BatchMode yes
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+
+          Host autoforge-private
+            HostName $PRIVATE_HOST
+            User $PRIVATE_USER
+            IdentityFile ~/.ssh/id_ed25519
+            BatchMode yes
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            ProxyCommand ssh -F ~/.ssh/config -W %h:%p autoforge-jump
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Upload private stack files
+        run: |
+          ssh -F ~/.ssh/config autoforge-private "mkdir -p '$DEPLOY_PATH'"
+          scp -F ~/.ssh/config infra/compose/docker-compose.private.yml autoforge-private:"$DEPLOY_PATH/docker-compose.private.yml"
+          scp -F ~/.ssh/config infra/compose/opencode.json autoforge-private:"$DEPLOY_PATH/opencode.json"
+          scp -F ~/.ssh/config infra/deploy/private/deploy.sh autoforge-private:"$DEPLOY_PATH/deploy.sh"
+          ssh -F ~/.ssh/config autoforge-private "chmod +x '$DEPLOY_PATH/deploy.sh'"
 
       - name: Render private runtime environment
         env:
@@ -63,9 +78,6 @@ jobs:
         run: |
           : "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:?OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID is required}"
           : "${OPENAI_API_KEY_SECRET_OCID:?OCI_OPENAI_API_KEY_SECRET_OCID is required}"
-          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
-          JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
-          TARGET="$PRIVATE_USER@$PRIVATE_HOST"
           KEYCLOAK_URL="${KEYCLOAK_URL:-https://kc.prodet.org}"
           KEYCLOAK_REALM="${KEYCLOAK_REALM:-autoforge}"
           {
@@ -84,7 +96,7 @@ jobs:
             echo "OPENAI_API_KEY_SECRET_OCID=$OPENAI_API_KEY_SECRET_OCID"
             echo "KEYCLOAK_ISSUER_URI=$KEYCLOAK_URL/realms/$KEYCLOAK_REALM"
           } > /tmp/autoforge-private.env
-          scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" /tmp/autoforge-private.env "$TARGET:$DEPLOY_PATH/.env"
+          scp -F ~/.ssh/config /tmp/autoforge-private.env autoforge-private:"$DEPLOY_PATH/.env"
 
       - name: Upload registry credentials
         env:
@@ -95,14 +107,11 @@ jobs:
           GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
         run: |
-          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
-          JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
-          TARGET="$PRIVATE_USER@$PRIVATE_HOST"
           {
             echo "GHCR_USERNAME=$GHCR_DEPLOY_USERNAME"
             echo "GHCR_TOKEN=$GHCR_DEPLOY_TOKEN"
           } > /tmp/autoforge-private.deploy.env
-          scp "${SSH_COMMON[@]}" -J "$JUMP_TARGET" /tmp/autoforge-private.deploy.env "$TARGET:$DEPLOY_PATH/.deploy.env"
+          scp -F ~/.ssh/config /tmp/autoforge-private.deploy.env autoforge-private:"$DEPLOY_PATH/.deploy.env"
 
       - name: Deploy private stack
         env:
@@ -111,7 +120,4 @@ jobs:
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |
-          SSH_COMMON=(-o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "$HOME/.ssh/id_ed25519")
-          JUMP_TARGET="$PUBLIC_USER@$PUBLIC_HOST"
-          TARGET="$PRIVATE_USER@$PRIVATE_HOST"
-          ssh "${SSH_COMMON[@]}" -J "$JUMP_TARGET" "$TARGET" "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"
+          ssh -F ~/.ssh/config autoforge-private "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"
