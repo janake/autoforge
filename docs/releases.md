@@ -26,6 +26,7 @@ Taskok
 - `BUG-2`: SSH deploy host split
 - `BUG-3`: Caddy gateway domain config
 - `BUG-4`: Frontend Keycloak redirect issue
+- `BUG-5`: Keycloak fragment callback handling
 
 Megjegyzes
 - Elso mukodo platform baseline: frontend, backend, gateway, OCI deploy es auth alapok.
