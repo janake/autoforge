@@ -4,13 +4,13 @@ Feladat leírása
 A Caddy nem kap érvényes domain nevet a GATEWAY_DOMAIN environment variable-ból, emiatt nem tud SSL tanúsítványt szerezni a Let's Encrypt-től. A containerben `GATEWAY_DOMAIN=-` volt beállítva, ami érvénytelen domain.
 
 Statusz
-- pending
+- in progress
 
 Branch
 - `bug/BUG-3`
 
 PR
-- pending
+- https://github.com/janake/autoforge/pull/22
 
 Acceptance criteria
 - A docker-compose.public.yml tartalmazza a GATEWAY_DOMAIN értéket.
