@@ -219,7 +219,9 @@ function App() {
 
     const bootstrap = async () => {
       try {
-        const client = await initializeKeycloak();
+        console.log("[DEBUG] Initializing Keycloak...");
+        const client = await initializeKeycloak("check-sso");
+        console.log("[DEBUG] Keycloak initialized, authenticated:", client.authenticated);
 
         if (!client.authenticated) {
           if (!cancelled) {
