@@ -8,7 +8,7 @@ spring:
         - id: backend_api_route
           uri: http://${BACKEND_UPSTREAM}
           predicates:
-            - Path=${GATEWAY_CONTEXT:-/api}/**
+            - Path=${GATEWAY_CONTEXT:/api}/**
         - id: backend_actuator_route
           uri: http://${BACKEND_UPSTREAM}
           predicates:

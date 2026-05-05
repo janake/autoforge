@@ -56,3 +56,26 @@ Taskok
 
 Megjegyzes
 - Nem-MAJOR taskoknal a verzio bump automatikus; csak MAJOR emelesnel kerunk kulon jovahagyast.
+
+## 0.1.3
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-7`: Sign-in button shown to authenticated users
+- `BUG-8`: Improve error message for 404 API route failures
+
+Megjegyzes
+- Auth flow es API route hiba megjelenites javitasok.
+
+## 0.1.4
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-9`: Gateway route configuration missing from image
+
+Megjegyzes
+- A gateway route konfiguracio bekerul a kontener image-be, hogy a publikus `/api/**` endpointok a backendhez route-oljanak.
