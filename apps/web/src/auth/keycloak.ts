@@ -16,11 +16,11 @@ function createKeycloak(): Keycloak {
   return keycloak;
 }
 
-export async function initializeKeycloak(onLoad: "check-sso" | "login-required" = "check-sso"): Promise<Keycloak> {
+export async function initializeKeycloak(onLoad?: "check-sso" | "login-required"): Promise<Keycloak> {
   const client = createKeycloak();
 
   await client.init({
-    onLoad,
+    ...(onLoad ? { onLoad } : {}),
     pkceMethod: "S256",
     checkLoginIframe: false,
     enableLogging: false,
