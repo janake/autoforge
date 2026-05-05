@@ -78,7 +78,7 @@ Leiras: subnet security listbe bekerult a `80/tcp` es `443/tcp` internet felol.
 Parancs:
 ```bash
 oci network security-list update \
-  --security-list-id ocid1.securitylist.oc1.eu-frankfurt-1.aaaaaaaatfftpaem4d7e4kuqywmtfvnxbt62hokmfzmzwvu7n5cmz47czroq \
+  --security-list-id <security-list-ocid> \
   --ingress-security-rules file:///tmp/prodet-new-securitylist-ingress.json \
   --force
 ```

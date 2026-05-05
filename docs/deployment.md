@@ -39,6 +39,25 @@ Privat host:
 - opencode server: belso REST endpoint a backendhez, auth-vedett
 - opencode image: `ghcr.io/anomalyco/opencode`
 - opencode secret ertekek: OCI Vaultbol, instance principal-lal olvasva a private hoston
+- workspace storage: 100 GB OCI Block Volume, ext4, mount point: `/mnt/autoforge-workspace`
+
+## Private workspace storage
+
+A private hosthoz egy kulon 100 GB-os OCI Block Volume van csatolva az Autoforge workspace celjara.
+
+- volume nev: `autoforge-private-workspace-100gb`
+- attach tipus: paravirtualized
+- filesystem: ext4
+- mount point: `/mnt/autoforge-workspace`
+- fstab: UUID alapu mount `defaults,nofail,_netdev` opciokkal
+- tulajdonos a hoston: deploy SSH user
+- cel: OpenCode/backend/worker altal hasznalt tartos workspace, nem kontener image vagy gitelt adat
+
+Megjegyzes:
+
+- Az OCI Always Free storage keret a Block Volume storage-ra vonatkozik, nem az OCI File Storage Service NFS-re.
+- A jelenlegi ket boot volume mellett a 100 GB-os extra block volume a 200 GB-os Always Free block storage kereten belul marad.
+- Ujabb volume vagy boot volume meretnoveles elott ellenorizni kell a teljes Block Volume storage hasznalatot.
 
 ## Host konyvtarak
 
@@ -124,6 +143,10 @@ Mindket gepen kell:
 - Docker Engine
 - Docker Compose plugin vagy standalone `docker-compose`
 - olyan SSH user, amelyik tud `docker compose` parancsot futtatni
+
+A private gepen plusz:
+
+- csatolt es mountolt workspace volume: `/mnt/autoforge-workspace`
 
 Hasznos kezdo parancsok:
 
