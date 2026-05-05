@@ -24,6 +24,15 @@ const publicSignals = [
   },
 ];
 
+function isKeycloakCallback(): boolean {
+  const searchParams = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+
+  return [searchParams, hashParams].some(
+    (params) => params.has("state") && (params.has("code") || params.has("error")),
+  );
+}
+
 function PublicHero({ onSignIn }: { onSignIn: () => void }) {
   const config = useMemo(() => getRuntimeConfig(), []);
 
@@ -198,10 +207,7 @@ function App() {
 
     const bootstrap = async () => {
       try {
-        const params = new URLSearchParams(window.location.search);
-        const isAuthCallback = params.has("state") && (params.has("code") || params.has("error"));
-
-        if (!isAuthCallback) {
+        if (!isKeycloakCallback()) {
           if (!cancelled) {
             setSession({ status: "public" });
           }
