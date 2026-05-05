@@ -91,9 +91,21 @@ jobs:
             const trivySummary = fs.existsSync('trivy-summary.txt') ? fs.readFileSync('trivy-summary.txt','utf8') : 'no trivy-summary';
             const trivyCount = fs.existsSync('trivy-unique-vuln-count.txt') ? fs.readFileSync('trivy-unique-vuln-count.txt','utf8') : '0';
             const artifactName = `security-scan-${context.runId}`;
-            const body = `**Security scan for PR #${context.payload.pull_request.number}**\n\n**npm audit vulnerabilities:**\n```
-${npmSummary}
-```\n\n**Trivy image vulnerabilities (per target):**\n```
-${trivySummary}
-```\n\nUnique Trivy vuln IDs: ${trivyCount}\n\nArtifacts uploaded: \`${artifactName}\` (npm-audit.json, trivy-image.json and summaries).`;
+            const body = [
+              `**Security scan for PR #${context.payload.pull_request.number}**`,
+              '',
+              '**npm audit vulnerabilities:**',
+              '```',
+              npmSummary,
+              '```',
+              '',
+              '**Trivy image vulnerabilities (per target):**',
+              '```',
+              trivySummary,
+              '```',
+              '',
+              `Unique Trivy vuln IDs: ${trivyCount}`,
+              '',
+              `Artifacts uploaded: \`${artifactName}\` (npm-audit.json, trivy-image.json and summaries).`
+            ].join('\n');
             await github.issues.createComment({owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.pull_request.number, body});
