@@ -13,7 +13,7 @@ Branch
 - `feature/AUTO-19-playwright-mcp`
 
 PR
-- pending
+- PR #29
 
 Acceptance criteria
 - Van repo-szintu OpenCode MCP config Playwright szerverrel.
@@ -39,6 +39,8 @@ Lepesnaplo
 5. Letrehoztam az MCP hasznalati dokumentaciot.
 6. Frissitettem az agent es release dokumentaciot.
 7. Beallitottam a user-level OpenCode configot is ugyanarra a Playwright MCP szerverre.
+8. Validaltam az OpenCode JSON konfiguraciokat Node JSON parsinggal.
+9. Megnyitottam a kapcsolodo PR-t.
 
 Eredmény
-- pending
+- A Playwright MCP konfiguracio es dokumentacio elkeszult.
