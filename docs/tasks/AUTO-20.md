@@ -13,7 +13,7 @@ Branch
 - `feature/AUTO-20-keycloak-client-config`
 
 PR
-- pending
+- PR #30
 
 Acceptance criteria
 - Letrejott vagy frissult az `autoforge-web` Keycloak client az `autoforge` realmben.
@@ -54,6 +54,7 @@ Lepesnaplo
 5. Beallitottam a public client flow-kat es frontend URL-eket.
 6. Beallitottam a PKCE code challenge methodot `S256`-ra.
 7. Dokumentaltam a konfiguralt parametereket.
+8. Megnyitottam a kapcsolodo PR-t.
 
 Eredmény
 - Az `autoforge-web` Keycloak client beallitva es dokumentalva lett.
