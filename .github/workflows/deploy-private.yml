@@ -10,11 +10,6 @@ on:
       - "infra/deploy/private/**"
       - ".github/workflows/deploy-private.yml"
   workflow_dispatch:
-    inputs:
-      image_tag:
-        description: GHCR tag to deploy for the backend image
-        required: true
-        default: main
 
 permissions:
   contents: read
@@ -56,7 +51,7 @@ jobs:
 
       - name: Render private runtime environment
         env:
-          IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag || 'main' }}
+          IMAGE_TAG: main
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
