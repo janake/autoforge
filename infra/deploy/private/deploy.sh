@@ -77,32 +77,37 @@ append_secret_env() {
 OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_OCID || true)"
 OPENAI_API_KEY_SECRET_OCID="$(get_env_value OPENAI_API_KEY_SECRET_OCID || true)"
 
-: "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:?OPENCODE_SERVER_PASSWORD_SECRET_OCID is required in .env}"
-: "${OPENAI_API_KEY_SECRET_OCID:?OPENAI_API_KEY_SECRET_OCID is required in .env}"
-
 RUNTIME_ENV="$(mktemp "$APP_DIR/.runtime.env.XXXXXX")"
 trap 'rm -f "$APP_DIR/.deploy.env" "${RUNTIME_ENV:-}"' EXIT
 chmod 600 "$RUNTIME_ENV"
 cp "$ENV_FILE" "$RUNTIME_ENV"
 printf '\n' >> "$RUNTIME_ENV"
 
-if ! OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret "$OPENCODE_SERVER_PASSWORD_SECRET_OCID")"; then
-  echo "Failed to read OPENCODE_SERVER_PASSWORD from OCI Vault." >&2
-  exit 1
+COMPOSE_ARGS=(--env-file "$RUNTIME_ENV" -f docker-compose.private.yml)
+
+if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] && [ -n "$OPENAI_API_KEY_SECRET_OCID" ]; then
+  if ! OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret "$OPENCODE_SERVER_PASSWORD_SECRET_OCID")"; then
+    echo "Failed to read OPENCODE_SERVER_PASSWORD from OCI Vault." >&2
+    exit 1
+  fi
+
+  if ! OPENAI_API_KEY_VALUE="$(get_vault_secret "$OPENAI_API_KEY_SECRET_OCID")"; then
+    echo "Failed to read OPENAI_API_KEY from OCI Vault." >&2
+    exit 1
+  fi
+
+  : "${OPENCODE_SERVER_PASSWORD_VALUE:?OPENCODE_SERVER_PASSWORD secret value is empty}"
+  : "${OPENAI_API_KEY_VALUE:?OPENAI_API_KEY secret value is empty}"
+
+  append_secret_env "OPENCODE_SERVER_PASSWORD" "$OPENCODE_SERVER_PASSWORD_VALUE"
+  append_secret_env "OPENAI_API_KEY" "$OPENAI_API_KEY_VALUE"
+  COMPOSE_ARGS+=(--profile opencode)
+else
+  echo "OpenCode secrets are not configured; deploying backend without the opencode profile." >&2
+  append_secret_env "OPENCODE_SERVER_PASSWORD" "disabled-until-vault-secrets-are-configured"
 fi
-
-if ! OPENAI_API_KEY_VALUE="$(get_vault_secret "$OPENAI_API_KEY_SECRET_OCID")"; then
-  echo "Failed to read OPENAI_API_KEY from OCI Vault." >&2
-  exit 1
-fi
-
-: "${OPENCODE_SERVER_PASSWORD_VALUE:?OPENCODE_SERVER_PASSWORD secret value is empty}"
-: "${OPENAI_API_KEY_VALUE:?OPENAI_API_KEY secret value is empty}"
-
-append_secret_env "OPENCODE_SERVER_PASSWORD" "$OPENCODE_SERVER_PASSWORD_VALUE"
-append_secret_env "OPENAI_API_KEY" "$OPENAI_API_KEY_VALUE"
 
 echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
-"${COMPOSE_CMD[@]}" --env-file "$RUNTIME_ENV" -f docker-compose.private.yml pull
-"${COMPOSE_CMD[@]}" --env-file "$RUNTIME_ENV" -f docker-compose.private.yml up -d --remove-orphans
+"${COMPOSE_CMD[@]}" "${COMPOSE_ARGS[@]}" pull
+"${COMPOSE_CMD[@]}" "${COMPOSE_ARGS[@]}" up -d --remove-orphans
 docker image prune -f

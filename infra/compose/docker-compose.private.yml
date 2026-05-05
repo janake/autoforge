@@ -4,8 +4,6 @@ services:
   backend:
     image: ${BACKEND_IMAGE:?BACKEND_IMAGE is required}:${BACKEND_IMAGE_TAG:-main}
     restart: unless-stopped
-    depends_on:
-      - opencode
     environment:
       SERVER_PORT: ${BACKEND_CONTAINER_PORT:-8080}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
@@ -21,6 +19,8 @@ services:
   opencode:
     image: ${OPENCODE_IMAGE:?OPENCODE_IMAGE is required}:${OPENCODE_IMAGE_TAG:-latest}
     restart: unless-stopped
+    profiles:
+      - opencode
     command:
       - serve
       - --hostname

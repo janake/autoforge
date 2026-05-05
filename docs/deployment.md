@@ -41,6 +41,7 @@ Privat host:
 - opencode image: `ghcr.io/anomalyco/opencode`
 - opencode secret ertekek: OCI Vaultbol, instance principal-lal olvasva a private hoston
 - workspace storage: 100 GB OCI Block Volume, ext4, mount point: `/mnt/autoforge-workspace`
+- ha az OpenCode Vault secret OCID-k nincsenek beallitva, a deploy csak a backendet inditja, az `opencode` profile nelkul
 
 Keycloak / OIDC:
 

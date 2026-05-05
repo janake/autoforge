@@ -17,6 +17,7 @@ Acceptance criteria
 - A public deploy a `cloudflare_sync.py` scriptet is feltolti a hosztra.
 - A security scan PR comment lepes nem bukik el a GitHub API hivason.
 - A repo secret-ek tartalmazzak az SSH deploy hostokat a tenyleges OCI IP-kkel.
+- A private deploy OpenCode Vault secret hianyaban sem blokkolja a backend deployt.
 
 Dokumentumok es fajlok
 - `.github/workflows/deploy-public.yml`
@@ -32,6 +33,7 @@ Lepesnaplo
 2. Azonositottam a public deploy SSH/SCP hivasi hibat.
 3. Javítottam a security scan commentelo lepes GitHub API hasznalatat.
 4. Ellenoriztem az OCI instance IP-ket, hogy a GitHub secret-eket valos deploy celokra allitsam.
+5. A private deployt ugy modositottam, hogy OpenCode secret nelkul backend-only modban fusson tovabb.
 
 Eredmeny
 - A koveto workflow-hibak kulon bug ticket ala kerultek, a javitasok e feladatban kovethetok.
