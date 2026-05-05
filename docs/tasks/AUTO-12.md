@@ -4,13 +4,13 @@ Feladat leírása
 Ossze kell foglalni, milyen teljesen ingyenes, self-hostolhato feature flag es personalization megoldasok illeszthetok az Autoforge stackbe, es hogyan hasznalhatok kesobb OCI Always Free adatbazisok.
 
 Statusz
-- in-progress
+- review
 
 Branch
 - `AUTO-12-feature-flags-research`
 
 PR
-- pending
+- PR #16
 
 Acceptance criteria
 - A dokumentacio tartalmazza az ingyenes self-hosted feature flag opciokat.
@@ -43,4 +43,4 @@ Lepesnaplo
    ```
 
 Eredmény
-- pending
+- PR #16 megnyitva review-ra.
