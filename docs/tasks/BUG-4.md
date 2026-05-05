@@ -10,7 +10,7 @@ Branch
 - `bug/BUG-4`
 
 PR
-- pending
+- https://github.com/janake/autoforge/pull/24
 
 Acceptance criteria
 - A publikus landing page betöltődik auth nélkül.
@@ -23,5 +23,9 @@ Dokumentumok és fájlok
 
 Lepesnaplo
 1. Ellenőriztem a Keycloak init kódot - `onLoad: check-sso` van használva.
-2. Hozzáadtam debug console log-okat.
-3. PR létrehozva BUG-3 alatt - de ez BUG-4, új branch és PR kell.
+2. Megállapítottam, hogy a landing page bootstrapje is Keycloak `check-sso`-t futtatott.
+3. A landing page most auth init nélkül public állapotba lép.
+4. Keycloak init csak OAuth callback feldolgozásakor vagy explicit sign-in indításakor történik.
+
+Eredmény
+- A publikus landing nem kezdeményez Keycloak redirectet.

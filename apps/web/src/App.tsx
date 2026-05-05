@@ -219,9 +219,17 @@ function App() {
 
     const bootstrap = async () => {
       try {
-        console.log("[DEBUG] Initializing Keycloak...");
+        const params = new URLSearchParams(window.location.search);
+        const isAuthCallback = params.has("state") && (params.has("code") || params.has("error"));
+
+        if (!isAuthCallback) {
+          if (!cancelled) {
+            setSession({ status: "public" });
+          }
+          return;
+        }
+
         const client = await initializeKeycloak("check-sso");
-        console.log("[DEBUG] Keycloak initialized, authenticated:", client.authenticated);
 
         if (!client.authenticated) {
           if (!cancelled) {
