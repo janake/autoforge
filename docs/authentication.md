@@ -34,6 +34,9 @@ Az Autoforge webes felülete külső OIDC szolgáltatóval hitelesít, a backend
 - Standard flow legyen bekapcsolva
 - PKCE legyen engedélyezve
 - public client legyen használva
+- client authentication legyen kikapcsolva
+- implicit flow legyen kikapcsolva
+- direct access grants legyen kikapcsolva a web clienten
 - valid redirect URI-k:
   - `https://oci.prodet.org/*`
   - `http://localhost:5173/*`
@@ -42,6 +45,35 @@ Az Autoforge webes felülete külső OIDC szolgáltatóval hitelesít, a backend
   - `https://oci.prodet.org`
   - `http://localhost:5173`
   - `http://localhost:4173`
+
+### Konfigurált Autoforge web client
+
+- Realm: `autoforge`
+- Client ID: `autoforge-web`
+- Client type: `OpenID Connect`
+- Client authentication: `Off`
+- Authorization: `Off`
+- Standard flow: `On`
+- Direct access grants: `Off`
+- Implicit flow: `Off`
+- Service accounts roles: `Off`
+- OAuth 2.0 Device Authorization Grant: `Off`
+- OIDC CIBA Grant: `Off`
+- Root URL: `https://oci.prodet.org`
+- Home URL: `/`
+- Valid redirect URIs:
+  - `https://oci.prodet.org/*`
+  - `http://localhost:5173/*`
+  - `http://localhost:4173/*`
+- Valid post logout redirect URIs:
+  - `https://oci.prodet.org/*`
+  - `http://localhost:5173/*`
+  - `http://localhost:4173/*`
+- Web origins:
+  - `https://oci.prodet.org`
+  - `http://localhost:5173`
+  - `http://localhost:4173`
+- Proof Key for Code Exchange Code Challenge Method: `S256`
 
 ### Backend
 

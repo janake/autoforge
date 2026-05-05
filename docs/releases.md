@@ -39,6 +39,7 @@ Taskok
 - `AUTO-15`: Landing page cleanup
 - `AUTO-16`: Agent operating rules
 - `AUTO-18`: Version tracking
+- `AUTO-20`: Keycloak web client configuration
 
 Megjegyzes
 - Processz es UI tisztitas: agent szabalyok, release manifest, landing cleanup es deployment sorrend tanulsagok.
