@@ -15,6 +15,7 @@ Az Autoforge fejlesztési ágai két csoportra oszlanak:
 - A bug ticketek neve `BUG-<szám>`, a feature ticketek neve `AUTO-<szám>`.
 - A task dokumentum tartalmazzon `Verzió` mezőt.
 - A task szerepeljen a `docs/releases.md` manifestben a célverzió alatt.
+- A célverzió nem-MAJOR feladatnál automatikusan a következő megfelelő `PATCH` vagy `MINOR` verzió.
 
 ## CI/CD viselkedés
 

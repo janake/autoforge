@@ -26,11 +26,14 @@ MAJOR.MINOR.PATCH
 
 Minden uj `AUTO-*` vagy `BUG-*` feladatnal meg kell adni a celverziot mar a task dokumentumban.
 
+Nem-MAJOR tasknal a celverzio automatikusan a kovetkezo megfelelo `PATCH` vagy `MINOR` verzio.
+MAJOR emelesnel a user jovahagyasa kotelezo.
+
 Pelda:
 
 ```text
 Verzió
-- `0.1.1`
+- `0.1.2`
 ```
 
 Ezutan ugyanazt a feladatot fel kell venni a `docs/releases.md` megfelelo verzioja ala.
@@ -54,6 +57,8 @@ A `docs/releases.md` minden verzional tartalmazza:
 ## Docker image verziozas
 
 A sajat Docker image-ek kotelezoen kapjanak verzios taget az aktualis root `package.json` `version` mezoje alapjan.
+
+A root verzio is automatikusan lep a kovetkezo megfelelo verziora nem-MAJOR tasknal; ez lesz az image tag alapja is.
 
 A `Container Images` workflow minden sajat image-re legalabb ezeket a tageket kesziti:
 
@@ -88,7 +93,7 @@ Pelda:
 
 ```markdown
 ## Version
-- `0.1.1`
+- `0.1.2`
 ```
 
 ## Visszamenoleges kezeles

@@ -59,6 +59,7 @@ Use internal references like `PR #26` in task files instead of full URLs when po
 ## Versioning
 
 - Every `AUTO-*` and `BUG-*` task must have a target version.
+- For non-major tasks, choose the next version automatically; only ask the user before a `MAJOR` bump.
 - The canonical task-to-version mapping is `docs/releases.md`.
 - Versioning rules are documented in `docs/versioning.md`.
 - Project-owned Docker images must be tagged with the root `package.json` version by the container image workflow.
@@ -70,6 +71,7 @@ Use internal references like `PR #26` in task files instead of full URLs when po
 - Commit messages must start with the task ID, for example `[AUTO-15] Remove public entry panel`.
 - PR titles must start with the task ID, for example `[AUTO-15] Landing page cleanup`.
 - PR bodies must include a `Version` section with the target version.
+- For non-major tasks, the target version should be the next automatic `PATCH` or `MINOR` version.
 - Do not use generic-only titles like `fix:` or `docs:` without the task ID.
 - Keep commits focused and do not include unrelated cleanup.
 

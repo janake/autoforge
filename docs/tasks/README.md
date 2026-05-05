@@ -11,6 +11,7 @@ Itt kovetunk minden fejlesztesi feladatot.
 - Minden feladathoz tartozo commit uzenete kezdodjon az azonositoval.
 - Minden feladatban legyen `Verzió` mezo.
 - Minden feladat szerepeljen a `docs/releases.md` manifestben a celverzio alatt.
+- Nem-MAJOR feladatnal a celverzio automatikusan a kovetkezo megfelelo `PATCH` vagy `MINOR` verzio.
 - Az aktiv work branchek neve `feature/<azonosito>` vagy `bug/<azonosito>` formatumot kovessen, peldaul: `feature/AUTO-1` vagy `bug/BUG-2`.
 - Minden task fajlban legyen `Lepesnaplo` szekcio, ahol a futtatott parancsok szerepelnek rovid leirassal.
 - A parancsokban secret/token erteket nem irunk ki, helyette placeholdert hasznalunk.
