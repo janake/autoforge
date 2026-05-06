@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-17-static-jwt-public-key`
 
 PR
--
+- PR #46
 
 Acceptance criteria
 - A backend a Keycloak access tokeneket statikus publikus kulccsal validálja.
