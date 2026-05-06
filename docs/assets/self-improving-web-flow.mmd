@@ -62,7 +62,7 @@ flowchart TB
   backend -->|create job ID| queue
   backend --> audit
   backend --> scheduler
-  backend -->|SSE /api/v1/ai/jobs/{id}/events| sse
+  backend -->|SSE job events endpoint| sse
   sse -->|live progress| gateway
   gateway --> caddy
   caddy --> web

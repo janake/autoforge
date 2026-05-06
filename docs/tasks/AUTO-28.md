@@ -34,6 +34,7 @@ feature/AUTO-28-self-improving-epic
 - [x] Adatbázis és RAG opciók hozzáadva.
 - [x] GraalVM/Spring Native vizsgálat hozzáadva.
 - [x] Tervezett end-to-end folyamatábra hozzáadva.
+- [x] Mermaid edge label javítva GitHub render kompatibilitáshoz.
 
 ## Eredmény
 Az epic dokumentációja előkészítve a későbbi taskokra bontáshoz.
