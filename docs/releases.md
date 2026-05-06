@@ -101,3 +101,14 @@ Taskok
 
 Megjegyzes
 - A private deploy workflow root verzio valtozasokra is lefut, hogy a backend image tag frissulese kikeruljon a private hostra.
+
+## 0.1.7
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-12`: Normalize public backend upstream
+
+Megjegyzes
+- A public deploy normalizalja a backend upstream erteket, hogy a gateway mindig host:port formatumot kapjon.
