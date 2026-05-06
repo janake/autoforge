@@ -156,3 +156,14 @@ Taskok
 
 Megjegyzes
 - A frontend a Keycloak redirect URL-t robusztusabban ismeri fel, nem csak `state+code` eseten.
+
+## 0.1.12
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-17`: Backend JWT validation depends on remote JWKS availability
+
+Megjegyzes
+- A backend statikus Keycloak publikus kulccsal validalja a JWT-t, hogy productionben ne bukjon el remote JWKS/issuer eleresen.
