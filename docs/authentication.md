@@ -2,7 +2,7 @@
 
 ## Cél
 
-Az Autoforge webes felülete külső OIDC szolgáltatóval hitelesít, a backend pedig JWT issuer-validációval fogadja az API-hívásokat.
+Az Autoforge webes felülete külső OIDC szolgáltatóval hitelesít, a backend pedig JWT-alapú bearer tokenekkel fogadja az API-hívásokat.
 
 ## Jelenlegi modell
 
@@ -10,7 +10,7 @@ Az Autoforge webes felülete külső OIDC szolgáltatóval hitelesít, a backend
 - a sign-in gomb indítja a Keycloak login flow-t
 - a frontend public clientként működik
 - a login PKCE `S256` flow-val történik
-- a backend resource serverként ellenőrzi az issuer URI-t
+- a backend resource serverként működik, és a JWT aláírást jelenleg egy csomagolt Keycloak publikus kulccsal ellenőrzi
 - külön client secret jelenleg nem szükséges
 - ha később confidential client kell, annak secretje OCI Vaultba kerüljön
 
@@ -26,6 +26,10 @@ Az Autoforge webes felülete külső OIDC szolgáltatóval hitelesít, a backend
 - `KEYCLOAK_REALM`: deploy-time helykitöltő a realmhez
 - `KEYCLOAK_CLIENT_ID`: a webes public client azonosítója
 - `KEYCLOAK_ISSUER_URI`: a backend issuer URI-ja
+
+Megjegyzes:
+
+- a backend jelenlegi production validációja nem runtime JWKS fetch-csen múlik; a publikus aláíró kulcs a backend resources között van csomagolva
 
 ## Beállítási elv
 
@@ -77,7 +81,9 @@ Az Autoforge webes felülete külső OIDC szolgáltatóval hitelesít, a backend
 
 ### Backend
 
-- issuer URI-t környezeti változóból kap
+- a bearer tokenből olvassa a JWT claim-eket
+- a JWT aláírást a backendbe csomagolt Keycloak publikus kulccsal ellenőrzi
+- az issuer claim továbbra is a Keycloak realm URL-jére mutat (`https://kc.prodet.org/realms/autoforge`)
 - a JWT role claim-ekből realm és resource role-ok is olvasódnak
 - a `/api/v1/me` végpont a tokenből visszaadja a felhasználói adatokat, hogy a frontend személyre szabható legyen
 

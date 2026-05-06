@@ -17,10 +17,19 @@
   - Keycloak OIDC login with PKCE
   - public client for the web app
 
+## Request flow
+
+- Browser -> `https://oci.prodet.org`
+- Caddy routes `/api/**` to the Spring Cloud API gateway container and all other paths to the React frontend.
+- The API gateway forwards requests to the private backend host on port `8080`.
+- The frontend authenticates against Keycloak with Authorization Code + PKCE.
+- Authenticated API calls carry a bearer token to `/api/v1/me` and other protected backend endpoints.
+- The backend validates JWT signatures with the bundled Keycloak public signing key.
+
 ## Delivery model
 
 - Every component runs in Docker.
-- Build and deployment flow will be driven by GitHub Actions.
+- Build and deployment flow is driven by GitHub Actions.
 - The public host serves as the external entry point via Caddy, which routes `/api` to the API gateway and everything else to the web frontend.
 - The web frontend delegates authentication to an external Keycloak OIDC provider and uses bearer tokens for API calls.
 - The private host serves internal application workloads.
@@ -28,21 +37,15 @@
 
 ## Current status
 
-- React chosen for frontend.
-- Frontend scaffolded with Vite + TypeScript.
-- Frontend now has a deployable Docker image definition.
-- Frontend build workflow prepared in GitHub Actions.
-- Frontend authentication now uses an external Keycloak OIDC provider with PKCE.
-- Backend scaffolded with Spring Boot + Maven.
-- Backend deploys from a registry image in the private stack.
-- Backend build workflow prepared in GitHub Actions.
-- Docker Compose stacks are defined for the public and private OCI hosts.
-- Manual GitHub Actions deploy workflows are prepared for both hosts.
-- The private host now also runs an OpenCode REST AI service for backend-driven AI tasks.
-- OpenCode runtime secrets are stored in OCI Vault and read by the private compute instance with instance principal authorization.
-- A 100 GB OCI Block Volume is attached to the private host and mounted at `/mnt/autoforge-workspace`.
-- Worker runtime not selected yet.
-- Active work branch names include the task ID prefix without any extra namespace prefix.
+- The public host runs versioned `web` and `api-gateway` containers behind Caddy.
+- The private host runs versioned `backend` and optional `opencode` containers via Docker Compose.
+- Container images are built in GitHub Actions and tagged with the root project version from `package.json`.
+- `main` merges automatically trigger relevant public/private deploy workflows based on changed paths.
+- The frontend uses Keycloak PKCE login and the backend serves `/api/v1/me` for authenticated profile bootstrapping.
+- The backend validates JWTs with a bundled Keycloak public key to avoid production-only remote JWKS/issuer fetch failures.
+- OCI Vault still stores OpenCode runtime secrets, which the private host reads at deploy time via instance principal.
+- The 100 GB OCI Block Volume remains mounted at `/mnt/autoforge-workspace`.
+- The worker runtime is still not selected and is not shown as an active service in the current deploy chain.
 
 ## Diagram Rule
 

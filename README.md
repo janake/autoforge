@@ -20,19 +20,15 @@ autoforge/
 
 ## Jelenlegi allapot
 
-- A frontend React + Vite + TypeScript alappal scaffoldolva van.
-- A frontendhez deployolhato Docker image definicio is keszult.
-- A frontendhez alap GitHub Actions build workflow is elokeszitve van.
-- A publikus hoston a React frontend + Spring Cloud API gateway + Caddy routing lancolat elokeszitett.
-- A backend Spring Boot + Maven alappal scaffoldolva van.
-- A backendhez alap GitHub Actions build workflow is elokeszitve van.
-- A ket OCI gephez tartozo Compose stackek es deploy workflow-k alapjai elokeszitve vannak.
-- A privat stack tartalmaz egy OpenCode REST AI szolgaltatast a backend hivasaihoz, Vaultbol betoltott runtime secret-ekkel.
-- A privat hosthoz tartozik egy 100 GB-os OCI Block Volume workspace `/mnt/autoforge-workspace` mounttal.
-- A worker szolgaltatas helye elokeszitve.
-- A deployment Docker + GitHub Actions alapu lesz.
-- A public/backend szerepkiosztas es az OCI runbook kulon dokumentumban van rogzitve.
-- A feature flag es personalization irany kulon dokumentumban van osszefoglalva, kesobbi OCI Always Free DB opciokkal.
+- A live frontend React + Vite + TypeScript alapon fut a public hoston.
+- A public hoston Caddy -> Spring Cloud API gateway -> React frontend lánc szolgálja ki a külső forgalmat.
+- A private hoston Spring Boot backend és OpenCode REST AI szolgáltatás fut Docker Compose stackben.
+- A saját image-ek verziózott GHCR tagekkel (`<version>`) épülnek és deployolódnak.
+- A `main` merge-ek automatikusan triggerelik a releváns build/deploy workflow-kat public és private hostra.
+- A frontend Keycloak PKCE flow-val hitelesít, a backend JWT-alapú protected endpointokat szolgál ki.
+- A backend jelenleg statikus Keycloak publikus kulccsal validálja a bearer tokeneket productionben.
+- A private hosthoz 100 GB OCI Block Volume workspace tartozik `/mnt/autoforge-workspace` mounttal.
+- A worker szolgáltatás helye továbbra is előkészített, de nem aktív része a jelenlegi OCI futásnak.
 
 ## Monorepo irany
 
@@ -60,4 +56,4 @@ autoforge/
 
 ## Indulasi megjegyzes
 
-Ebben a fazisban a frontend es a backend alap mar letrejott, a ket hostos Docker deploy foundation elokeszitve van, a worker runtime valasztas meg kesobbi lepes.
+A jelenlegi fókusz a live web + gateway + backend + OpenCode lánc stabil működése. Az auth/deploy hibák után a fő dokumentáció most már a tényleges production állapotot követi; a következő nagyobb lépések a feature work és a worker runtime aktiválása lehetnek.
