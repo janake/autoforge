@@ -1,0 +1,145 @@
+version: 1
+stack: autoforge
+description: Repository-level MCP catalog for the Autoforge engineering stack.
+
+mcps:
+  - id: playwright
+    enabled: true
+    priority: critical
+    category: e2e
+    description: Browser automation for auth, UI, redirect, and request tracing.
+    used_for:
+      - Reproduce real login flows against live or preview environments.
+      - Verify redirect handling, callback URLs, and authenticated UI state.
+      - Capture failing requests, response codes, and console errors.
+      - Confirm that frontend fixes actually work in a browser, not only in code review.
+
+  - id: github
+    enabled: true
+    priority: critical
+    category: delivery
+    description: GitHub and GitHub Actions integration for PRs, checks, logs, and releases.
+    used_for:
+      - Inspect PR state, review status, mergeability, and release notes.
+      - Read Actions logs for build, deploy, and image publishing failures.
+      - Correlate merged changes with workflow runs on main.
+      - Check whether deploy workflows actually fired after merges.
+
+  - id: ssh-remote-shell
+    enabled: true
+    priority: critical
+    category: runtime
+    description: Remote shell access to public and private OCI hosts.
+    used_for:
+      - Inspect live compose stacks and runtime environment files.
+      - Read container logs and health status directly on the hosts.
+      - Verify what versions are really running in OCI.
+      - Debug production-only issues that cannot be reproduced locally.
+
+  - id: docker-compose
+    enabled: true
+    priority: critical
+    category: runtime
+    description: Container, image, compose, and exec-level runtime inspection.
+    used_for:
+      - Compare desired image tags with actually running containers.
+      - Inspect compose env drift between public and private hosts.
+      - Exec into gateway or backend containers for targeted checks.
+      - Validate that deploy scripts resulted in the expected runtime state.
+
+  - id: http-api
+    enabled: true
+    priority: critical
+    category: runtime
+    description: Direct HTTP client for live API, gateway, actuator, Keycloak, and health endpoints.
+    used_for:
+      - Distinguish 401 vs 404 vs 502 failures in the request chain.
+      - Validate `/api/v1/me`, `/api/v1/status`, and `/actuator/health` behavior.
+      - Check Keycloak discovery, JWKS, and userinfo endpoints.
+      - Confirm whether a bug is frontend-only or backend/runtime-related.
+
+  - id: keycloak-admin
+    enabled: true
+    priority: critical
+    category: auth
+    description: Keycloak realm and client administration access.
+    used_for:
+      - Inspect client settings, redirect URIs, web origins, and flow flags.
+      - Check realm config, user accounts, and assigned roles.
+      - Detect auth regressions caused by Keycloak-side drift.
+      - Validate whether the browser flow and backend expectations still match.
+
+  - id: oci
+    enabled: true
+    priority: critical
+    category: infra
+    description: Oracle Cloud Infrastructure inventory and control-plane inspection.
+    used_for:
+      - Inspect compute instances, VCN layout, and network policy state.
+      - Validate Block Volume attachment and host placement.
+      - Confirm secret/Vault access assumptions for private runtime.
+      - Trace OCI-side causes behind public/private connectivity problems.
+
+  - id: cloudflare
+    enabled: true
+    priority: high
+    category: edge
+    description: Cloudflare DNS and SSL mode inspection.
+    used_for:
+      - Verify proxied DNS records for public hostnames.
+      - Check whether SSL mode or record drift breaks ingress behavior.
+      - Confirm that public deploy scripts changed DNS as expected.
+      - Separate Cloudflare edge issues from OCI origin issues.
+
+  - id: vault-secrets
+    enabled: true
+    priority: high
+    category: infra
+    description: Secret inventory and metadata checks for runtime dependencies.
+    used_for:
+      - Verify presence and versioning of OCI Vault-backed secrets.
+      - Confirm whether required deploy-time secret references exist.
+      - Support rotation planning for runtime credentials.
+      - Reduce blind debugging around missing or stale secret references.
+
+  - id: maven-java-deps
+    enabled: true
+    priority: high
+    category: backend
+    description: Maven dependency and BOM inspection for Java services.
+    used_for:
+      - Catch Spring Boot and Spring Cloud version mismatch issues.
+      - Inspect runtime dependency trees for production-only breakage.
+      - Validate gateway/backend dependency alignment before deploy.
+      - Support focused debugging of `NoSuchMethodError` and classpath conflicts.
+
+  - id: node-workspace
+    enabled: true
+    priority: medium
+    category: frontend
+    description: Node workspace and lockfile consistency inspection.
+    used_for:
+      - Keep root versioning, lockfile state, and workspace consistency aligned.
+      - Detect frontend dependency drift across root and app-level packages.
+      - Support reproducible installs for web and worker packages.
+      - Reduce package-level surprises during CI and release bumps.
+
+  - id: diagram-architecture
+    enabled: true
+    priority: medium
+    category: docs
+    description: Diagram maintenance support for architecture assets.
+    used_for:
+      - Keep architecture diagrams in sync with runtime topology.
+      - Flag when docs mention stale hosts, services, or auth flows.
+      - Support SVG/Mermaid/diagram refresh after deploy or topology changes.
+      - Reduce architecture drift between code, deploy, and documentation.
+
+  - id: observability
+    enabled: false
+    priority: backlog
+    category: runtime
+    description: Future log/metrics/traces integration.
+    used_for:
+      - Aggregate runtime evidence without shelling into hosts.
+      - Support long-term operations once Grafana/Loki/Prometheus/Sentry exist.

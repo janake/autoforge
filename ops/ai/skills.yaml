@@ -1,0 +1,122 @@
+version: 1
+stack: autoforge
+description: Suggested skill catalog for engineering agents working on Autoforge.
+
+skills:
+  - id: auth-debug
+    enabled: true
+    owners:
+      - frontend
+      - backend
+    uses_mcps:
+      - playwright
+      - http-api
+      - keycloak-admin
+      - github
+    description: End-to-end authentication debugging for Keycloak, callbacks, tokens, and `/api/v1/me` bootstrap.
+    responsibilities:
+      - Reproduce login failures in a real browser.
+      - Check callback handling, session persistence, and token presence.
+      - Separate frontend state bugs from backend JWT rejection.
+      - Validate claims, issuer, audience, and protected endpoint behavior.
+
+  - id: gateway-debug
+    enabled: true
+    owners:
+      - edge
+      - backend
+    uses_mcps:
+      - ssh-remote-shell
+      - docker-compose
+      - http-api
+      - maven-java-deps
+    description: Public edge and API gateway troubleshooting across Caddy, Spring Cloud Gateway, and upstream routing.
+    responsibilities:
+      - Diagnose 404, 401, and 502 behavior in the request chain.
+      - Validate route config packaging and runtime loading.
+      - Confirm header forwarding and backend reachability.
+      - Catch dependency mismatches and runtime gateway crashes.
+
+  - id: oci-deploy-debug
+    enabled: true
+    owners:
+      - infra
+      - delivery
+    uses_mcps:
+      - github
+      - ssh-remote-shell
+      - docker-compose
+      - oci
+      - cloudflare
+      - vault-secrets
+    description: OCI runtime and deploy diagnostics across public/private hosts and workflow automation.
+    responsibilities:
+      - Verify whether the right workflows fired after merges.
+      - Compare desired image tags with live runtime tags.
+      - Inspect host env drift, compose drift, and deploy path filters.
+      - Trace OCI networking, DNS, and secret-related deployment issues.
+
+  - id: backend-auth-runtime
+    enabled: true
+    owners:
+      - backend
+      - security
+    uses_mcps:
+      - http-api
+      - maven-java-deps
+      - ssh-remote-shell
+      - docker-compose
+      - keycloak-admin
+    description: Spring Security and JWT runtime validation for production-authenticated backend behavior.
+    responsibilities:
+      - Validate bearer token acceptance in local and production contexts.
+      - Investigate issuer, JWKS, static key, and claim mapping issues.
+      - Compare local-success / production-failure scenarios with real tokens.
+      - Keep backend auth config aligned with Keycloak realm behavior.
+
+  - id: e2e-repro
+    enabled: true
+    owners:
+      - qa
+      - frontend
+    uses_mcps:
+      - playwright
+      - http-api
+      - github
+    description: Deterministic reproduction of browser-visible regressions with request-level evidence.
+    responsibilities:
+      - Turn vague UI failures into reproducible scripts.
+      - Capture console errors, request headers, and redirect URLs.
+      - Reduce guesswork during auth and UI regressions.
+      - Provide a final proof that a fix works in a browser.
+
+  - id: release-versioning
+    enabled: true
+    owners:
+      - delivery
+      - docs
+    uses_mcps:
+      - github
+      - node-workspace
+    description: Version bump, release manifest, and workflow trigger consistency management.
+    responsibilities:
+      - Keep task IDs, releases manifest, and package versions aligned.
+      - Ensure version changes propagate to image tags and deploy workflows.
+      - Detect drift between workflow triggers and release behavior.
+      - Reduce deploy surprises caused by stale tags or missed workflows.
+
+  - id: docs-sync
+    enabled: true
+    owners:
+      - docs
+      - architecture
+    uses_mcps:
+      - diagram-architecture
+      - github
+      - oci
+    description: Documentation and diagram synchronization after architecture, auth, or deploy changes.
+    responsibilities:
+      - Keep README, architecture, deployment, and authentication docs current.
+      - Update architecture diagrams when topology or flow changes.
+      - Catch stale wording such as “prepared” when something is already live.
+      - Preserve traceability from code/runtime changes back to docs and releases.
