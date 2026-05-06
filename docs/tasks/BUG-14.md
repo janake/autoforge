@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-14-keycloak-callback-init`
 
 PR
--
+- PR #43
 
 Acceptance criteria
 - Login callback URL esetén a Keycloak init nem `check-sso`-val fut.
