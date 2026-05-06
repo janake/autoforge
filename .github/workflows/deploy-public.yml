@@ -84,6 +84,8 @@ jobs:
           PUBLIC_SSH_HOST: ${{ secrets.OCI_PUBLIC_SSH_HOST }}
           PUBLIC_HOST: ${{ secrets.OCI_PUBLIC_HOST }}
           PUBLIC_USER: ${{ secrets.OCI_PUBLIC_USER }}
+          PRIVATE_SSH_HOST: ${{ secrets.OCI_PRIVATE_SSH_HOST }}
+          PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           GATEWAY_DOMAIN: ${{ secrets.OCI_GATEWAY_DOMAIN }}
           BACKEND_UPSTREAM: ${{ secrets.OCI_BACKEND_UPSTREAM }}
           KEYCLOAK_URL: ${{ secrets.OCI_KEYCLOAK_URL }}
@@ -95,6 +97,14 @@ jobs:
           : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
           : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
           TARGET="$PUBLIC_USER@$PUBLIC_SSH_HOST"
+          PRIVATE_BACKEND_HOST="${PRIVATE_SSH_HOST:-${PRIVATE_HOST:-}}"
+          BACKEND_UPSTREAM="${BACKEND_UPSTREAM:-$PRIVATE_BACKEND_HOST}"
+          BACKEND_UPSTREAM="${BACKEND_UPSTREAM#http://}"
+          BACKEND_UPSTREAM="${BACKEND_UPSTREAM#https://}"
+          : "${BACKEND_UPSTREAM:?OCI_BACKEND_UPSTREAM or OCI_PRIVATE_SSH_HOST/OCI_PRIVATE_HOST is required}"
+          if [[ "$BACKEND_UPSTREAM" != *:* ]]; then
+            BACKEND_UPSTREAM="$BACKEND_UPSTREAM:8080"
+          fi
           KEYCLOAK_URL="${KEYCLOAK_URL:-https://kc.prodet.org}"
           KEYCLOAK_REALM="${KEYCLOAK_REALM:-autoforge}"
           KEYCLOAK_CLIENT_ID="${KEYCLOAK_CLIENT_ID:-autoforge-web}"
