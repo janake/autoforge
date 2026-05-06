@@ -48,6 +48,7 @@ groups:
     contains_skills:
       - oci-deploy-debug
       - release-versioning
+      - git-management
 
   - id: knowledge-governance
     enabled: true
@@ -58,3 +59,13 @@ groups:
     contains_skills:
       - docs-sync
       - release-versioning
+
+  - id: security-compliance
+    enabled: true
+    description: Security auditing, vulnerability assessment, and compliance enforcement.
+    contains_mcps:
+      - sast-scanner
+      - secret-scanner
+      - dependency-audit
+    contains_skills:
+      - security-audit

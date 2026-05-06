@@ -105,6 +105,36 @@ skills:
       - Detect drift between workflow triggers and release behavior.
       - Reduce deploy surprises caused by stale tags or missed workflows.
 
+  - id: git-management
+    enabled: true
+    owners:
+      - delivery
+      - developers
+    uses_mcps:
+      - github
+    description: Git branching, commit hygiene, and PR workflow automation.
+    responsibilities:
+      - Enforce task-ID-based branching and commit naming.
+      - Manage branch lifecycle (creation, pushing, cleanup).
+      - Automate PR creation, updates, and title/body formatting.
+      - Ensure consistency between local branch state and remote PR status.
+
+  - id: security-audit
+    enabled: true
+    owners:
+      - security
+      - developers
+    uses_mcps:
+      - sast-scanner
+      - secret-scanner
+      - dependency-audit
+    description: Comprehensive automated security auditing and vulnerability assessment.
+    responsibilities:
+      - Run SAST scans on new code changes.
+      - Scan for potential secret leaks in commits.
+      - Audit project dependencies for known vulnerabilities.
+      - Provide security reports for PR reviews.
+
   - id: docs-sync
     enabled: true
     owners:

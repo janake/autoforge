@@ -215,10 +215,21 @@ Megjegyzes
 ## 0.1.17
 
 Statusz
-- in progress
+- completed
 
 Taskok
 - `AUTO-26`: Add Gemini API key placeholder to .env.private.example
 
 Megjegyzes
 - Dokumentációs frissítés: Gemini helyőrző felvétele a példa környezeti változók közé.
+
+## 0.1.18
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-27`: Integrate security auditing tools and skills
+
+Megjegyzes
+- Biztonsági eszközök (SAST, titokkeresés, függőség-audit) és egy átfogó `security-audit` skill integrálása.

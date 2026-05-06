@@ -133,6 +133,27 @@ Feladata:
 - legfrissebb dokumentáció lekérése külső könyvtárakhoz vagy Autoforge-specifikus API-khoz
 - ügynök környezetének kiegészítése valós idejű dokumentációs adatokkal
 
+### `sast-scanner`
+
+Feladata:
+
+- forráskód sebezhetőségeinek (pl. OWASP Top 10) statikus elemzése
+- automatizált szkennelés PR-ok előtt
+
+### `secret-scanner`
+
+Feladata:
+
+- tárolt titkok (API kulcsok, jelszavak) keresése a git történetben
+- biztonsági gyakorlatoknak való megfelelés biztosítása
+
+### `dependency-audit`
+
+Feladata:
+
+- ismert sebezhetőségek keresése a `npm`/`maven` függőségekben
+- biztonsági tanácsadók összevetése a függőségi fával
+
 ### `observability`
 
 Feladata:
@@ -188,6 +209,16 @@ Feladata:
 - auth es session hibak tenyleges bongeszos reprodukcioja
 - javitas utan vegso bizonyitas a mukodesre
 
+### `security-audit`
+
+Feladata:
+
+- átfogó automatizált biztonsági audit és sebezhetőségi felmérés
+- SAST szkennelés futtatása
+- titokszivárgás ellenőrzése
+- függőségek sebezhetőségi vizsgálata
+- biztonsági jelentés készítése PR-review-khoz
+
 ### `release-versioning`
 
 Feladata:
@@ -196,6 +227,15 @@ Feladata:
 - deployhez szukseges image tag kovetes
 - package verzio es release dokumentacio osszhangban tartasa
 - stale vagy hianyzó workflow trigger logikak gyors felfedese
+
+### `git-management`
+
+Feladata:
+
+- feladat-ID alapú branching és commit elnevezések kikényszerítése
+- branch életciklus menedzsment (létrehozás, push, takarítás)
+- PR létrehozás, frissítés, cím és törzs formázás automatizálása
+- konzisztencia biztosítása a lokális branch és a remote PR állapot között
 
 ### `docs-sync`
 
@@ -263,6 +303,7 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 | **502 Bad Gateway / 404 Route** | `edge-routing` | `gateway-debug` | `http-api` $\rightarrow$ `ssh-remote-shell` $\rightarrow$ `docker-compose` |
 | **Deploy nem történt / Rossz verzió** | `delivery-runtime` | `oci-deploy-debug` | `github` $\rightarrow$ `docker-compose` $\rightarrow$ `ssh-remote-shell` |
 | **JWT validációs hiba (Backend)** | `api-auth` | `backend-auth-runtime` | `http-api` $\rightarrow$ `maven-java-deps` $\rightarrow$ `keycloak-admin` |
+| **Biztonsági audit / Sebezhetőség** | `security-compliance` | `security-audit` | `sast-scanner` $\rightarrow$ `dependency-audit` $\rightarrow$ `secret-scanner` |
 | **Dokumentáció és realidadegyezetlen** | `knowledge-governance` | `docs-sync` | `oci` $\rightarrow$ `github` $\rightarrow$ `diagram-architecture` |
 
 ## Ajanlott prioritasi sorrend

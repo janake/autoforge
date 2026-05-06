@@ -152,3 +152,30 @@ mcps:
     used_for:
       - Fetching latest documentation for external libraries or Autoforge-specific APIs.
       - Augmenting agent context with real-time documentation data.
+
+  - id: sast-scanner
+    enabled: true
+    priority: critical
+    category: security
+    description: Static Application Security Testing (SAST) for detecting vulnerabilities in source code.
+    used_for:
+      - Identifying insecure coding patterns and common vulnerabilities (OWASP Top 10).
+      - Running automated scans on new code changes before PR submission.
+
+  - id: secret-scanner
+    enabled: true
+    priority: critical
+    category: security
+    description: Scanning repository history for leaked credentials, tokens, and secrets.
+    used_for:
+      - Detecting accidentally committed API keys or passwords.
+      - Ensuring compliance with security best practices regarding secret management.
+
+  - id: dependency-audit
+    enabled: true
+    priority: high
+    category: security
+    description: Auditing project dependencies for known vulnerabilities.
+    used_for:
+      - Checking `npm`, `maven`, and other package managers for vulnerable dependency versions.
+      - Validating dependency tree against security advisories.
