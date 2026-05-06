@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-12-normalize-backend-upstream`
 
 PR
--
+- PR #41
 
 Acceptance criteria
 - A public deploy eltávolítja a `http://` és `https://` előtagot a backend upstreamből.
