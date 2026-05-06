@@ -72,6 +72,7 @@ append_secret_env() {
 
 OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_OCID || true)"
 OPENAI_API_KEY_SECRET_OCID="$(get_env_value OPENAI_API_KEY_SECRET_OCID || true)"
+GEMINI_API_KEY_SECRET_OCID="$(get_env_value GEMINI_API_KEY_SECRET_OCID || true)"
 
 RUNTIME_ENV="$(mktemp "$APP_DIR/.runtime.env.XXXXXX")"
 trap 'rm -f "$APP_DIR/.deploy.env" "${RUNTIME_ENV:-}"' EXIT
@@ -81,31 +82,25 @@ printf '\n' >> "$RUNTIME_ENV"
 
 COMPOSE_ARGS=(--env-file "$RUNTIME_ENV" -f docker-compose.private.yml)
 
-if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] && [ -n "$OPENAI_API_KEY_SECRET_OCID" ]; then
-  if ! command -v oci >/dev/null 2>&1; then
-    echo "OCI CLI is required on the private host to read OpenCode secrets from OCI Vault." >&2
-    exit 1
-  fi
+if ! command -v oci >/dev/null 2>&1; then
+  echo "OCI CLI is required on the private host to read OpenCode secrets from OCI Vault." >&2
+  exit 1
+fi
 
-  if ! OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret "$OPENCODE_SERVER_PASSWORD_SECRET_OCID")"; then
-    echo "Failed to read OPENCODE_SERVER_PASSWORD from OCI Vault." >&2
-    exit 1
-  fi
-
-  if ! OPENAI_API_KEY_VALUE="$(get_vault_secret "$OPENAI_API_KEY_SECRET_OCID")"; then
-    echo "Failed to read OPENAI_API_KEY from OCI Vault." >&2
-    exit 1
-  fi
-
-  : "${OPENCODE_SERVER_PASSWORD_VALUE:?OPENCODE_SERVER_PASSWORD secret value is empty}"
-  : "${OPENAI_API_KEY_VALUE:?OPENAI_API_KEY secret value is empty}"
-
+if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ]; then
+  OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret "$OPENCODE_SERVER_PASSWORD_SECRET_OCID")"
   append_secret_env "OPENCODE_SERVER_PASSWORD" "$OPENCODE_SERVER_PASSWORD_VALUE"
-  append_secret_env "OPENAI_API_KEY" "$OPENAI_API_KEY_VALUE"
   COMPOSE_ARGS+=(--profile opencode)
-else
-  echo "OpenCode secrets are not configured; deploying backend without the opencode profile." >&2
-  append_secret_env "OPENCODE_SERVER_PASSWORD" "disabled-until-vault-secrets-are-configured"
+fi
+
+if [ -n "$OPENAI_API_KEY_SECRET_OCID" ]; then
+  OPENAI_API_KEY_VALUE="$(get_vault_secret "$OPENAI_API_KEY_SECRET_OCID")"
+  append_secret_env "OPENAI_API_KEY" "$OPENAI_API_KEY_VALUE"
+fi
+
+if [ -n "$GEMINI_API_KEY_SECRET_OCID" ]; then
+  GEMINI_API_KEY_VALUE="$(get_vault_secret "$GEMINI_API_KEY_SECRET_OCID")"
+  append_secret_env "GEMINI_API_KEY" "$GEMINI_API_KEY_VALUE"
 fi
 
 if [ -f "$BACKEND_IMAGE_ARCHIVE" ]; then

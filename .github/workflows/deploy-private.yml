@@ -124,6 +124,7 @@ jobs:
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
           OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
           OPENAI_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENAI_API_KEY_SECRET_OCID }}
+          GEMINI_API_KEY_SECRET_OCID: ${{ secrets.OCI_GEMINI_API_KEY_SECRET_OCID }}
           KEYCLOAK_URL: ${{ secrets.OCI_KEYCLOAK_URL }}
           KEYCLOAK_REALM: ${{ secrets.OCI_KEYCLOAK_REALM }}
         run: |
@@ -147,6 +148,9 @@ jobs:
             fi
             if [ -n "${OPENAI_API_KEY_SECRET_OCID:-}" ]; then
               echo "OPENAI_API_KEY_SECRET_OCID=$OPENAI_API_KEY_SECRET_OCID"
+            fi
+            if [ -n "${GEMINI_API_KEY_SECRET_OCID:-}" ]; then
+              echo "GEMINI_API_KEY_SECRET_OCID=$GEMINI_API_KEY_SECRET_OCID"
             fi
             echo "KEYCLOAK_ISSUER_URI=$KEYCLOAK_URL/realms/$KEYCLOAK_REALM"
           } > /tmp/autoforge-private.env
