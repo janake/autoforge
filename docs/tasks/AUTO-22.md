@@ -13,7 +13,7 @@ Branch
 - `feature/AUTO-22-docs-refresh`
 
 PR
--
+- PR #47
 
 Acceptance criteria
 - A `README.md` a jelenlegi live platformállapotot írja le, nem előkészített/scaffoldolt jövőidőben.
