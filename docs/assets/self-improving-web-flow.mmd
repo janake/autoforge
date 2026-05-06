@@ -1,0 +1,124 @@
+flowchart TB
+  %% EPIC-1 planned self-improving Autoforge flow.
+
+  user["Authenticated user\nadmin/operator"]
+  keycloak["Keycloak OIDC\nPKCE login\nJWT roles"]
+
+  subgraph public_host["Public OCI host - Always Free"]
+    caddy["Caddy\nHTTPS ingress\noci.prodet.org"]
+    web["React frontend\nPrompt panel\nLive output\nJob history"]
+    gateway["Spring Cloud Gateway\n/api/** routing\nSSE pass-through"]
+  end
+
+  subgraph private_host["Private OCI host - Always Free"]
+    backend["Spring Boot backend\nAI job API\nAuthZ + audit\nRate limit"]
+    sse["SSE event stream\njob.created\njob.queued\nai.output\ntool.output\npr.created"]
+    scheduler["Job scheduler\nqueued\nwaiting_for_capacity\nrunning\nvalidating\nfailed/cancelled"]
+    queue[("Persistent job store\nAutonomous DB Always Free\nor SQLite on block volume")]
+    audit[("Audit log\nuser subject\nprompt hash\nprovider/model\nbranch/commit/PR\nchecks")]
+    orchestrator["OpenCode orchestrator\nprivate network only\nno public endpoint"]
+    workspace["Isolated workspace\nper-job clone/worktree\nno .env\nno deploy secrets\npath allow/deny list"]
+    opencode["OpenCode runtime\nsource edit\ntest/build commands\npatch/diff output"]
+    model_proxy["AI provider proxy / router\nrate limit\nquota/backoff\nprovider fallback"]
+    github_broker["Git/PR broker\nminimal GitHub App/token\nbranch\ncommit\npush\nopen PR"]
+    security["Security gate\nsecret scan\ndependency audit\nSAST\nforbidden paths"]
+    validation["Validation gate\nbuild\ntest\ntypecheck\nrelease/version docs"]
+    rag[("Future RAG index\nallowlisted docs/code\nOracle AI Vector Search\nor local embedded store")]
+    block_volume[("OCI Block Volume\n/mnt/autoforge-workspace\nworkspace + queue + logs")]
+  end
+
+  subgraph providers["External AI providers"]
+    openai["OpenAI / ChatGPT API"]
+    gemini["Google Gemini API"]
+  end
+
+  subgraph github["GitHub"]
+    repo["autoforge repository"]
+    pr["Pull request\nAI-authored\nhuman review"]
+    actions["GitHub Actions\nFrontend Build\nBackend Build\nContainer Images\nDeploy Public/Private"]
+    ghcr["GHCR images\nweb\ngateway\nbackend"]
+  end
+
+  subgraph oci_managed["OCI Always Free / managed options"]
+    adb["Autonomous Database\njob/audit store candidate\nfuture vector search candidate"]
+    nosql["OCI NoSQL\nregional availability spike"]
+    vault["OCI Vault\nprovider keys\nserver password\nnot exposed to AI runtime"]
+    monitoring["OCI Monitoring/Logging\nfree-tier check before use"]
+  end
+
+  subgraph hardening["Mandatory isolation controls"]
+    no_secrets["No secrets inside AI workspace\nno GitHub token\nno OCI CLI creds\nno SSH keys"]
+    no_metadata["Block metadata endpoint\n169.254.169.254"]
+    no_docker["No Docker socket\nno privileged container\nnon-root runtime"]
+    allow_commands["Command allowlist\nbuild/test/lint/typecheck/git diff"]
+  end
+
+  user -->|Sign in| keycloak
+  keycloak -->|JWT roles| web
+  user -->|Prompt: what to build| web
+  web -->|POST /api/v1/ai/jobs\nBearer token| caddy
+  caddy --> gateway
+  gateway --> backend
+  backend -->|create job ID| queue
+  backend --> audit
+  backend --> scheduler
+  backend -->|SSE /api/v1/ai/jobs/{id}/events| sse
+  sse -->|live progress| gateway
+  gateway --> caddy
+  caddy --> web
+  web -->|append-only job log| user
+
+  scheduler -->|capacity available| orchestrator
+  scheduler -->|rate limit / quota| queue
+  queue -->|not_before retry| scheduler
+  scheduler -->|provider fallback decision| model_proxy
+
+  orchestrator --> workspace
+  workspace --> opencode
+  opencode -->|needs model call| model_proxy
+  model_proxy -->|primary/fallback| openai
+  model_proxy -->|primary/fallback| gemini
+  vault -.->|provider keys only to proxy/deploy runtime| model_proxy
+
+  rag -.->|future contextual retrieval| orchestrator
+  block_volume --> workspace
+  block_volume --> queue
+  block_volume --> audit
+  adb -.-> queue
+  adb -.-> audit
+  adb -.-> rag
+  nosql -.-> queue
+
+  opencode -->|diff/patch output| security
+  security --> validation
+  validation -->|approved artifacts| github_broker
+  github_broker -->|branch + commit + push| repo
+  repo --> pr
+  pr -->|human review + merge| actions
+  actions --> ghcr
+  actions -->|deploy public host| caddy
+  actions -->|deploy private host| backend
+
+  hardening -.-> orchestrator
+  hardening -.-> workspace
+  hardening -.-> opencode
+  no_secrets -.-> workspace
+  no_metadata -.-> opencode
+  no_docker -.-> opencode
+  allow_commands -.-> opencode
+
+  monitoring -.-> backend
+  monitoring -.-> scheduler
+  monitoring -.-> actions
+
+  classDef external fill:#fff4d6,stroke:#b88700,color:#2f2500
+  classDef public fill:#e7f0ff,stroke:#2f62b3,color:#0f2747
+  classDef private fill:#e9f8ef,stroke:#2f8f55,color:#10351e
+  classDef security fill:#ffe9e9,stroke:#b83a3a,color:#4a1111
+  classDef data fill:#f0e9ff,stroke:#6c4db3,color:#251447
+
+  class user,keycloak,openai,gemini,repo,pr,actions,ghcr external
+  class caddy,web,gateway public
+  class backend,sse,scheduler,orchestrator,workspace,opencode,model_proxy,github_broker private
+  class no_secrets,no_metadata,no_docker,allow_commands,security,validation security
+  class queue,audit,rag,block_volume,adb,nosql,vault,monitoring data

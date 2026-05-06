@@ -233,3 +233,14 @@ Taskok
 
 Megjegyzes
 - Biztonsági eszközök (SAST, titokkeresés, függőség-audit) és egy átfogó `security-audit` skill integrálása.
+
+## 0.1.19
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-28`: Self-improving web epic definition
+
+Megjegyzes
+- Az első önfejlesztő webes epic dokumentálása, beleértve az adatbázis/RAG opciókat, Always Free OCI korlátokat és GraalVM erőforrás-spike-ot.
