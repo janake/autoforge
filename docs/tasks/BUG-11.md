@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-11-private-deploy-version-trigger`
 
 PR
--
+- PR #40
 
 Acceptance criteria
 - A private deploy workflow lefut `package.json` változásra.
