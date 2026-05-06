@@ -193,10 +193,21 @@ Megjegyzes
 ## 0.1.15
 
 Statusz
-- in progress
+- completed
 
 Taskok
 - `AUTO-24`: Finalize AI Tooling integration and PR protocol
 
 Megjegyzes
 - Az AI Tooling stack (MCP, Skill, Group) integracioja es dokumentacioja (Context7) veglegesitese, valamint a pre-PR protokoll bevezetese.
+
+## 0.1.16
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-25`: Integrate Gemini and ChatGPT API keys into OpenCode runtime
+
+Megjegyzes
+- A Gemini és ChatGPT API kulcsok kezelése az OCI Vault-ból a belső OpenCode konténer számára.
