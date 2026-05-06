@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-15-keycloak-login-required-callback`
 
 PR
--
+- PR #44
 
 Acceptance criteria
 - Login redirect után a frontend nem marad public állapotban.
