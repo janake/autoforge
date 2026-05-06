@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-10-public-deploy-trigger`
 
 PR
--
+- PR #39
 
 Acceptance criteria
 - A public deploy workflow lefut `infra/gateway/**` változásra.
