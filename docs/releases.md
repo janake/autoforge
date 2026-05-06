@@ -90,3 +90,14 @@ Taskok
 
 Megjegyzes
 - A public deploy workflow gateway es verzio valtozasokra is lefut, hogy az uj gateway image kikeruljon OCI-ra.
+
+## 0.1.6
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-11`: Private deploy trigger misses version changes
+
+Megjegyzes
+- A private deploy workflow root verzio valtozasokra is lefut, hogy a backend image tag frissulese kikeruljon a private hostra.
