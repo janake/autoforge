@@ -6,9 +6,12 @@ on:
       - main
     paths:
       - "apps/web/**"
+      - "infra/gateway/**"
       - "infra/compose/**"
       - "infra/deploy/public/**"
       - ".github/workflows/deploy-public.yml"
+      - "package.json"
+      - "package-lock.json"
   workflow_dispatch:
 
 permissions:
