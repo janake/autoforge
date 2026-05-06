@@ -145,3 +145,14 @@ Taskok
 
 Megjegyzes
 - A login callback URL-en a Keycloak init `login-required` modban fut, hogy a session biztosan `ready` allapotba keruljon.
+
+## 0.1.11
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-16`: Keycloak callback detection is too narrow
+
+Megjegyzes
+- A frontend a Keycloak redirect URL-t robusztusabban ismeri fel, nem csak `state+code` eseten.
