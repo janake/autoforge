@@ -9,6 +9,8 @@ on:
       - "infra/compose/**"
       - "infra/deploy/private/**"
       - ".github/workflows/deploy-private.yml"
+      - "package.json"
+      - "package-lock.json"
   workflow_dispatch:
 
 permissions:
