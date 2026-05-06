@@ -211,3 +211,14 @@ Taskok
 
 Megjegyzes
 - A Gemini és ChatGPT API kulcsok kezelése az OCI Vault-ból a belső OpenCode konténer számára.
+
+## 0.1.17
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-26`: Add Gemini API key placeholder to .env.private.example
+
+Megjegyzes
+- Dokumentációs frissítés: Gemini helyőrző felvétele a példa környezeti változók közé.
