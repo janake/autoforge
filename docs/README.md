@@ -1,18 +1,16 @@
 # docs
 
-Projekt dokumentaciok helye.
+Projekt dokumentációk helye.
 
-Az OCI infrastrukturahoz kapcsolodo aktualis runbook jelenleg a kovetkezo fajlban van:
+Ez a könyvtár tartalmazza a jelenlegi Autoforge OCI topológia, deploy modell, auth működés és task tracking leírásait.
 
-- `./oci-prodet-new-runbook.md`
+Fő dokumentumok:
 
-Itt lesznek majd:
-
-- architektura leiras
-- deploy folyamat
-- local dev megjegyzesek
-- task tracking
-- verziozas es release manifest
+- `docs/architecture.md`: public/private OCI felépítés, gateway lánc, OpenCode és workspace storage
+- `docs/deployment.md`: verziózott image-ek, auto deploy workflow-k, host könyvtárak és secret-ek
+- `docs/authentication.md`: Keycloak PKCE login, frontend callback flow, backend JWT-validáció
+- `docs/releases.md`: task -> verzió megfeleltetés
+- `docs/tasks/`: feladatszintű nyilvántartás
 
 Verziozasi szabalyok:
 

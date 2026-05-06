@@ -167,3 +167,14 @@ Taskok
 
 Megjegyzes
 - A backend statikus Keycloak publikus kulccsal validalja a JWT-t, hogy productionben ne bukjon el remote JWKS/issuer eleresen.
+
+## 0.1.13
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-22`: Documentation and architecture refresh
+
+Megjegyzes
+- A README, az architektura, a deploy es az auth dokumentacio mostani live OCI allapothoz es workflow viselkedeshez igazodik.

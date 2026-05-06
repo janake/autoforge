@@ -5,7 +5,7 @@
 Az Autoforge jelenlegi deploy modellje ket OCI geppel szamol:
 
 - publikus host: React frontend + Spring Cloud API gateway + Caddy gateway
-- privat host: Spring Boot backend
+- privat host: Spring Boot backend + optional OpenCode REST AI
 
 A GitHub Actions workflow-k GHCR image-eket hasznalnak, majd SSH-n keresztul frissitik a ket hostot.
 A publikus host deployja opcionálisan Cloudflare DNS rekordokat is frissit a webes domainhez.
@@ -19,7 +19,7 @@ A `Container Images` workflow ezeket az image-eket kezeli:
 - `ghcr.io/<registry-owner>/autoforge/backend`
 - `ghcr.io/anomalyco/opencode` hivatalos OpenCode image-kent fut a private stackben, ezt nem ez a workflow epiti
 
-A workflow a `main`, `<version>` es `sha-<commit>` tageket kesziti el. A `<version>` tag a root `package.json` `version` mezojebol jon, peldaul `0.1.1`.
+A workflow a `main`, `<version>` es `sha-<commit>` tageket kesziti el. A `<version>` tag a root `package.json` `version` mezojebol jon, peldaul `0.1.13`.
 Deploy soran a sajat image-eknel a `<version>` tag kerul a Compose env fajlba, nem a mozgó `main` tag.
 
 ## Verziózás
@@ -39,6 +39,7 @@ Publikus host:
 - gateway domain: `oci.prodet.org`, `api.oci.prodet.org`
 - backend upstream: a privat host belso cime, peldaul `<private-backend-ip>:8080`
 - API image: `ghcr.io/<registry-owner>/autoforge/api-gateway`
+- a public deploy normalizalja a `BACKEND_UPSTREAM` erteket `host:port` formatumra
 
 Privat host:
 
@@ -56,7 +57,7 @@ Keycloak / OIDC:
 
 - a web frontend kulso OIDC providerhoz csatlakozik PKCE flow-val
 - a public stack runtime envje tartalmazza a Keycloak URL-t, a realm helykitoltot es a public client azonositot
-- a private stack runtime envje az issuer URI-t kapja, amely a provider URL-bol es a realm helykitoltobol epul fel
+- a private stack runtime envje tovabbra is megkapja a Keycloak issuer URI-t, de a JWT signature validacio jelenleg a backendbe csomagolt publikus kulccsal tortenik
 - jelenlegi modellben public clientet hasznalunk, ezert nincs külön client secret
 - ha kesobb confidential client vagy tovabbi auth secret kell, azt OCI Vaultban kell tarolni
 
@@ -99,9 +100,14 @@ A tipikus tartalom:
 - `Frontend Build`: PR es main build a React apphoz
 - `Backend Build`: PR es main test a Spring Boot apphoz
 - `Container Images`: web es backend image build + push GHCR-be
-- `Deploy Public Host`: manual workflow a publikus stack frissitesere
-- `Deploy Private Host`: manual workflow a privat stack frissitesere ProxyJump-pal, beleertve a backendet es az opencode REST AI service-et
+- `Deploy Public Host`: public stack frissitese merge utan vagy manual dispatch-csel
+- `Deploy Private Host`: private stack frissitese merge utan vagy manual dispatch-csel, beleertve a backendet es az opencode REST AI service-et
 - ugyanazok a workflow-k `main`-re merge-elt, relevans fájlokat erinto pushokra is lefutnak, hogy a deploy automatikusan meginduljon
+
+Fontos trigger-ek:
+
+- public deploy lefut `apps/web/**`, `infra/gateway/**`, `infra/compose/**`, `infra/deploy/public/**`, `.github/workflows/deploy-public.yml`, `package.json`, `package-lock.json` valtozasra
+- private deploy lefut `services/backend/**`, `infra/compose/**`, `infra/deploy/private/**`, `.github/workflows/deploy-private.yml`, `package.json`, `package-lock.json` valtozasra
 
 ## Szukseges GitHub secret-ek
 

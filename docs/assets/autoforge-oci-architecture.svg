@@ -35,7 +35,7 @@
 
   <rect x="120" y="75" width="270" height="95" class="panel"/>
   <text x="155" y="113" class="text h1">GitHub Actions</text>
-  <text x="155" y="142" class="text body">Build and deploy workflows</text>
+  <text x="155" y="142" class="text body">Versioned image + deploy workflows</text>
 
   <rect x="520" y="75" width="260" height="95" class="panel"/>
   <text x="560" y="113" class="text h1">GHCR</text>
@@ -72,7 +72,7 @@
   <text x="955" y="445" class="text h2">OCI Compute Instance</text>
   <text x="955" y="472" class="text body">private application host</text>
   <rect x="955" y="505" width="270" height="38" class="service"/>
-  <text x="975" y="530" class="text body">Docker: Spring Boot backend</text>
+  <text x="975" y="530" class="text body">Docker: Spring Boot backend (JWT API)</text>
   <rect x="955" y="552" width="270" height="38" class="service"/>
   <text x="975" y="577" class="text body">Docker: OpenCode REST AI</text>
 
@@ -111,15 +111,15 @@
 
   <rect x="145" y="765" width="270" height="70" class="service"/>
   <text x="170" y="795" class="text h2">All components in Docker</text>
-  <text x="170" y="820" class="text small">Caddy, React, API gateway, backend, OpenCode</text>
+  <text x="170" y="820" class="text small">Caddy, React, API gateway, backend and OpenCode run in containers</text>
 
   <rect x="455" y="765" width="270" height="70" class="service"/>
   <text x="480" y="795" class="text h2">Backend internal only</text>
-  <text x="480" y="820" class="text small">Public API gateway reaches private backend</text>
+  <text x="480" y="820" class="text small">Public API gateway forwards /api to the private backend host</text>
 
   <rect x="765" y="765" width="270" height="70" class="service"/>
   <text x="790" y="795" class="text h2">Secrets in OCI Vault</text>
-  <text x="790" y="820" class="text small">Read by private host at deploy time</text>
+  <text x="790" y="820" class="text small">OpenCode secrets are read by the private host at deploy time</text>
 
   <rect x="1075" y="765" width="270" height="70" class="storage"/>
   <text x="1100" y="795" class="text h2">Persistent workspace</text>
