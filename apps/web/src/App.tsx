@@ -24,6 +24,15 @@ const publicSignals = [
   },
 ];
 
+function isKeycloakCallback(): boolean {
+  const searchParams = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+
+  return [searchParams, hashParams].some(
+    (params) => params.has("state") && (params.has("code") || params.has("error")),
+  );
+}
+
 function PublicHero({ onSignIn }: { onSignIn: () => void }) {
   const config = useMemo(() => getRuntimeConfig(), []);
 
@@ -200,7 +209,9 @@ function App() {
 
     const bootstrap = async () => {
       try {
-        const client = await initializeKeycloak("check-sso");
+        const client = isKeycloakCallback()
+          ? await initializeKeycloak()
+          : await initializeKeycloak("check-sso");
 
         if (!client.authenticated) {
           if (!cancelled) {
