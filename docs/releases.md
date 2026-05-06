@@ -178,3 +178,14 @@ Taskok
 
 Megjegyzes
 - A README, az architektura, a deploy es az auth dokumentacio mostani live OCI allapothoz es workflow viselkedeshez igazodik.
+
+## 0.1.14
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-23`: AI tooling stack integration
+
+Megjegyzes
+- A repo sajat MCP, skill es group manifesteket kap az auth/gateway/deploy/OCI munkafolyamatok tamogatasara.

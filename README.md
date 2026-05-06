@@ -37,6 +37,7 @@ autoforge/
 - `services/worker`: AI altal vezerelt hatterfolyamatok helye
 - `infra/compose`: Docker Compose stackek es publikus/private host konfiguraciok
 - `infra/deploy`: tavoli deploy scriptek
+- `ops/ai`: repo-szintu MCP, skill es capability group manifestek
 - `docs`: projekt dokumentacio
 
 ## Dokumentumok
@@ -44,6 +45,7 @@ autoforge/
 - `docs/architecture.md`: OCI topologia es architektura
 - `docs/deployment.md`: deploy modell es host elofeltetelek
 - `docs/authentication.md`: OIDC / Keycloak integracio
+- `docs/ai-tooling.md`: ajanlott MCP / skill / group stack az engineering munkahoz
 - `docs/feature-flags.md`: feature flag, personalization es kesobbi OCI Always Free DB opciok
 - `docs/branching.md`: feature/bug branch policy es CI/CD szabalyok
 

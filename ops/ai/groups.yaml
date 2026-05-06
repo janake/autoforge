@@ -1,0 +1,60 @@
+version: 1
+stack: autoforge
+description: Capability groups for engineering agents and automation around Autoforge.
+
+groups:
+  - id: app-surface
+    enabled: true
+    description: Public UI, browser runtime, callback state, and user-facing flow ownership.
+    contains_mcps:
+      - playwright
+      - node-workspace
+      - http-api
+    contains_skills:
+      - auth-debug
+      - e2e-repro
+
+  - id: api-auth
+    enabled: true
+    description: Backend API, JWT validation, claim handling, and Keycloak contract ownership.
+    contains_mcps:
+      - keycloak-admin
+      - maven-java-deps
+      - http-api
+    contains_skills:
+      - auth-debug
+      - backend-auth-runtime
+
+  - id: edge-routing
+    enabled: true
+    description: Public ingress, Caddy, API gateway, path routing, and upstream behavior ownership.
+    contains_mcps:
+      - docker-compose
+      - ssh-remote-shell
+      - http-api
+    contains_skills:
+      - gateway-debug
+
+  - id: delivery-runtime
+    enabled: true
+    description: GitHub Actions, OCI runtime, deploy triggers, image tags, and host state ownership.
+    contains_mcps:
+      - github
+      - oci
+      - docker-compose
+      - ssh-remote-shell
+      - vault-secrets
+      - cloudflare
+    contains_skills:
+      - oci-deploy-debug
+      - release-versioning
+
+  - id: knowledge-governance
+    enabled: true
+    description: Architecture consistency, docs quality, and release traceability ownership.
+    contains_mcps:
+      - diagram-architecture
+      - github
+    contains_skills:
+      - docs-sync
+      - release-versioning
