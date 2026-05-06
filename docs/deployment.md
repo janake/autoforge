@@ -138,6 +138,7 @@ Vault secret azonosito GitHub secret-ek:
 
 - `OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-opencode-server-password` secret OCID-ja
 - `OCI_OPENAI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-openai-api-key` secret OCID-ja
+- `OCI_GEMINI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-gemini-api-key` secret OCID-ja
 
 Fontos:
 
@@ -152,6 +153,7 @@ Fontos:
 
 - `autoforge-opencode-server-password`: az OpenCode REST szerver HTTP basic auth jelszava. Legalabb 32 karakteres, veletlen, newline nelkuli ertek legyen.
 - `autoforge-openai-api-key`: az OpenAI API kulcs, amelyet az OpenCode provider hasznal. Newline nelkuli ertek legyen.
+- `autoforge-gemini-api-key`: a Google Gemini API kulcs, amelyet az OpenCode provider hasznal. Newline nelkuli ertek legyen.
 
 Megjegyzes:
 
