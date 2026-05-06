@@ -116,6 +116,14 @@ Record the commands and outcomes in the task file `Lepesnaplo` section. Do not r
 
 When asked for a review, prioritize findings first: bugs, regressions, risks, missing tests, and security concerns. If no findings exist, say that explicitly and mention residual risks.
 
+## Pre-PR Mandatory Protocol
+
+Before opening a PR, perform the following:
+
+1. Identify the relevant Group/Skill/MCP stack for the task (see `docs/ai-tooling.md`).
+2. Run the necessary verification commands using the identified tooling.
+3. Document the outcomes in the task file `Lepesnaplo`.
+
 ## Final Response Checklist
 
 When finishing a task, report:

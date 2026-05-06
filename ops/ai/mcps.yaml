@@ -143,3 +143,12 @@ mcps:
     used_for:
       - Aggregate runtime evidence without shelling into hosts.
       - Support long-term operations once Grafana/Loki/Prometheus/Sentry exist.
+
+  - id: context7
+    enabled: true
+    priority: high
+    category: docs
+    description: Up-to-date documentation provider for LLMs and AI code editors.
+    used_for:
+      - Fetching latest documentation for external libraries or Autoforge-specific APIs.
+      - Augmenting agent context with real-time documentation data.

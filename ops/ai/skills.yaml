@@ -114,6 +114,7 @@ skills:
       - diagram-architecture
       - github
       - oci
+      - context7
     description: Documentation and diagram synchronization after architecture, auth, or deploy changes.
     responsibilities:
       - Keep README, architecture, deployment, and authentication docs current.
