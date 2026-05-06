@@ -5,7 +5,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:https://kc.prodet.org/realms/autoforge}
+          public-key-location: classpath:keycloak-public.pem
 
 management:
   endpoints:
