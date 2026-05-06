@@ -123,3 +123,14 @@ Taskok
 
 Megjegyzes
 - A gateway Spring Boot parent patch verzioja illeszkedik a Spring Cloud Gateway runtime elvarasaihoz.
+
+## 0.1.9
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-14`: Keycloak callback init falls back to public state
+
+Megjegyzes
+- A frontend a login callback URL-en nem `check-sso`, hanem normal callback-feldolgozassal inicializalja a Keycloak klienst.
