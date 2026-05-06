@@ -126,6 +126,13 @@ Feladata:
 - topology vagy auth/deploy valtozas utani vizualis frissites tamogatasa
 - stale arch allitasok gyors felfedese
 
+### `context7`
+
+Feladata:
+
+- legfrissebb dokumentáció lekérése külső könyvtárakhoz vagy Autoforge-specifikus API-khoz
+- ügynök környezetének kiegészítése valós idejű dokumentációs adatokkal
+
 ### `observability`
 
 Feladata:
@@ -239,6 +246,24 @@ Feladata:
 
 - dokumentacio, diagram, release es task traceability karbantartasa
 - architektura es deploy tudasbazis aktualis allapotban tartasa
+
+## Hogyan használd (Üzletmeneti folyamat)
+
+Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagnosztikai rendszer. Az ügynöknek a következő sorrendben kell navigálnia:
+
+1. **Group (Képességcsoport) kiválasztása**: Azonosítsd, hogy a hiba melyik doménbe tartozik (pl. ha a felhasználó nem tud belépni $\rightarrow$ `app-surface` vagy `api-auth`).
+2. **Skill (Készség) aktiválása**: Határozd meg a konkrét célt a csoporton belül (pl. ha a callback nem működik $\rightarrow$ `auth-debug`).
+3. **MCP (Eszköz) alkalmazása**: Gyűjts bizonyítékokat a skillhez tartozó eszközökkel (pl. `playwright` a böngészőhöz, `http-api` a tokenekhez).
+
+### Gyakori scenario-k (Troubleshooting Matrix)
+
+| Probléma | Group | Skill | MCP-k (Sorrendben) |
+| :--- | :--- | :--- | :--- |
+| **Login hiba / Redirect loop** | `app-surface` | `auth-debug` | `playwright` $\rightarrow$ `http-api` $\rightarrow$ `keycloak-admin` |
+| **502 Bad Gateway / 404 Route** | `edge-routing` | `gateway-debug` | `http-api` $\rightarrow$ `ssh-remote-shell` $\rightarrow$ `docker-compose` |
+| **Deploy nem történt / Rossz verzió** | `delivery-runtime` | `oci-deploy-debug` | `github` $\rightarrow$ `docker-compose` $\rightarrow$ `ssh-remote-shell` |
+| **JWT validációs hiba (Backend)** | `api-auth` | `backend-auth-runtime` | `http-api` $\rightarrow$ `maven-java-deps` $\rightarrow$ `keycloak-admin` |
+| **Dokumentáció és realidadegyezetlen** | `knowledge-governance` | `docs-sync` | `oci` $\rightarrow$ `github` $\rightarrow$ `diagram-architecture` |
 
 ## Ajanlott prioritasi sorrend
 

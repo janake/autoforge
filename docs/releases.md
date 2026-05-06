@@ -189,3 +189,14 @@ Taskok
 
 Megjegyzes
 - A repo sajat MCP, skill es group manifesteket kap az auth/gateway/deploy/OCI munkafolyamatok tamogatasara.
+
+## 0.1.15
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-24`: Finalize AI Tooling integration and PR protocol
+
+Megjegyzes
+- Az AI Tooling stack (MCP, Skill, Group) integracioja es dokumentacioja (Context7) veglegesitese, valamint a pre-PR protokoll bevezetese.
