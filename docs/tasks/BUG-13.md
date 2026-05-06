@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-13-gateway-spring-version`
 
 PR
--
+- PR #42
 
 Acceptance criteria
 - A gateway runtime nem dob `HttpHeaders.headerSet()` `NoSuchMethodError` hibát.
