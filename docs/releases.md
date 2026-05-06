@@ -112,3 +112,14 @@ Taskok
 
 Megjegyzes
 - A public deploy normalizalja a backend upstream erteket, hogy a gateway mindig host:port formatumot kapjon.
+
+## 0.1.8
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-13`: Gateway Spring dependency mismatch
+
+Megjegyzes
+- A gateway Spring Boot parent patch verzioja illeszkedik a Spring Cloud Gateway runtime elvarasaihoz.
