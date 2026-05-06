@@ -79,3 +79,14 @@ Taskok
 
 Megjegyzes
 - A gateway route konfiguracio bekerul a kontener image-be, hogy a publikus `/api/**` endpointok a backendhez route-oljanak.
+
+## 0.1.5
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-10`: Public deploy trigger misses gateway image changes
+
+Megjegyzes
+- A public deploy workflow gateway es verzio valtozasokra is lefut, hogy az uj gateway image kikeruljon OCI-ra.
