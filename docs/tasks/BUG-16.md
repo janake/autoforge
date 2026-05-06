@@ -13,7 +13,7 @@ Branch
 - `bug/BUG-16-keycloak-callback-detection`
 
 PR
--
+- PR #45
 
 Acceptance criteria
 - A frontend callbacknek tekinti a Keycloak redirect URL-eket akkor is, ha nincs együtt `state` és `code`.
