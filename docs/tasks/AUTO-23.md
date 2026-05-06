@@ -13,7 +13,7 @@ Branch
 - `feature/AUTO-23-ai-ops-tooling`
 
 PR
--
+- PR #48
 
 Acceptance criteria
 - A repo tartalmaz külön MCP, skill és group manifestet.
