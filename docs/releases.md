@@ -134,3 +134,14 @@ Taskok
 
 Megjegyzes
 - A frontend a login callback URL-en nem `check-sso`, hanem normal callback-feldolgozassal inicializalja a Keycloak klienst.
+
+## 0.1.10
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-15`: Keycloak callback requires explicit login-required init
+
+Megjegyzes
+- A login callback URL-en a Keycloak init `login-required` modban fut, hogy a session biztosan `ready` allapotba keruljon.

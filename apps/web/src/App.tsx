@@ -210,7 +210,7 @@ function App() {
     const bootstrap = async () => {
       try {
         const client = isKeycloakCallback()
-          ? await initializeKeycloak()
+          ? await initializeKeycloak("login-required")
           : await initializeKeycloak("check-sso");
 
         if (!client.authenticated) {
