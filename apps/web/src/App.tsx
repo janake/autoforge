@@ -28,9 +28,9 @@ function isKeycloakCallback(): boolean {
   const searchParams = new URLSearchParams(window.location.search);
   const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
 
-  return [searchParams, hashParams].some(
-    (params) => params.has("state") && (params.has("code") || params.has("error")),
-  );
+  return [searchParams, hashParams].some((params) => {
+    return ["code", "error", "session_state", "iss"].some((key) => params.has(key));
+  });
 }
 
 function PublicHero({ onSignIn }: { onSignIn: () => void }) {

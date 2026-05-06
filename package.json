@@ -1,7 +1,7 @@
 {
   "name": "autoforge",
   "private": true,
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "AI-assisted self-evolving application platform",
   "workspaces": [
     "apps/*",
