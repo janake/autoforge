@@ -270,24 +270,27 @@ Dependencies: EPIC3-STORY-11.
 
 Output: Jira-linked PR/release folyamat.
 
-## EPIC3-STORY-14: Legacy docs/tasks archive döntés és átállás
+## EPIC3-STORY-14: Story/task Markdown fájlok törlése a migráció után
 
 Issue type: `Story`
 
 Priority: `Medium`
 
-Goal: Eldönteni és végrehajtani, hogy a `docs/tasks/*.md` fájlok hogyan maradnak meg a Jira migráció után.
+Goal: A sikeres Jira import és validált mapping után eltávolítani a story/task szintű Markdown nyilvántartást a gitből, hogy Jira legyen az egyetlen operatív backlog source of truth.
 
 Acceptance criteria:
 
-- Döntés születik: read-only archive, áthelyezés, vagy későbbi törlés.
+- A törlés előfeltétele dokumentált: minden érintett story/task/bug Jira-ban van és szerepel a mappingben.
+- `docs/tasks/*.md` fájlok törlésre kerülnek a migráció lezáró PR-jében.
+- Story breakdown jellegű átmeneti dokumentumok törlésre kerülnek, ha Jira issue-ként már létrejöttek.
+- Megmarad egy minimális `docs/jira-mapping.*` audit mapping.
 - README vagy index jelzi, hogy a napi source of truth Jira.
-- Új `docs/tasks/*.md` létrehozása tiltott vagy legacy-only szabályként dokumentált.
-- Régi task linkek nem törnek el indokolatlanul.
+- Új `docs/tasks/*.md` létrehozása tiltottként dokumentált.
+- Régi task linkek helyett Jira issue key és mapping alapján történik a visszakeresés.
 
 Dependencies: EPIC3-STORY-10, EPIC3-STORY-11.
 
-Output: Legacy task dokumentációs policy.
+Output: Lezáró cleanup PR, amely eltávolítja a story/task Markdown nyilvántartást és meghagyja a Jira mappinget.
 
 ## EPIC3-STORY-15: Jira import validáció és lezárási riport
 

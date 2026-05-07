@@ -22,6 +22,8 @@ Jira bevezetésével:
 
 Részletes Jira-ready story bontás: `docs/epics/EPIC-3-jira-migration-stories.md`.
 
+Fontos végállapot: sikeres Jira migráció és validált mapping után a story/task szintű Markdown fájlokat törölni kell a gitből. A repo nem marad párhuzamos story-kezelési hely; Jira lesz az egyetlen operatív backlog és story source of truth.
+
 ### Egyszeri migráció
 
 Át kell emelni Jira-ba:
@@ -219,8 +221,9 @@ Jira-first működés után a repo dokumentáció szerepe:
 - `docs/authentication.md`: auth folyamat.
 - `docs/ai-tooling.md`: AI skillek és MCP-k.
 - `docs/releases.md`: release manifest, de Jira issue key alapú.
-- `docs/epics/*.md`: opcionális high-level ADR/vision dokumentum, nem napi státuszforrás.
-- `docs/tasks/*.md`: csak legacy archive vagy megszüntetendő.
+- `docs/epics/*.md`: opcionális high-level ADR/vision dokumentum, nem napi státuszforrás; story bontásokat Jira migráció után törölni kell.
+- `docs/tasks/*.md`: sikeres migráció és validált mapping után törlendő, nem read-only archive.
+- `docs/jira-mapping.*`: megmaradó audit mapping a régi ID-k és Jira issue key-k között.
 
 ## Migrációs lépések taskokra bontva
 
@@ -237,7 +240,7 @@ Megjegyzés: a részletes, Jira-ba emelhető story lista külön dokumentumban v
 7. Jira issue import futtatása.
 8. Jira mapping fájl generálása.
 9. AGENT.md frissítése Jira-first szabályokra.
-10. docs/tasks legacy archive döntés.
+10. docs/tasks és story Markdown fájlok törlése a sikeres Jira migráció után.
 11. CI/PR template frissítése Jira issue linkeléssel.
 12. AI tooling bővítés `jira` MCP-vel és `jira-management` skillel.
 
@@ -273,6 +276,6 @@ Ezeket külön taskban kell hozzáadni az `ops/ai/*.yaml` manifestekhez és a `d
 - Mi legyen a Jira projekt kulcsa?
 - Milyen Jira workflow státuszok vannak már létrehozva?
 - Használhatunk custom fieldeket vagy csak description alapú strukturált mezőket?
-- A legacy `docs/tasks/*.md` fájlok maradjanak read-only archive-ként vagy később töröljük őket?
+- Pontosan mely dokumentumok maradjanak meg high-level ADR/architecture célra, ha a story/task fájlokat töröljük?
 - A Jira import fusson lokálisan egyszeri admin műveletként vagy GitHub Actions manual workflow-ból?
 - A Jira issue-kbe visszakerüljön-e a teljes lépésnapló, vagy csak summary + link a repo fájlra?
