@@ -244,3 +244,14 @@ Taskok
 
 Megjegyzes
 - EPIC-3 kidolgozása a meglévő Markdown taskok, bugok és epicek Jira-ba migrálására és a Jira-first működés bevezetésére.
+
+## 0.1.21
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-31`: Add Jira migration dry-run generator
+
+Megjegyzes
+- Credential nélküli Jira migrációs dry-run generátor a Markdown taskok, epicek, story breakdownok és release mapping import tervéhez.
