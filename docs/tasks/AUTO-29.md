@@ -14,7 +14,7 @@ in_progress
 feature/AUTO-29-jira-migration-epic
 
 ## PR
-- (Nincs még)
+- PR #53
 
 ## Acceptance criteria
 - EPIC-3 dokumentum létrejön a `docs/epics/` alatt.
@@ -33,6 +33,7 @@ feature/AUTO-29-jira-migration-epic
 - [x] Státuszleképezés kidolgozva.
 - [x] Jira-first jövőbeli működés rögzítve.
 - [x] Secret kezelés szabályai rögzítve.
+- [x] PR megnyitva.
 
 ## Eredmény
 Az EPIC-3 dokumentáció elkészült a későbbi taskokra bontáshoz.
