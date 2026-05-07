@@ -142,6 +142,15 @@ Feladata:
 - legfrissebb dokumentáció lekérése külső könyvtárakhoz vagy Autoforge-specifikus API-khoz
 - ügynök környezetének kiegészítése valós idejű dokumentációs adatokkal
 
+### `prompt-library`
+
+Feladata:
+
+- ujrafelhasznalhato prompt mintak es guardrail-ek karbantartasa
+- prompt cel, scope, bemenet, kimenet es acceptance criteria tisztazasa
+- trusted instrukciok es untrusted tartalom szetvalasztasanak tamogatasa
+- prompt injection es secret exposure kockazatok csokkentese hosszu eletu promptoknal
+
 ### `sast-scanner`
 
 Feladata:
@@ -227,6 +236,15 @@ Feladata:
 - titokszivárgás ellenőrzése
 - függőségek sebezhetőségi vizsgálata
 - biztonsági jelentés készítése PR-review-khoz
+
+### `prompt-engineering`
+
+Feladata:
+
+- tiszta, korlatos promptok tervezese cel, scope, bemenet es kimenet szerint
+- system/developer instrukciok es user/retrieved tartalom szetvalasztasa
+- prompt injection, tulengedelyezes es secret exposure kockazatok kiszurese
+- hosszu eletu agent, workflow es termek promptok review-ja es standardizalasa
 
 ### `release-versioning`
 
@@ -323,6 +341,7 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 | **Jira backlog / story migráció** | `delivery-runtime` | `jira-management` | `jira` $\rightarrow$ `github` $\rightarrow$ `node-workspace` |
 | **JWT validációs hiba (Backend)** | `api-auth` | `backend-auth-runtime` | `http-api` $\rightarrow$ `maven-java-deps` $\rightarrow$ `keycloak-admin` |
 | **Biztonsági audit / Sebezhetőség** | `security-compliance` | `security-audit` | `sast-scanner` $\rightarrow$ `dependency-audit` $\rightarrow$ `secret-scanner` |
+| **Prompt minőség / prompt injection** | `knowledge-governance` | `prompt-engineering` | `prompt-library` $\rightarrow$ `context7` $\rightarrow$ `secret-scanner` |
 | **Dokumentáció és realidadegyezetlen** | `knowledge-governance` | `docs-sync` | `oci` $\rightarrow$ `github` $\rightarrow$ `diagram-architecture` |
 
 ## Ajanlott prioritasi sorrend
@@ -348,6 +367,7 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 - `maven-java-deps`
 - `node-workspace`
 - `diagram-architecture`
+- `prompt-library`
 - `observability`
 
 ## Miert ez a csomag jo az Autoforge stackhez

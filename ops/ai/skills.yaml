@@ -151,6 +151,24 @@ skills:
       - Audit project dependencies for known vulnerabilities.
       - Provide security reports for PR reviews.
 
+  - id: prompt-engineering
+    enabled: true
+    owners:
+      - ai
+      - product
+      - security
+      - developers
+    uses_mcps:
+      - prompt-library
+      - context7
+      - secret-scanner
+    description: Prompt design, prompt quality, and prompt injection defense for Autoforge AI workflows.
+    responsibilities:
+      - Create clear, bounded prompts with explicit goals, constraints, inputs, and outputs.
+      - Separate trusted system/developer instructions from untrusted user or retrieved content.
+      - Review long-lived prompts for ambiguity, over-permission, hidden tool access, and secret exposure risk.
+      - Maintain reusable prompt patterns for self-improving web, Jira migration, docs sync, and AI operations.
+
   - id: docs-sync
     enabled: true
     owners:

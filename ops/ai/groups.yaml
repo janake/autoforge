@@ -57,11 +57,13 @@ groups:
     description: Architecture consistency, docs quality, and release traceability ownership.
     contains_mcps:
       - diagram-architecture
+      - prompt-library
       - github
       - jira
     contains_skills:
       - docs-sync
       - release-versioning
+      - prompt-engineering
       - jira-management
 
   - id: security-compliance
