@@ -119,6 +119,22 @@ skills:
       - Automate PR creation, updates, and title/body formatting.
       - Ensure consistency between local branch state and remote PR status.
 
+  - id: jira-management
+    enabled: true
+    owners:
+      - delivery
+      - product
+      - developers
+    uses_mcps:
+      - jira
+      - github
+    description: Jira-first backlog, issue lifecycle, migration, and PR traceability management.
+    responsibilities:
+      - Create and update Jira epics, stories, bugs, tasks, and spikes.
+      - Keep Jira status aligned with branch, PR, review, merge, and verification state.
+      - Support Markdown-to-Jira migration with idempotent external-ID based updates.
+      - Enforce Jira issue keys in branch names, commit messages, PR titles, and PR bodies.
+
   - id: security-audit
     enabled: true
     owners:

@@ -40,6 +40,7 @@ groups:
     description: GitHub Actions, OCI runtime, deploy triggers, image tags, and host state ownership.
     contains_mcps:
       - github
+      - jira
       - oci
       - docker-compose
       - ssh-remote-shell
@@ -49,6 +50,7 @@ groups:
       - oci-deploy-debug
       - release-versioning
       - git-management
+      - jira-management
 
   - id: knowledge-governance
     enabled: true
@@ -57,10 +59,12 @@ groups:
       - diagram-architecture
       - prompt-library
       - github
+      - jira
     contains_skills:
       - docs-sync
       - release-versioning
       - prompt-engineering
+      - jira-management
 
   - id: security-compliance
     enabled: true

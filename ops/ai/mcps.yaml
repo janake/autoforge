@@ -25,6 +25,17 @@ mcps:
       - Correlate merged changes with workflow runs on main.
       - Check whether deploy workflows actually fired after merges.
 
+  - id: jira
+    enabled: true
+    priority: critical
+    category: delivery
+    description: Jira issue, epic, story, backlog, status, and release tracking integration.
+    used_for:
+      - Create, read, update, and transition Jira epics, stories, bugs, tasks, and spikes.
+      - Run JQL searches for backlog grooming, migration checks, and status synchronization.
+      - Link Jira issues with branches, commits, pull requests, releases, and verification notes.
+      - Support Jira-first source-of-truth workflows after the Markdown task migration.
+
   - id: ssh-remote-shell
     enabled: true
     priority: critical
