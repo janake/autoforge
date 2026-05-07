@@ -233,3 +233,14 @@ Taskok
 
 Megjegyzes
 - Biztonsági eszközök (SAST, titokkeresés, függőség-audit) és egy átfogó `security-audit` skill integrálása.
+
+## 0.1.20
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-29`: Define Jira migration epic
+
+Megjegyzes
+- EPIC-3 kidolgozása a meglévő Markdown taskok, bugok és epicek Jira-ba migrálására és a Jira-first működés bevezetésére.

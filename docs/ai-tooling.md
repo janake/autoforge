@@ -36,6 +36,15 @@ Feladata:
 - merge utani deploy viselkedes kovetese
 - release es release-note traceability tamogatasa
 
+### `jira`
+
+Feladata:
+
+- Jira epic, story, bug, task es spike olvasasa, letrehozasa es frissitese
+- backlog grooming, statuszvaltas es JQL alapu kereses tamogatasa
+- Jira issue-k osszekotese branch, commit, PR, release es verifikacios adatokkal
+- Jira-first source-of-truth mukodes tamogatasa a Markdown task migracio utan
+
 ### `ssh-remote-shell`
 
 Feladata:
@@ -237,6 +246,15 @@ Feladata:
 - PR létrehozás, frissítés, cím és törzs formázás automatizálása
 - konzisztencia biztosítása a lokális branch és a remote PR állapot között
 
+### `jira-management`
+
+Feladata:
+
+- Jira-first backlog, epic, story, bug, task es spike eletciklus kezelese
+- Markdown -> Jira migracio tamogatasa external ID alapu idempotens frissitesekkel
+- Jira statuszok osszehangolasa branch, PR, review, merge es verifikacios allapottal
+- Jira issue key kotelezo hasznalata branch, commit, PR cim es PR torzs szinten
+
 ### `docs-sync`
 
 Feladata:
@@ -302,6 +320,7 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 | **Login hiba / Redirect loop** | `app-surface` | `auth-debug` | `playwright` $\rightarrow$ `http-api` $\rightarrow$ `keycloak-admin` |
 | **502 Bad Gateway / 404 Route** | `edge-routing` | `gateway-debug` | `http-api` $\rightarrow$ `ssh-remote-shell` $\rightarrow$ `docker-compose` |
 | **Deploy nem történt / Rossz verzió** | `delivery-runtime` | `oci-deploy-debug` | `github` $\rightarrow$ `docker-compose` $\rightarrow$ `ssh-remote-shell` |
+| **Jira backlog / story migráció** | `delivery-runtime` | `jira-management` | `jira` $\rightarrow$ `github` $\rightarrow$ `node-workspace` |
 | **JWT validációs hiba (Backend)** | `api-auth` | `backend-auth-runtime` | `http-api` $\rightarrow$ `maven-java-deps` $\rightarrow$ `keycloak-admin` |
 | **Biztonsági audit / Sebezhetőség** | `security-compliance` | `security-audit` | `sast-scanner` $\rightarrow$ `dependency-audit` $\rightarrow$ `secret-scanner` |
 | **Dokumentáció és realidadegyezetlen** | `knowledge-governance` | `docs-sync` | `oci` $\rightarrow$ `github` $\rightarrow$ `diagram-architecture` |
@@ -312,6 +331,7 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 
 - `playwright`
 - `github`
+- `jira`
 - `ssh-remote-shell`
 - `docker-compose`
 - `http-api`
