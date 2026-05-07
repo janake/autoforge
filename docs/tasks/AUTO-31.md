@@ -14,7 +14,7 @@ in_progress
 feature/AUTO-31-jira-dry-run-import
 
 ## PR
-- (Nincs még)
+- PR #55
 
 ## Acceptance criteria
 
@@ -39,6 +39,7 @@ feature/AUTO-31-jira-dry-run-import
 - [x] `npm run jira:dry-run` sikeresen lefutott; `build/jira-import-plan.json` generálva.
 - [x] Ellenőrizve, hogy a generált `build/jira-import-plan.json` gitignore alatt van.
 - [x] Secret-pattern keresés nem talált token-szerű értéket.
+- [x] PR megnyitva.
 
 ## Eredmény
 
