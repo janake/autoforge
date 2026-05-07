@@ -71,6 +71,14 @@ OCI Vault secret név alapú lookupkal:
 npm run jira:import:check -- --oci-lookup-by-name
 ```
 
+Elérhető Jira projektek ellenőrzése:
+
+```bash
+node ops/jira/import-plan.mjs --oci-lookup-by-name --list-projects
+```
+
+Ha a lista üres, akkor a tokenhez tartozó Jira felhasználó nem lát projektet, vagy nincs `Browse projects` jogosultsága az adott Jira site-on.
+
 ## Jira import futtatás
 
 Alap create/update import:

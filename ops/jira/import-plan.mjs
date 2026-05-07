@@ -15,6 +15,7 @@ function parseArgs(argv) {
     applyStatus: false,
     checkExisting: false,
     ociLookupByName: false,
+    listProjects: false,
     limit: null,
     onlyExternalId: null,
     fallbackIssueType: "Task",
@@ -41,6 +42,10 @@ function parseArgs(argv) {
     }
     if (arg === "--oci-lookup-by-name") {
       args.ociLookupByName = true;
+      continue;
+    }
+    if (arg === "--list-projects") {
+      args.listProjects = true;
       continue;
     }
     if (arg === "--limit") {
@@ -84,6 +89,7 @@ Options:
   --apply-status             Try to transition Jira issues to the planned status. Requires --apply.
   --check-existing           Read Jira and report whether issues already exist, without writing.
   --oci-lookup-by-name       Resolve JIRA_* secrets from OCI Vault by display name.
+  --list-projects            List Jira projects visible to the configured credentials and exit.
   --limit <n>                Process only the first n issues.
   --issue <external-id>      Process one external ID, for example AUTO-29 or EPIC3-STORY-1.
   --fallback-issue-type <t>  Fallback issue type for create retry. Default: Task.
@@ -110,13 +116,19 @@ async function main() {
   const plan = readPlan(args.plan);
   const issues = selectIssues(plan.issues || [], args);
 
-  if (!args.apply && !args.checkExisting) {
+  if (!args.apply && !args.checkExisting && !args.listProjects) {
     printLocalDryRun(plan, issues, args);
     return;
   }
 
   const credentials = loadCredentials(args);
   const client = new JiraClient(credentials);
+
+  if (args.listProjects) {
+    await client.listProjects();
+    return;
+  }
+
   const results = [];
 
   for (const issue of issues) {
@@ -267,7 +279,15 @@ class JiraClient {
     const text = await response.text();
     const data = text ? JSON.parse(text) : null;
     if (!response.ok) {
-      const message = data?.errorMessages?.join("; ") || data?.message || response.statusText;
+      const fieldErrors = data?.errors && typeof data.errors === "object"
+        ? Object.entries(data.errors).map(([field, message]) => `${field}: ${message}`)
+        : [];
+      const message = [
+        ...(data?.errorMessages || []),
+        ...fieldErrors,
+        data?.message,
+        response.statusText,
+      ].filter(Boolean).join("; ");
       throw new Error(`Jira ${method} ${apiPath} failed (${response.status}): ${message}`);
     }
     return data;
@@ -289,6 +309,20 @@ class JiraClient {
       throw new Error(`Multiple Jira issues found for external ID ${externalId}`);
     }
     return data.issues?.[0] || null;
+  }
+
+  async listProjects() {
+    const data = await this.request("GET", "/rest/api/3/project/search?maxResults=100");
+    const projects = data.values || [];
+    console.log(JSON.stringify({
+      count: projects.length,
+      projects: projects.map((project) => ({
+        key: project.key,
+        name: project.name,
+        projectTypeKey: project.projectTypeKey,
+        simplified: project.simplified,
+      })),
+    }, null, 2));
   }
 
   async createIssue(issue, fallbackIssueType) {
