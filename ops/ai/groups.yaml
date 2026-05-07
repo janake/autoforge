@@ -55,10 +55,12 @@ groups:
     description: Architecture consistency, docs quality, and release traceability ownership.
     contains_mcps:
       - diagram-architecture
+      - prompt-library
       - github
     contains_skills:
       - docs-sync
       - release-versioning
+      - prompt-engineering
 
   - id: security-compliance
     enabled: true

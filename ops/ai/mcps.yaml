@@ -153,6 +153,17 @@ mcps:
       - Fetching latest documentation for external libraries or Autoforge-specific APIs.
       - Augmenting agent context with real-time documentation data.
 
+  - id: prompt-library
+    enabled: true
+    priority: high
+    category: ai-governance
+    description: Repository-level prompt patterns, guardrails, and prompt quality guidance.
+    used_for:
+      - Standardize reusable prompt templates for AI agents and user-facing AI workflows.
+      - Improve prompt clarity, scope boundaries, acceptance criteria, and expected outputs.
+      - Reduce prompt injection risk by separating trusted instructions from untrusted content.
+      - Support prompt reviews before adding long-lived agent, workflow, or product prompts.
+
   - id: sast-scanner
     enabled: true
     priority: critical

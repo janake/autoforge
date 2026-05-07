@@ -233,3 +233,14 @@ Taskok
 
 Megjegyzes
 - Biztonsági eszközök (SAST, titokkeresés, függőség-audit) és egy átfogó `security-audit` skill integrálása.
+
+## 0.1.21
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-30`: Add prompt engineering AI tooling
+
+Megjegyzes
+- Prompt engineering és prompt safety capability hozzáadása az AI tooling stackhez.
