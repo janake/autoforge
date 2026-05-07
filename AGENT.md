@@ -7,6 +7,7 @@ This file is mandatory for every AI agent working in this repository. Before sta
 - Do not mix unrelated work in the same branch, commit, or PR.
 - Do not start local servers, frontend dev servers, backend services, Docker stacks, or long-running local processes unless the user explicitly asks for it.
 - Prefer small, correct changes over broad rewrites.
+- Tasks (Stories, Bugs) must be broken down to be extremely small and focused. The scope of a single task must be small enough that even a smaller, less capable AI model can implement it without making logic leaps or losing context.
 - Never revert, overwrite, or remove user changes unless the user explicitly asks for it.
 - Do not commit secrets, private keys, tokens, local absolute paths, personal identifiers, cloud credentials, tenancy/user OCIDs, or machine-specific data.
 - Use placeholders or configured secrets for sensitive values, for example `${AUTOFORGE_SSH_KEY}`, `<registry-owner>`, `<repo-url>`.
@@ -24,53 +25,28 @@ Classify every new request before making changes.
 
 For any non-trivial code, infra, workflow, or documentation task, do the following:
 
-1. Pick the next unused task ID from `docs/tasks/`.
-2. Create a task file under `docs/tasks/` named exactly `<ID>.md`.
-3. Assign the task to a target version before editing code or docs.
-4. Add the task to `docs/releases.md` under the target version.
-5. Create a dedicated branch from the current `origin/main` unless the user explicitly asks to continue an existing branch.
-6. Use branch names in this format:
+1. Look up or create the relevant Jira issue (Story, Bug, Task).
+2. Assign the task to a target version in Jira before editing code.
+3. Create a dedicated branch from the current `origin/main` unless the user explicitly asks to continue an existing branch.
+4. Use branch names in this format:
    - `feature/AUTO-<number>-short-description`
-   - `bug/BUG-<number>-short-description`
-7. Make only changes that belong to that task.
-8. Update the task file as work progresses.
-9. Run the relevant verification commands.
-10. Commit with a message that starts with the task ID.
-11. Push the branch.
-12. Open or update a PR with a title that starts with the task ID and body that includes the target version.
-
-## Task File Minimum Content
-
-Every task file must include:
-
-- Title with ID and short name.
-- `Feladat leírása`.
-- `Statusz`.
-- `Verzió`.
-- `Branch`.
-- `PR`.
-- `Acceptance criteria`.
-- `Dokumentumok és fájlok`.
-- `Lepesnaplo`.
-- `Eredmény` when the work is done.
-
-Use internal references like `PR #26` in task files instead of full URLs when possible.
+   - `bug/AUTO-<number>-short-description`
+5. Make only changes that belong to that task.
+6. Run the relevant verification commands.
+7. Commit with a message that starts with the task ID.
+8. Push the branch.
+9. Open or update a PR with a title that starts with the task ID and body that includes the target version.
+10. Do NOT create Markdown tracking files in the repository. All task tracking must happen in Jira.
 
 ## Versioning
 
-- Every `AUTO-*` and `BUG-*` task must have a target version.
+- Every task must have a target version in Jira.
 - Automatic version bump policy:
-  - For non-major tasks (AUTO-*, BUG-*), the version is automatically incremented according to the protocol (using MAJOR.MINOR.PATCH format). Typically, a PATCH or MINOR bump occurs, with the specific bump determined by the task type (see docs/versioning.md). For MAJOR changes, user confirmation is required for the version increment, and this is recorded in the PR/Release manifest.
+  - For non-major tasks, the version is automatically incremented according to the protocol (using MAJOR.MINOR.PATCH format).
   - The root package.json version and container image tags are updated accordingly during CI/CD.
-  - Version changes are reflected in all related documents: `docs/releases.md`, `docs/versioning.md`, and the `Version` field in task files.
-  - The `Version` field in task files remains mandatory and must appear in the release manifest.
-  - Always display the appropriate version in the AUTO-/BUG banner in documentation so it can be easily traced during audits.
+  - Versioning rules are documented in `docs/versioning.md`.
 - For non-major tasks, choose the next version automatically; only ask the user before a `MAJOR` bump.
-- The canonical task-to-version mapping is `docs/releases.md`.
- - Versioning rules are documented in `docs/versioning.md`.
 - Project-owned Docker images must be tagged with the root `package.json` version by the container image workflow.
-- Do not open a PR if the task file has no `Verzió` section.
-- Do not merge task documentation that disagrees with `docs/releases.md`.
 
 ## Commit And PR Naming
 

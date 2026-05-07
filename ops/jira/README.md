@@ -79,6 +79,10 @@ node ops/jira/import-plan.mjs --oci-lookup-by-name --list-projects
 
 Ha a lista üres, akkor a tokenhez tartozó Jira felhasználó nem lát projektet, vagy nincs `Browse projects` jogosultsága az adott Jira site-on.
 
+Az importáló minden Jira API mód előtt ellenőrzi a credentialt a `/rest/api/3/myself` endpointtal. Ha ez `401` hibát ad, akkor a `JIRA_EMAIL` és `JIRA_API_TOKEN` páros nem használható az adott Jira site-on; ilyenkor a projektlista vagy JQL keresés eredménye nem tekinthető valid import előfeltételnek.
+
+Az importáló `--check-existing` és `--apply` módban a konfigurált `JIRA_PROJECT_KEY` elérését is ellenőrzi. Ha a projekt preflight hibázik, előbb a Jira project key-t és a felhasználó `Browse projects` / `Create issues` jogosultságát kell javítani.
+
 ## Jira import futtatás
 
 Alap create/update import:
@@ -102,6 +106,7 @@ npm run jira:import -- --oci-lookup-by-name --apply-status
 Fontos:
 
 - Az import idempotens: external ID label alapján keres meglévő issue-t.
+- A `parentExternalId` mezővel rendelkező issue-kat az importáló Jira parent mezővel is összeköti a feloldott parent issue key alapján.
 - A meglévő issue keresés a Jira Cloud új `/rest/api/3/search/jql` endpointját használja.
 - A token értéke nem kerül kiírásra.
 - Ha egy Jira issue type nem létezik, a create retry alapértelmezetten `Task` típussal történik.

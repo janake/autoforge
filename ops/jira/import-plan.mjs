@@ -129,10 +129,13 @@ async function main() {
     return;
   }
 
-  const results = [];
+    const results = [];
 
   for (const issue of issues) {
     const existing = await client.findIssueByExternalId(issue.externalId);
+    const parentKey = issue.parentExternalId
+      ? await client.findParentKey(issue.parentExternalId, issue.externalId)
+      : null;
 
     if (!args.apply) {
       results.push({ externalId: issue.externalId, action: existing ? "exists" : "missing", key: existing?.key || null });
@@ -140,8 +143,8 @@ async function main() {
     }
 
     const result = existing
-      ? await client.updateIssue(existing.key, issue)
-      : await client.createIssue(issue, args.fallbackIssueType);
+      ? await client.updateIssue(existing.key, issue, parentKey)
+      : await client.createIssue(issue, args.fallbackIssueType, parentKey);
 
     if (args.applyStatus) {
       await client.transitionIssue(result.key, issue.status);
@@ -311,6 +314,14 @@ class JiraClient {
     return data.issues?.[0] || null;
   }
 
+  async findParentKey(parentExternalId, childExternalId) {
+    const parent = await this.findIssueByExternalId(parentExternalId);
+    if (!parent) {
+      throw new Error(`Parent Jira issue not found for ${childExternalId}: ${parentExternalId}`);
+    }
+    return parent.key;
+  }
+
   async listProjects() {
     const data = await this.request("GET", "/rest/api/3/project/search?maxResults=100");
     const projects = data.values || [];
@@ -325,35 +336,33 @@ class JiraClient {
     }, null, 2));
   }
 
-  async createIssue(issue, fallbackIssueType) {
-    const payload = this.issuePayload(issue, issue.issueType);
+  async createIssue(issue, fallbackIssueType, parentKey = null) {
+    const payload = this.issuePayload(issue, issue.issueType, parentKey);
     try {
-      const created = await this.request("POST", "/rest/api/3/issue", payload);
+      const created = await this.request("POST", "/rest/api/2/issue", payload);
       return { key: created.key };
     } catch (error) {
       if (issue.issueType === fallbackIssueType) {
         throw error;
       }
-      const fallback = this.issuePayload(issue, fallbackIssueType);
-      fallback.fields.description = toAdf(`${adfPlainText(issue)}\n\nImport note: requested issue type ${issue.issueType} was retried as ${fallbackIssueType}.`);
-      const created = await this.request("POST", "/rest/api/3/issue", fallback);
+      const fallback = this.issuePayload(issue, fallbackIssueType, parentKey);
+      // For fallback description, we use the v3 format because we know description works with toAdf in v2 endpoint as well, 
+      // but actually let's just use string to be safe.
+      fallback.fields.description = `${adfPlainText(issue)}\n\nImport note: requested issue type ${issue.issueType} was retried as ${fallbackIssueType}.`;
+      const created = await this.request("POST", "/rest/api/2/issue", fallback);
       return { key: created.key };
     }
   }
 
-  async updateIssue(key, issue) {
-    await this.request("PUT", `/rest/api/3/issue/${encodeURIComponent(key)}`, {
-      fields: {
-        summary: issue.summary,
-        description: toAdf(adfPlainText(issue)),
-        labels: labelsForIssue(issue),
-      },
+  async updateIssue(key, issue, parentKey = null) {
+    await this.request("PUT", `/rest/api/2/issue/${encodeURIComponent(key)}`, {
+      fields: issueFields(issue, parentKey),
     });
     return { key };
   }
 
   async transitionIssue(key, targetStatus) {
-    const data = await this.request("GET", `/rest/api/3/issue/${encodeURIComponent(key)}/transitions`);
+    const data = await this.request("GET", `/rest/api/2/issue/${encodeURIComponent(key)}/transitions`);
     const transition = (data.transitions || []).find((candidate) => {
       return [candidate.name, candidate.to?.name]
         .filter(Boolean)
@@ -365,22 +374,37 @@ class JiraClient {
       return;
     }
 
-    await this.request("POST", `/rest/api/3/issue/${encodeURIComponent(key)}/transitions`, {
+    await this.request("POST", `/rest/api/2/issue/${encodeURIComponent(key)}/transitions`, {
       transition: { id: transition.id },
     });
   }
 
-  issuePayload(issue, issueType) {
+  issuePayload(issue, issueType, parentKey = null) {
     return {
       fields: {
         project: { key: this.credentials.projectKey },
-        summary: issue.summary,
+        ...issueFields(issue, parentKey),
         issuetype: { name: issueType },
-        description: toAdf(adfPlainText(issue)),
-        labels: labelsForIssue(issue),
       },
     };
   }
+}
+
+function issueFields(issue, parentKey = null) {
+  return {
+    summary: issue.summary,
+    description: adfPlainText(issue), // Using string for v2
+    labels: labelsForIssue(issue),
+    ...(parentKey ? { parent: { key: parentKey } } : {}),
+    ...(issue.fields?.priority ? { priority: { name: issue.fields.priority } } : {}),
+    customfield_10039: Array.isArray(issue.fields?.acceptanceCriteria) 
+      ? issue.fields.acceptanceCriteria.map(ac => `- ${ac}`).join("\n")
+      : (issue.fields?.acceptanceCriteria || ""),
+    customfield_10040: issue.fields?.dependencies || "",
+    customfield_10041: issue.fields?.output || "",
+    customfield_10042: issue.fields?.goal || "",
+    customfield_10043: issue.fields?.scope || "",
+  };
 }
 
 function adfPlainText(issue) {
