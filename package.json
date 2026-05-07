@@ -15,6 +15,9 @@
     "test:backend": "mvn -q -f services/backend/pom.xml test",
     "build:backend": "mvn -q -f services/backend/pom.xml package",
     "dev:worker": "npm run dev --workspace @autoforge/worker",
-    "jira:dry-run": "node ops/jira/generate-import-plan.mjs"
+    "jira:dry-run": "node ops/jira/generate-import-plan.mjs",
+    "jira:import:dry-run": "node ops/jira/import-plan.mjs",
+    "jira:import:check": "node ops/jira/import-plan.mjs --check-existing",
+    "jira:import": "node ops/jira/import-plan.mjs --apply"
   }
 }

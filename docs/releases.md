@@ -254,4 +254,4 @@ Taskok
 - `AUTO-31`: Add Jira migration dry-run generator
 
 Megjegyzes
-- Credential nélküli Jira migrációs dry-run generátor a Markdown taskok, epicek, story breakdownok és release mapping import tervéhez.
+- Credential nélküli Jira migrációs dry-run generátor és idempotens Jira importáló a Markdown taskok, epicek, story breakdownok és release mapping alapján.
