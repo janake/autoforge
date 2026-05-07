@@ -246,7 +246,7 @@ Megjegyzés: a részletes, Jira-ba emelhető story lista külön dokumentumban v
 
 ## Jira MCP és skill igény
 
-Az AI tooling stacket bővíteni kell:
+Az AI tooling stack Jira támogatással bővül, hogy a migráció és a későbbi Jira-first működés explicit ügynöki képesség legyen.
 
 Javasolt MCP:
 
@@ -256,7 +256,12 @@ Javasolt skill:
 
 - `jira-management`: backlog grooming, issue import, státusz szinkron, PR/Jira linkelés, release mapping.
 
-Ezeket külön taskban kell hozzáadni az `ops/ai/*.yaml` manifestekhez és a `docs/ai-tooling.md` dokumentációhoz.
+Manifestek és dokumentáció:
+
+- `ops/ai/mcps.yaml`: `jira` MCP.
+- `ops/ai/skills.yaml`: `jira-management` skill.
+- `ops/ai/groups.yaml`: delivery és knowledge capability group kapcsolódások.
+- `docs/ai-tooling.md`: használati sorrend és troubleshooting mátrix.
 
 ## Acceptance criteria az epic lezárásához
 
