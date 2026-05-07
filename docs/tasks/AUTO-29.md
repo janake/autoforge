@@ -23,9 +23,11 @@ feature/AUTO-29-jira-migration-epic
 - Az epic tartalmazza a Jira-first jövőbeli működési szabályokat.
 - Az epic tartalmazza a Jira token és secret kezelés biztonsági szabályait.
 - Az epic tartalmazza a Jira MCP és skill igényt.
+- Az epichez elkészül egy Jira-ready story bontás.
 
 ## Dokumentumok és fájlok
 - `docs/epics/EPIC-3-jira-migration.md`
+- `docs/epics/EPIC-3-jira-migration-stories.md`
 - `docs/releases.md`
 
 ## Lepesnaplo
@@ -34,6 +36,7 @@ feature/AUTO-29-jira-migration-epic
 - [x] Jira-first jövőbeli működés rögzítve.
 - [x] Secret kezelés szabályai rögzítve.
 - [x] PR megnyitva.
+- [x] Jira-ready story bontás elkészítve.
 
 ## Eredmény
 Az EPIC-3 dokumentáció elkészült a későbbi taskokra bontáshoz.

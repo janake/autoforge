@@ -20,6 +20,8 @@ Jira bevezetésével:
 
 ## Scope
 
+Részletes Jira-ready story bontás: `docs/epics/EPIC-3-jira-migration-stories.md`.
+
 ### Egyszeri migráció
 
 Át kell emelni Jira-ba:
@@ -223,6 +225,8 @@ Jira-first működés után a repo dokumentáció szerepe:
 ## Migrációs lépések taskokra bontva
 
 Későbbi task bontási javaslat:
+
+Megjegyzés: a részletes, Jira-ba emelhető story lista külön dokumentumban van: `docs/epics/EPIC-3-jira-migration-stories.md`.
 
 1. Jira projekt, issue type-ok és workflow véglegesítése.
 2. Jira access token biztonságos tárolási modell kialakítása.
