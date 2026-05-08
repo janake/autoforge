@@ -95,6 +95,13 @@ Javasolt Jira státuszok:
 - `Done`: merged, dokumentált, verifikált.
 - `Cancelled`: nem valósul meg vagy kiváltotta másik issue.
 
+Spike és döntési issue szabály:
+
+- Spike vagy döntési issue nem kerülhet `Done` státuszba pusztán default javaslat, agent preferencia vagy feltételezett best practice alapján.
+- Spike csak explicit user döntés, rögzített kutatási eredmény vagy közvetlen lezárási kérés után zárható.
+- Ha csak ajánlott default van, de nincs megerősített döntés, kommentben `Recommended, not decided` jelölést kell használni, és az issue maradjon nyitva.
+- Hibás lezárás esetén az issue-t vissza kell nyitni, korrekciós kommenttel és user felé történő egyértelmű jelzéssel.
+
 ## Markdown -> Jira státuszleképezés
 
 Import során a jelenlegi Markdown adatokból kell best-effort státuszt képezni.

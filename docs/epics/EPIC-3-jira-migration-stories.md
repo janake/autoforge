@@ -224,6 +224,7 @@ Acceptance criteria:
 - Branch, commit és PR név Jira issue key alapján készül.
 - PR body kötelezően linkeli a Jira issue-t.
 - Munka végén Jira komment és státuszfrissítés szabályai rögzítve.
+- Spike/döntési issue csak explicit user döntés vagy rögzített kutatási eredmény után zárható; default javaslat önmagában nem elég.
 - Legacy `AUTO-*` és `BUG-*` használat historical reference-ként marad.
 - Secret kezelés továbbra is tiltja tokenek fájlba írását.
 

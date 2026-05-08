@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
   <title id="title">Autoforge OCI architecture</title>
-  <desc id="desc">Autoforge deployment on Oracle Cloud Infrastructure with public and private compute instances, external Keycloak OIDC authentication, OCI Vault, GHCR, GitHub Actions, and a 100 GB OCI Block Volume workspace attached to the private instance.</desc>
+  <desc id="desc">Autoforge deployment on Oracle Cloud Infrastructure with public and private compute instances, external Keycloak OIDC authentication, OCI Vault, GHCR, GitHub Actions, private Object Storage prompt JSON retention, a relational Job Store, and a 100 GB OCI Block Volume workspace attached to the private instance.</desc>
   <defs>
     <style>
       .bg { fill: #f8fafc; }
@@ -81,6 +81,19 @@
   <text x="955" y="670" class="text body">100 GB ext4 workspace</text>
   <text x="955" y="694" class="text small">Mounted at /mnt/autoforge-workspace</text>
 
+  <rect x="1315" y="360" width="115" height="118" class="storage"/>
+  <text x="1330" y="390" class="text h2">Object</text>
+  <text x="1330" y="412" class="text h2">Storage</text>
+  <text x="1330" y="438" class="text small">Private bucket</text>
+  <text x="1330" y="458" class="text small">Prompt JSON</text>
+  <text x="1330" y="474" class="text small">72h delete</text>
+
+  <rect x="1315" y="520" width="115" height="118" class="storage"/>
+  <text x="1330" y="550" class="text h2">Job Store</text>
+  <text x="1330" y="577" class="text small">job_id/status</text>
+  <text x="1330" y="597" class="text small">prompt_hash</text>
+  <text x="1330" y="617" class="text small">summary + URI</text>
+
   <rect x="690" y="410" width="120" height="70" class="service"/>
   <text x="715" y="438" class="text h2">VCN</text>
   <text x="705" y="463" class="text small">Route tables</text>
@@ -91,9 +104,9 @@
   <text x="75" y="520" class="text h2">Internet</text>
   <path d="M145 535 H220" class="arrow"/>
   <path d="M575 575 H925" class="arrow"/>
-  <path d="M1255 540 H1375" class="arrow"/>
-  <text x="1335" y="520" class="text h2">Internet</text>
-  <text x="1318" y="570" class="text small">Updates / outbound</text>
+  <path d="M1255 700 H1375" class="arrow"/>
+  <text x="1335" y="680" class="text h2">Internet</text>
+  <text x="1318" y="730" class="text small">Updates / outbound</text>
 
   <path d="M390 122 H520" class="mgmt"/>
   <text x="425" y="105" class="text small">Push images</text>
@@ -108,6 +121,9 @@
 
   <path d="M610 355 H890" class="route"/>
   <path d="M610 650 H890" class="route"/>
+  <path d="M1255 520 H1315" class="mgmt"/>
+  <path d="M1255 575 H1315" class="mgmt"/>
+  <text x="1265" y="506" class="text small">AI Proxy writes</text>
 
   <rect x="145" y="765" width="270" height="70" class="service"/>
   <text x="170" y="795" class="text h2">All components in Docker</text>
@@ -122,6 +138,6 @@
   <text x="790" y="820" class="text small">OpenCode secrets are read by the private host at deploy time</text>
 
   <rect x="1075" y="765" width="270" height="70" class="storage"/>
-  <text x="1100" y="795" class="text h2">Persistent workspace</text>
-  <text x="1100" y="820" class="text small">100 GB OCI Block Volume on private host</text>
+  <text x="1100" y="795" class="text h2">Hybrid prompt audit</text>
+  <text x="1100" y="820" class="text small">Full prompts in Object Storage; metadata in Job Store</text>
 </svg>
