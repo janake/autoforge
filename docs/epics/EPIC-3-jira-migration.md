@@ -261,6 +261,7 @@ Manifestek és dokumentáció:
 - `ops/ai/mcps.yaml`: `jira` MCP.
 - `ops/ai/skills.yaml`: `jira-management` skill.
 - `ops/ai/groups.yaml`: delivery és knowledge capability group kapcsolódások.
+- `ops/mcp/jira-local.sh`: helyi launch point a Jira MCP stdio futtatásához.
 - `docs/ai-tooling.md`: használati sorrend és troubleshooting mátrix.
 
 ## Acceptance criteria az epic lezárásához
