@@ -255,3 +255,14 @@ Taskok
 
 Megjegyzes
 - Credential nélküli Jira migrációs dry-run generátor és idempotens Jira importáló a Markdown taskok, epicek, story breakdownok és release mapping alapján.
+
+## 0.1.22
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-136`: Enforce Terraform scripts for reproducible infrastructure changes
+
+Megjegyzes
+- Az infrastruktúra-, host readiness-, OCI- és runtime provisioning jellegű változásokhoz Terraform script vagy modul kötelező, hogy a módosítás nulláról reprodukálható legyen.
