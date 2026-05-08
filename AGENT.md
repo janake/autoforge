@@ -88,6 +88,7 @@ Record the commands and outcomes in the task file `Lepesnaplo` section. Do not r
 - If architecture, deploy behavior, workflow behavior, auth flow, or public UI behavior changes, update the relevant docs in the same task.
 - Keep task docs consistent with the actual branch and PR.
 - Do not leave stale references to wrong IDs, wrong PRs, or closed/superseded branches.
+- For any infrastructure, host readiness, OCI, runtime provisioning, or similar repeatable environment change, also create a Terraform script or Terraform module that can reproduce the change from scratch.
 
 ## Review Mindset
 
@@ -111,3 +112,7 @@ When finishing a task, report:
 - Key files changed.
 - Verification command results.
 - Anything not completed or blocked.
+
+## Jira Status Rule
+
+Ha bármilyen Jira **story**-t kezdessz el dolgozni, akkor előtte (vagy a munka legelső lépésében) a Jira státuszt állítsd át **In Progress**-ra.
