@@ -1,20 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1150" viewBox="0 0 1900 1150" role="img" aria-labelledby="title desc">
   <title id="title">Autoforge OCI architecture</title>
-  <desc id="desc">Autoforge deployment on Oracle Cloud Infrastructure with public and private compute instances, external Keycloak OIDC authentication, OCI Vault, GHCR, GitHub Actions, an OCI Object Storage private bucket for full prompt JSON retention, Oracle Autonomous Database for Job Store metadata, and a 100 GB OCI Block Volume workspace attached to the private instance.</desc>
+  <desc id="desc">Autoforge deployment on Oracle Cloud Infrastructure with public and private compute instances, external Keycloak OIDC authentication, OCI Vault, GHCR, GitHub Actions, OCI Object Storage private bucket for full prompt JSON retention, Oracle Autonomous Database for Job Store metadata, and a 100 GB OCI Block Volume workspace attached to the private instance.</desc>
   <defs>
     <style>
       .bg { fill: #f8fafc; }
-      .panel { fill: #ffffff; stroke: #1f2937; stroke-width: 2; rx: 8; }
-      .oci { fill: none; stroke: #c43e2f; stroke-width: 3; stroke-dasharray: 8 6; rx: 10; }
-      .net { fill: #f0fdf4; stroke: #3f7d20; stroke-width: 2; rx: 8; }
-      .box { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; rx: 8; }
-      .service { fill: #ffffff; stroke: #64748b; stroke-width: 1.5; rx: 6; }
-      .storage { fill: #fff7ed; stroke: #ea580c; stroke-width: 2; rx: 8; }
-      .vault { fill: #fef2f2; stroke: #b91c1c; stroke-width: 2; rx: 8; }
-      .oidc { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 2; rx: 8; }
+      .panel { fill: #ffffff; stroke: #1f2937; stroke-width: 2; rx: 10; }
+      .oci { fill: none; stroke: #c43e2f; stroke-width: 3; stroke-dasharray: 10 7; rx: 12; }
+      .subnet { fill: #f0fdf4; stroke: #3f7d20; stroke-width: 2.5; rx: 10; }
+      .compute { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; rx: 10; }
+      .service { fill: #ffffff; stroke: #64748b; stroke-width: 1.6; rx: 7; }
+      .storage { fill: #fff7ed; stroke: #ea580c; stroke-width: 2; rx: 10; }
+      .vault { fill: #fef2f2; stroke: #b91c1c; stroke-width: 2; rx: 10; }
+      .oidc { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 2; rx: 10; }
+      .network { fill: #f8fafc; stroke: #64748b; stroke-width: 1.6; rx: 8; }
       .text { font-family: Arial, sans-serif; fill: #111827; }
-      .title { font-size: 34px; font-weight: 700; }
-      .h1 { font-size: 24px; font-weight: 700; }
+      .title { font-size: 36px; font-weight: 700; }
+      .h1 { font-size: 25px; font-weight: 700; }
       .h2 { font-size: 18px; font-weight: 700; }
       .body { font-size: 15px; }
       .small { font-size: 13px; fill: #374151; }
@@ -22,6 +23,9 @@
       .arrow { stroke: #1d4ed8; stroke-width: 3; fill: none; marker-end: url(#arrow); }
       .mgmt { stroke: #111827; stroke-width: 2.5; fill: none; stroke-dasharray: 7 6; marker-end: url(#arrowDark); }
       .route { stroke: #c43e2f; stroke-width: 2.5; fill: none; stroke-dasharray: 8 6; }
+      .icon { fill: none; stroke: #c43e2f; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+      .iconFill { fill: #fff7ed; stroke: #c43e2f; stroke-width: 2.2; }
+      .iconDark { fill: none; stroke: #111827; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     </style>
     <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#1d4ed8"/>
@@ -29,117 +33,155 @@
     <marker id="arrowDark" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#111827"/>
     </marker>
+    <g id="icon-compute">
+      <rect x="0" y="6" width="42" height="28" class="icon" rx="3"/>
+      <path d="M8 14 H34 M8 22 H34 M14 34 V41 H28 V34" class="icon"/>
+    </g>
+    <g id="icon-bucket">
+      <path d="M4 12 C4 5 42 5 42 12 V38 C42 45 4 45 4 38 Z" class="iconFill"/>
+      <path d="M4 12 C4 19 42 19 42 12 M4 27 C4 34 42 34 42 27" class="icon"/>
+    </g>
+    <g id="icon-db">
+      <ellipse cx="23" cy="10" rx="20" ry="8" class="iconFill"/>
+      <path d="M3 10 V38 C3 48 43 48 43 38 V10 M3 24 C3 34 43 34 43 24" class="icon"/>
+    </g>
+    <g id="icon-vault">
+      <path d="M23 4 L42 12 V25 C42 37 34 46 23 50 C12 46 4 37 4 25 V12 Z" class="iconFill"/>
+      <path d="M16 25 L21 30 L32 18" class="icon"/>
+    </g>
+    <g id="icon-volume">
+      <rect x="5" y="8" width="38" height="34" class="iconFill" rx="4"/>
+      <path d="M12 18 H36 M12 28 H36 M12 36 H24" class="icon"/>
+    </g>
+    <g id="icon-vcn">
+      <circle cx="12" cy="14" r="6" class="icon"/>
+      <circle cx="36" cy="14" r="6" class="icon"/>
+      <circle cx="24" cy="38" r="6" class="icon"/>
+      <path d="M18 16 H30 M15 20 L21 34 M33 20 L27 34" class="icon"/>
+    </g>
   </defs>
 
-  <rect class="bg" width="1500" height="900"/>
-  <text x="560" y="46" class="text title">AUTOFORGE - OCI Architecture</text>
+  <rect class="bg" width="1900" height="1150"/>
+  <text x="700" y="54" class="text title">AUTOFORGE - OCI Architecture</text>
 
-  <rect x="120" y="75" width="270" height="95" class="panel"/>
-  <text x="155" y="113" class="text h1">GitHub Actions</text>
-  <text x="155" y="142" class="text body">Versioned image + deploy workflows</text>
+  <rect x="80" y="85" width="330" height="120" class="panel"/>
+  <text x="150" y="125" class="text h1">GitHub Actions</text>
+  <text x="150" y="158" class="text body">Versioned image + deploy workflows</text>
+  <path d="M105 135 h24 m-12 -12 v24" class="iconDark"/>
 
-  <rect x="520" y="75" width="260" height="95" class="panel"/>
-  <text x="560" y="113" class="text h1">GHCR</text>
-  <text x="560" y="142" class="text body">Container image registry</text>
+  <rect x="545" y="85" width="320" height="120" class="panel"/>
+  <text x="625" y="125" class="text h1">GHCR</text>
+  <text x="625" y="158" class="text body">Container image registry</text>
+  <rect x="575" y="120" width="32" height="32" class="iconDark" rx="4"/>
 
-  <rect x="980" y="75" width="270" height="95" class="vault"/>
-  <text x="1025" y="113" class="text h1">OCI Vault</text>
-  <text x="1025" y="142" class="text body">Runtime secrets</text>
+  <rect x="1195" y="85" width="320" height="120" class="vault"/>
+  <use href="#icon-vault" x="1222" y="112"/>
+  <text x="1290" y="125" class="text h1">OCI Vault</text>
+  <text x="1290" y="158" class="text body">Runtime secrets</text>
 
-  <rect x="1280" y="75" width="180" height="95" class="oidc"/>
-  <text x="1305" y="110" class="text h2">Keycloak</text>
-  <text x="1305" y="138" class="text body">OIDC / PKCE</text>
+  <rect x="1585" y="85" width="230" height="120" class="oidc"/>
+  <text x="1630" y="128" class="text h1">Keycloak</text>
+  <text x="1630" y="160" class="text body">OIDC / PKCE</text>
 
-  <rect x="45" y="225" width="1410" height="600" class="oci"/>
-  <text x="75" y="270" class="text h1">OCI Tenancy</text>
-  <text x="75" y="300" class="text body">Compartment: prodet-new</text>
+  <rect x="55" y="275" width="1790" height="735" class="oci"/>
+  <text x="95" y="325" class="text h1">OCI Tenancy</text>
+  <text x="95" y="357" class="text body">Compartment: prodet-new</text>
 
-  <rect x="220" y="335" width="390" height="375" class="net"/>
-  <text x="250" y="375" class="text h1">Public Subnet</text>
-  <rect x="255" y="410" width="320" height="235" class="box"/>
-  <text x="285" y="445" class="text h2">OCI Compute Instance</text>
-  <text x="285" y="472" class="text body">public entry host</text>
-  <rect x="285" y="505" width="260" height="38" class="service"/>
-  <text x="305" y="530" class="text body">Docker: Caddy</text>
-  <rect x="285" y="552" width="260" height="38" class="service"/>
-  <text x="305" y="577" class="text body">Docker: React frontend</text>
-  <rect x="285" y="599" width="260" height="38" class="service"/>
-  <text x="305" y="624" class="text body">Docker: Spring Cloud API Gateway</text>
-  <text x="255" y="675" class="text small">Domains: oci.prodet.org, api.oci.prodet.org</text>
+  <rect x="230" y="420" width="470" height="440" class="subnet"/>
+  <text x="270" y="465" class="text h1">Public Subnet</text>
+  <rect x="275" y="500" width="380" height="265" class="compute"/>
+  <use href="#icon-compute" x="305" y="525"/>
+  <text x="365" y="548" class="text h2">OCI Compute Instance</text>
+  <text x="365" y="575" class="text body">public entry host</text>
+  <rect x="315" y="615" width="300" height="42" class="service"/>
+  <text x="338" y="642" class="text body">Docker: Caddy</text>
+  <rect x="315" y="668" width="300" height="42" class="service"/>
+  <text x="338" y="695" class="text body">Docker: React frontend</text>
+  <rect x="315" y="721" width="300" height="42" class="service"/>
+  <text x="338" y="748" class="text body">Docker: Spring Cloud API Gateway</text>
+  <text x="275" y="812" class="text small">Domains: oci.prodet.org, api.oci.prodet.org</text>
 
-  <rect x="890" y="335" width="410" height="375" class="net"/>
-  <text x="920" y="375" class="text h1">Private Workload Host</text>
-  <rect x="925" y="410" width="330" height="170" class="box"/>
-  <text x="955" y="445" class="text h2">OCI Compute Instance</text>
-  <text x="955" y="472" class="text body">private application host</text>
-  <rect x="955" y="505" width="270" height="38" class="service"/>
-  <text x="975" y="530" class="text body">Docker: Spring Boot backend (JWT API)</text>
-  <rect x="955" y="552" width="270" height="38" class="service"/>
-  <text x="975" y="577" class="text body">Docker: OpenCode REST AI</text>
+  <rect x="820" y="500" width="160" height="92" class="network"/>
+  <use href="#icon-vcn" x="838" y="518"/>
+  <text x="890" y="540" class="text h2">VCN</text>
+  <text x="890" y="565" class="text small">Route tables</text>
+  <rect x="820" y="630" width="160" height="92" class="network"/>
+  <path d="M850 654 L870 644 L890 654 V680 C890 690 872 700 870 700 C868 700 850 690 850 680 Z" class="icon"/>
+  <text x="890" y="668" class="text h2">Security</text>
+  <text x="890" y="693" class="text small">Lists / NSGs</text>
 
-  <rect x="925" y="615" width="330" height="70" class="storage"/>
-  <text x="955" y="645" class="text h2">OCI Block Volume</text>
-  <text x="955" y="670" class="text body">100 GB ext4 workspace</text>
-  <text x="955" y="694" class="text small">Mounted at /mnt/autoforge-workspace</text>
+  <rect x="1120" y="420" width="500" height="440" class="subnet"/>
+  <text x="1160" y="465" class="text h1">Private Workload Host</text>
+  <rect x="1165" y="500" width="390" height="230" class="compute"/>
+  <use href="#icon-compute" x="1195" y="525"/>
+  <text x="1255" y="548" class="text h2">OCI Compute Instance</text>
+  <text x="1255" y="575" class="text body">private application host</text>
+  <rect x="1210" y="625" width="300" height="42" class="service"/>
+  <text x="1233" y="652" class="text body">Docker: Spring Boot backend (JWT API)</text>
+  <rect x="1210" y="678" width="300" height="42" class="service"/>
+  <text x="1233" y="705" class="text body">Docker: OpenCode REST AI</text>
 
-  <rect x="1310" y="350" width="135" height="130" class="storage"/>
-  <text x="1322" y="380" class="text h2">OCI Object</text>
-  <text x="1322" y="402" class="text h2">Storage</text>
-  <text x="1322" y="428" class="text tiny">Private bucket</text>
-  <text x="1322" y="446" class="text tiny">prompt_{jobId}.json</text>
-  <text x="1322" y="464" class="text tiny">Lifecycle: delete 72h</text>
+  <rect x="1165" y="765" width="390" height="90" class="storage"/>
+  <use href="#icon-volume" x="1195" y="785"/>
+  <text x="1255" y="798" class="text h2">OCI Block Volume</text>
+  <text x="1255" y="824" class="text body">100 GB ext4 workspace</text>
+  <text x="1255" y="846" class="text tiny">Mounted at /mnt/autoforge-workspace</text>
 
-  <rect x="1310" y="520" width="135" height="130" class="storage"/>
-  <text x="1322" y="550" class="text h2">Oracle ADB</text>
-  <text x="1322" y="572" class="text h2">Job Store</text>
-  <text x="1322" y="598" class="text tiny">job_id / jira_id</text>
-  <text x="1322" y="616" class="text tiny">status + prompt_hash</text>
-  <text x="1322" y="634" class="text tiny">summary + object URI</text>
+  <rect x="1655" y="390" width="165" height="170" class="storage"/>
+  <use href="#icon-bucket" x="1675" y="410"/>
+  <text x="1730" y="425" class="text h2">OCI Object</text>
+  <text x="1730" y="448" class="text h2">Storage</text>
+  <text x="1675" y="488" class="text small">Private bucket</text>
+  <text x="1675" y="510" class="text tiny">prompt_{jobId}.json</text>
+  <text x="1675" y="530" class="text tiny">Lifecycle: delete 72h</text>
 
-  <rect x="690" y="410" width="120" height="70" class="service"/>
-  <text x="715" y="438" class="text h2">VCN</text>
-  <text x="705" y="463" class="text small">Route tables</text>
-  <rect x="690" y="505" width="120" height="70" class="service"/>
-  <text x="705" y="535" class="text h2">Security</text>
-  <text x="710" y="560" class="text small">Lists / NSGs</text>
+  <rect x="1655" y="620" width="165" height="170" class="storage"/>
+  <use href="#icon-db" x="1675" y="642"/>
+  <text x="1730" y="655" class="text h2">Oracle</text>
+  <text x="1730" y="678" class="text h2">Autonomous DB</text>
+  <text x="1675" y="720" class="text small">Job Store</text>
+  <text x="1675" y="742" class="text tiny">job_id / jira_id</text>
+  <text x="1675" y="762" class="text tiny">status + prompt_hash</text>
+  <text x="1675" y="782" class="text tiny">summary + object URI</text>
 
-  <text x="75" y="520" class="text h2">Internet</text>
-  <path d="M145 535 H220" class="arrow"/>
-  <path d="M575 575 H925" class="arrow"/>
-  <path d="M1255 700 H1375" class="arrow"/>
-  <text x="1335" y="680" class="text h2">Internet</text>
-  <text x="1318" y="730" class="text small">Updates / outbound</text>
+  <text x="95" y="645" class="text h2">Internet</text>
+  <path d="M165 660 H230" class="arrow"/>
+  <path d="M655 690 H1165" class="arrow"/>
+  <path d="M1555 865 H1750" class="arrow"/>
+  <text x="1715" y="898" class="text h2">Internet</text>
+  <text x="1660" y="926" class="text small">Updates / outbound</text>
 
-  <path d="M390 122 H520" class="mgmt"/>
-  <text x="425" y="105" class="text small">Push images</text>
-  <path d="M1360 170 V225 H610" class="mgmt"/>
-  <text x="1180" y="205" class="text small">External login / bearer tokens</text>
-  <path d="M255 170 V335" class="mgmt"/>
-  <path d="M650 170 V335 H415" class="mgmt"/>
-  <path d="M780 170 V260 H1090 V410" class="mgmt"/>
-  <path d="M1115 170 V410" class="mgmt"/>
-  <text x="1005" y="250" class="text small">Private instance reads secrets</text>
-  <text x="1005" y="270" class="text small">with instance principal</text>
+  <path d="M410 145 H545" class="mgmt"/>
+  <text x="455" y="125" class="text small">Push images</text>
+  <path d="M1700 205 V275 H700" class="mgmt"/>
+  <text x="1485" y="250" class="text small">External login / bearer tokens</text>
+  <path d="M245 205 V420" class="mgmt"/>
+  <path d="M705 205 V420 H465" class="mgmt"/>
+  <path d="M865 205 V315 H1360 V500" class="mgmt"/>
+  <path d="M1355 205 V500" class="mgmt"/>
+  <text x="1000" y="345" class="text small">Private instance reads secrets</text>
+  <text x="1000" y="368" class="text small">with instance principal</text>
 
-  <path d="M610 355 H890" class="route"/>
-  <path d="M610 650 H890" class="route"/>
-  <path d="M1255 520 H1310" class="mgmt"/>
-  <path d="M1255 575 H1310" class="mgmt"/>
-  <text x="1260" y="506" class="text tiny">AI Proxy writes via IAM</text>
+  <path d="M700 445 H1120" class="route"/>
+  <path d="M700 780 H1120" class="route"/>
+  <path d="M1555 610 H1655" class="mgmt"/>
+  <path d="M1555 695 H1655" class="mgmt"/>
+  <text x="1565" y="592" class="text small">AI Proxy writes via IAM</text>
+  <text x="1565" y="682" class="text tiny">metadata + object URI</text>
 
-  <rect x="145" y="765" width="270" height="70" class="service"/>
-  <text x="170" y="795" class="text h2">All components in Docker</text>
-  <text x="170" y="820" class="text small">Caddy, React, API gateway, backend and OpenCode run in containers</text>
+  <rect x="130" y="945" width="340" height="85" class="service"/>
+  <text x="165" y="980" class="text h2">All components in Docker</text>
+  <text x="165" y="1008" class="text small">Caddy, React, API gateway, backend and OpenCode run in containers</text>
 
-  <rect x="455" y="765" width="270" height="70" class="service"/>
-  <text x="480" y="795" class="text h2">Backend internal only</text>
-  <text x="480" y="820" class="text small">Public API gateway forwards /api to the private backend host</text>
+  <rect x="525" y="945" width="340" height="85" class="service"/>
+  <text x="560" y="980" class="text h2">Backend internal only</text>
+  <text x="560" y="1008" class="text small">Public API gateway forwards /api to the private backend host</text>
 
-  <rect x="765" y="765" width="270" height="70" class="service"/>
-  <text x="790" y="795" class="text h2">Secrets in OCI Vault</text>
-  <text x="790" y="820" class="text small">OpenCode secrets are read by the private host at deploy time</text>
+  <rect x="920" y="945" width="340" height="85" class="service"/>
+  <text x="955" y="980" class="text h2">Secrets in OCI Vault</text>
+  <text x="955" y="1008" class="text small">OpenCode secrets are read by the private host at deploy time</text>
 
-  <rect x="1075" y="765" width="270" height="70" class="storage"/>
-  <text x="1100" y="795" class="text h2">Hybrid prompt audit</text>
-  <text x="1100" y="820" class="text small">OCI Object Storage + Oracle ADB Job Store</text>
+  <rect x="1315" y="945" width="390" height="85" class="storage"/>
+  <text x="1350" y="980" class="text h2">Hybrid prompt audit</text>
+  <text x="1350" y="1008" class="text small">OCI Object Storage + Oracle Autonomous Database Job Store</text>
 </svg>
