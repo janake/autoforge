@@ -20,57 +20,34 @@ Classify every new request before making changes.
 - A simple requested UI/content change is not a bug unless the user explicitly describes it as broken behavior.
 - If the classification is unclear, ask one short clarification question before creating a branch or ticket.
 
-## Required New Task Flow
+## Jira-First Task Flow
 
 For any non-trivial code, infra, workflow, or documentation task, do the following:
 
-1. Pick the next unused task ID from `docs/tasks/`.
-2. Create a task file under `docs/tasks/` named exactly `<ID>.md`.
-3. Assign the task to a target version before editing code or docs.
-4. Add the task to `docs/releases.md` under the target version.
-5. Create a dedicated branch from the current `origin/main` unless the user explicitly asks to continue an existing branch.
-6. Use branch names in this format:
+1. Identify or create a Jira issue.
+2. Assign the task to a target version in Jira.
+3. Create a dedicated branch from the current `origin/main` unless the user explicitly asks to continue an existing branch.
+4. Use branch names in this format:
    - `feature/AUTO-<number>-short-description`
    - `bug/BUG-<number>-short-description`
-7. Make only changes that belong to that task.
-8. Update the task file as work progresses.
-9. Run the relevant verification commands.
-10. Commit with a message that starts with the task ID.
-11. Push the branch.
-12. Open or update a PR with a title that starts with the task ID and body that includes the target version.
-
-## Task File Minimum Content
-
-Every task file must include:
-
-- Title with ID and short name.
-- `Feladat leírása`.
-- `Statusz`.
-- `Verzió`.
-- `Branch`.
-- `PR`.
-- `Acceptance criteria`.
-- `Dokumentumok és fájlok`.
-- `Lepesnaplo`.
-- `Eredmény` when the work is done.
-
-Use internal references like `PR #26` in task files instead of full URLs when possible.
+5. Make only changes that belong to that Jira task.
+6. Run the relevant verification commands.
+7. Commit with a message that starts with the Jira task ID.
+8. Push the branch.
+9. Open or update a PR with a title that starts with the Jira task ID and body that includes the target version.
 
 ## Versioning
 
-- Every `AUTO-*` and `BUG-*` task must have a target version.
-- Automatic version bump policy:
-  - For non-major tasks (AUTO-*, BUG-*), the version is automatically incremented according to the protocol (using MAJOR.MINOR.PATCH format). Typically, a PATCH or MINOR bump occurs, with the specific bump determined by the task type (see docs/versioning.md). For MAJOR changes, user confirmation is required for the version increment, and this is recorded in the PR/Release manifest.
-  - The root package.json version and container image tags are updated accordingly during CI/CD.
-  - Version changes are reflected in all related documents: `docs/releases.md`, `docs/versioning.md`, and the `Version` field in task files.
-  - The `Version` field in task files remains mandatory and must appear in the release manifest.
-  - Always display the appropriate version in the AUTO-/BUG banner in documentation so it can be easily traced during audits.
+- Every `AUTO-*` and `BUG-*` Jira issue must have a target version assigned.
+- Version changes are reflected in `docs/releases.md` and the Jira issue.
+- The target version in Jira is mandatory.
+- Always display the appropriate version in documentation banner so it can be easily traced during audits.
 - For non-major tasks, choose the next version automatically; only ask the user before a `MAJOR` bump.
 - The canonical task-to-version mapping is `docs/releases.md`.
- - Versioning rules are documented in `docs/versioning.md`.
+- Versioning rules are documented in `docs/versioning.md`.
 - Project-owned Docker images must be tagged with the root `package.json` version by the container image workflow.
-- Do not open a PR if the task file has no `Verzió` section.
-- Do not merge task documentation that disagrees with `docs/releases.md`.
+- Do not open a PR if the Jira issue has no target version.
+- Do not merge PR documentation that disagrees with `docs/releases.md`.
 
 ## Commit And PR Naming
 
@@ -128,9 +105,9 @@ Before opening a PR, perform the following:
 
 When finishing a task, report:
 
-- Task ID.
+- Jira issue ID.
 - Branch.
-- PR link or PR number.
+- PR link.
 - Key files changed.
 - Verification command results.
 - Anything not completed or blocked.
