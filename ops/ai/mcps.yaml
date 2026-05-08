@@ -30,6 +30,7 @@ mcps:
     priority: critical
     category: delivery
     description: Jira issue, epic, story, backlog, status, and release tracking integration.
+    local_launch: ops/mcp/jira-local.sh
     used_for:
       - Create, read, update, and transition Jira epics, stories, bugs, tasks, and spikes.
       - Run JQL searches for backlog grooming, migration checks, and status synchronization.

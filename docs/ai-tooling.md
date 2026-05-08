@@ -15,6 +15,7 @@ Nem minimal csomagra optimalizal, hanem arra, hogy:
 - `ops/ai/mcps.yaml`: ajanlott MCP katalogus
 - `ops/ai/skills.yaml`: ajanlott skill katalogus
 - `ops/ai/groups.yaml`: ajanlott capability groupok
+- `ops/mcp/jira-local.sh`: helyi, gitignored Jira MCP launcher a repohoz kotott stdio inditashoz
 
 ## MCP-k
 
@@ -44,6 +45,7 @@ Feladata:
 - backlog grooming, statuszvaltas es JQL alapu kereses tamogatasa
 - Jira issue-k osszekotese branch, commit, PR, release es verifikacios adatokkal
 - Jira-first source-of-truth mukodes tamogatasa a Markdown task migracio utan
+- Helyi futtatasnal az `ops/ai/mcps.yaml` a `ops/mcp/jira-local.sh` gitignored launchert hasznalja.
 
 ### `ssh-remote-shell`
 
