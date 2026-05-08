@@ -112,6 +112,14 @@ Record the commands and outcomes in the task file `Lepesnaplo` section. Do not r
 - Keep task docs consistent with the actual branch and PR.
 - Do not leave stale references to wrong IDs, wrong PRs, or closed/superseded branches.
 
+## Jira Decision And Spike Rules
+
+- Never transition a Spike, decision issue, or user-choice issue to `Done` based only on a default recommendation, agent preference, or inferred best practice.
+- A Spike can be moved to `Done` only when the user explicitly confirms the decision, the requested research output is completed and recorded, or the user directly asks to close it.
+- If a Spike contains a recommended default but no confirmed decision, leave it open and comment with `Recommended, not decided` instead of closing it.
+- When recording a decision in Jira, include the selected option, the reason, follow-up issue keys, and whether the decision came from explicit user confirmation.
+- If an issue was closed incorrectly, immediately reopen it, add a correction comment, and tell the user what was corrected.
+
 ## Review Mindset
 
 When asked for a review, prioritize findings first: bugs, regressions, risks, missing tests, and security concerns. If no findings exist, say that explicitly and mention residual risks.
