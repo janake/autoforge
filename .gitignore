@@ -23,3 +23,5 @@ target/
 # ignore built gateway jar
 infra/gateway/gateway.jar
 
+# local-only MCP launcher wiring
+ops/mcp/jira-local.sh

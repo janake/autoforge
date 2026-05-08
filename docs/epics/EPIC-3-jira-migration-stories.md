@@ -244,7 +244,7 @@ Acceptance criteria:
 - `ops/ai/mcps.yaml` tartalmaz `jira` MCP-t.
 - `ops/ai/skills.yaml` tartalmaz `jira-management` skillt.
 - `ops/ai/groups.yaml` a megfelelő delivery/knowledge csoporthoz kapcsolja.
-- `ops/mcp/jira-local.sh` biztosít helyi launch pointot a Jira MCP-hez.
+- `ops/mcp/jira-local.sh` biztosít helyi, gitignored launch pointot a Jira MCP-hez.
 - `docs/ai-tooling.md` dokumentálja a Jira MCP és skill használati sorrendjét.
 - Pre-PR protokoll kiterjed Jira issue ellenőrzésre.
 
