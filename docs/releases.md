@@ -263,6 +263,8 @@ Statusz
 
 Taskok
 - `AUTO-136`: Enforce Terraform scripts for reproducible infrastructure changes
+- `AUTO-137`: OCI always-free observability strategy
 
 Megjegyzes
 - Az infrastruktúra-, host readiness-, OCI- és runtime provisioning jellegű változásokhoz Terraform script vagy modul kötelező, hogy a módosítás nulláról reprodukálható legyen.
+- Az observability stratégia az OCI Always Free korlátaihoz igazodik, és self-hosted vagy könnyű komponensekre épít.
