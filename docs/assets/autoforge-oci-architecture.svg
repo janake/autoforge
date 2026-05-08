@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900" role="img" aria-labelledby="title desc">
   <title id="title">Autoforge OCI architecture</title>
-  <desc id="desc">Autoforge deployment on Oracle Cloud Infrastructure with public and private compute instances, external Keycloak OIDC authentication, OCI Vault, GHCR, GitHub Actions, private Object Storage prompt JSON retention, a relational Job Store, and a 100 GB OCI Block Volume workspace attached to the private instance.</desc>
+  <desc id="desc">Autoforge deployment on Oracle Cloud Infrastructure with public and private compute instances, external Keycloak OIDC authentication, OCI Vault, GHCR, GitHub Actions, an OCI Object Storage private bucket for full prompt JSON retention, Oracle Autonomous Database for Job Store metadata, and a 100 GB OCI Block Volume workspace attached to the private instance.</desc>
   <defs>
     <style>
       .bg { fill: #f8fafc; }
@@ -18,6 +18,7 @@
       .h2 { font-size: 18px; font-weight: 700; }
       .body { font-size: 15px; }
       .small { font-size: 13px; fill: #374151; }
+      .tiny { font-size: 11px; fill: #374151; }
       .arrow { stroke: #1d4ed8; stroke-width: 3; fill: none; marker-end: url(#arrow); }
       .mgmt { stroke: #111827; stroke-width: 2.5; fill: none; stroke-dasharray: 7 6; marker-end: url(#arrowDark); }
       .route { stroke: #c43e2f; stroke-width: 2.5; fill: none; stroke-dasharray: 8 6; }
@@ -81,18 +82,19 @@
   <text x="955" y="670" class="text body">100 GB ext4 workspace</text>
   <text x="955" y="694" class="text small">Mounted at /mnt/autoforge-workspace</text>
 
-  <rect x="1315" y="360" width="115" height="118" class="storage"/>
-  <text x="1330" y="390" class="text h2">Object</text>
-  <text x="1330" y="412" class="text h2">Storage</text>
-  <text x="1330" y="438" class="text small">Private bucket</text>
-  <text x="1330" y="458" class="text small">Prompt JSON</text>
-  <text x="1330" y="474" class="text small">72h delete</text>
+  <rect x="1310" y="350" width="135" height="130" class="storage"/>
+  <text x="1322" y="380" class="text h2">OCI Object</text>
+  <text x="1322" y="402" class="text h2">Storage</text>
+  <text x="1322" y="428" class="text tiny">Private bucket</text>
+  <text x="1322" y="446" class="text tiny">prompt_{jobId}.json</text>
+  <text x="1322" y="464" class="text tiny">Lifecycle: delete 72h</text>
 
-  <rect x="1315" y="520" width="115" height="118" class="storage"/>
-  <text x="1330" y="550" class="text h2">Job Store</text>
-  <text x="1330" y="577" class="text small">job_id/status</text>
-  <text x="1330" y="597" class="text small">prompt_hash</text>
-  <text x="1330" y="617" class="text small">summary + URI</text>
+  <rect x="1310" y="520" width="135" height="130" class="storage"/>
+  <text x="1322" y="550" class="text h2">Oracle ADB</text>
+  <text x="1322" y="572" class="text h2">Job Store</text>
+  <text x="1322" y="598" class="text tiny">job_id / jira_id</text>
+  <text x="1322" y="616" class="text tiny">status + prompt_hash</text>
+  <text x="1322" y="634" class="text tiny">summary + object URI</text>
 
   <rect x="690" y="410" width="120" height="70" class="service"/>
   <text x="715" y="438" class="text h2">VCN</text>
@@ -121,9 +123,9 @@
 
   <path d="M610 355 H890" class="route"/>
   <path d="M610 650 H890" class="route"/>
-  <path d="M1255 520 H1315" class="mgmt"/>
-  <path d="M1255 575 H1315" class="mgmt"/>
-  <text x="1265" y="506" class="text small">AI Proxy writes</text>
+  <path d="M1255 520 H1310" class="mgmt"/>
+  <path d="M1255 575 H1310" class="mgmt"/>
+  <text x="1260" y="506" class="text tiny">AI Proxy writes via IAM</text>
 
   <rect x="145" y="765" width="270" height="70" class="service"/>
   <text x="170" y="795" class="text h2">All components in Docker</text>
@@ -139,5 +141,5 @@
 
   <rect x="1075" y="765" width="270" height="70" class="storage"/>
   <text x="1100" y="795" class="text h2">Hybrid prompt audit</text>
-  <text x="1100" y="820" class="text small">Full prompts in Object Storage; metadata in Job Store</text>
+  <text x="1100" y="820" class="text small">OCI Object Storage + Oracle ADB Job Store</text>
 </svg>

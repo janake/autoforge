@@ -14,8 +14,8 @@
   - worker service
   - attached OCI Block Volume for the shared Autoforge workspace
 - OCI storage services:
-  - private Object Storage bucket for full AI prompt JSON files
-  - relational Job Store for job metadata, prompt hash, summary, and object URI
+  - OCI Object Storage private bucket for full AI prompt JSON files
+  - Oracle Autonomous Database Job Store for job metadata, prompt hash, summary, and object URI
 - External identity provider:
   - Keycloak OIDC login with PKCE
   - public client for the web app
@@ -37,8 +37,8 @@
 - The web frontend delegates authentication to an external Keycloak OIDC provider and uses bearer tokens for API calls.
 - The private host serves internal application workloads.
 - The private host has a dedicated 100 GB OCI Block Volume mounted as an ext4 workspace at `/mnt/autoforge-workspace`.
-- The AI Proxy stores full generated prompts in a private OCI Object Storage bucket as native JSON objects.
-- The Job Store keeps `job_id`, `jira_id`, `status`, `prompt_hash`, secret-filtered `summary`, and `object_store_uri` for audit and debug workflows.
+- The AI Proxy stores full generated prompts in an OCI Object Storage private bucket as native JSON objects.
+- The Oracle Autonomous Database Job Store keeps `job_id`, `jira_id`, `status`, `prompt_hash`, secret-filtered `summary`, and `object_store_uri` for audit and debug workflows.
 - Object Storage lifecycle management deletes full prompt JSON objects after 72 hours; the Job Store retains hash and summary for long-term audit history.
 
 ## Current status
@@ -51,7 +51,7 @@
 - The backend validates JWTs with a bundled Keycloak public key to avoid production-only remote JWKS/issuer fetch failures.
 - OCI Vault still stores OpenCode runtime secrets, which the private host reads at deploy time via instance principal.
 - The 100 GB OCI Block Volume remains mounted at `/mnt/autoforge-workspace`.
-- Prompt audit storage uses the hybrid Object Storage plus Job Store model decided in `AUTO-114`.
+- Prompt audit storage uses the hybrid OCI Object Storage plus Oracle Autonomous Database Job Store model decided in `AUTO-114`.
 - The worker runtime is still not selected and is not shown as an active service in the current deploy chain.
 
 ## Diagram Rule
