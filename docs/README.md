@@ -6,7 +6,7 @@ Ez a könyvtár tartalmazza a jelenlegi Autoforge OCI topológia, deploy modell,
 
 Fő dokumentumok:
 
-- `docs/architecture.md`: public/private OCI felépítés, gateway lánc, OpenCode és workspace storage
+- `docs/architecture.md`: public/private OCI felépítés, gateway lánc, OpenCode és workspace storage, a részletes ábra Confluence-ban él
 - `docs/deployment.md`: verziózott image-ek, auto deploy workflow-k, host könyvtárak és secret-ek
 - `docs/authentication.md`: Keycloak PKCE login, frontend callback flow, backend JWT-validáció
 - `docs/ai-tooling.md`: ajánlott MCP-k, skillek és capability groupok az Autoforge stackhez

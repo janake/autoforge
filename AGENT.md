@@ -89,6 +89,7 @@ Record the commands and outcomes in the task file `Lepesnaplo` section. Do not r
 - Keep task docs consistent with the actual branch and PR.
 - Do not leave stale references to wrong IDs, wrong PRs, or closed/superseded branches.
 - For any infrastructure, host readiness, OCI, runtime provisioning, or similar repeatable environment change, also create a Terraform script or Terraform module that can reproduce the change from scratch.
+- Architecture diagrams that are published in Confluence should not remain duplicated in git; update the Confluence page instead and keep only the summary/reference links in repo docs.
 
 ## Jira Decision And Spike Rules
 
@@ -124,3 +125,11 @@ When finishing a task, report:
 ## Jira Status Rule
 
 Ha bármilyen Jira **story**-t kezdessz el dolgozni, akkor előtte (vagy a munka legelső lépésében) a Jira státuszt állítsd át **In Progress**-ra.
+
+## Epic Closure Rule
+
+- Jira epicet csak akkor szabad `Done` státuszba tenni, ha az epic alatti összes story is `Done` státuszban van.
+
+## Jira Archive Rule
+
+- Ha az összes Jira issue, epic és story exportálása vagy archiválása a cél, akkor a teljes exportot lokálisan kell letölteni, és egyetlen zip archívumban kell összecsomagolni.
