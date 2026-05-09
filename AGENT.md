@@ -128,6 +128,10 @@ When finishing a task, report:
 
 Ha bármilyen Jira **story**-t kezdessz el dolgozni, akkor előtte (vagy a munka legelső lépésében) a Jira státuszt állítsd át **In Progress**-ra.
 
+## Task Completion Rule
+
+- A nem-spike Jira taskokat csak akkor szabad `Done` státuszba tenni, ha az implementáció merge-elve van, és a PR review/verification lezárult.
+
 ## Epic Closure Rule
 
 - Jira epicet csak akkor szabad `Done` státuszba tenni, ha az epic alatti összes story is `Done` státuszban van.
