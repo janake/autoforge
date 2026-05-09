@@ -1,0 +1,1877 @@
+{
+  "generatedAt": "2026-05-09T14:32:19.038Z",
+  "jql": "project = AUTO AND status = \"To Do\" AND issuetype in (Epic, Story, Task) ORDER BY key ASC",
+  "count": 111,
+  "issues": [
+    {
+      "key": "AUTO-1",
+      "id": "10000",
+      "summary": "Task 1",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-5",
+      "id": "10004",
+      "summary": "Jira alapú epic és story kezelés",
+      "issueType": "Epic",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-3",
+        "epic",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-6",
+      "id": "10005",
+      "summary": "Jira projektmodell és workflow véglegesítése",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-1",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-7",
+      "id": "10006",
+      "summary": "Jira secret kezelés és hozzáférési modell",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-2",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-8",
+      "id": "10007",
+      "summary": "Markdown task parser elkészítése",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-3",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-9",
+      "id": "10008",
+      "summary": "Release manifest parser és verzió mapping",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-4",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-10",
+      "id": "10009",
+      "summary": "Epic dokumentum parser és Jira Epic mapping",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-5",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-11",
+      "id": "10010",
+      "summary": "GitHub PR státusz enrichment",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-6",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-12",
+      "id": "10011",
+      "summary": "Jira státuszleképező implementálása",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-7",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-13",
+      "id": "10012",
+      "summary": "Jira import dry-run generátor",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-8",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-14",
+      "id": "10013",
+      "summary": "Jira issue import futtatása idempotensen",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-9",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-15",
+      "id": "10014",
+      "summary": "Jira mapping fájl generálása",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-10",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-16",
+      "id": "10015",
+      "summary": "AGENT.md Jira-first folyamatra frissítése",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-11",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-17",
+      "id": "10016",
+      "summary": "AI tooling bővítése Jira MCP-vel és skill-lel",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-12",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-18",
+      "id": "10017",
+      "summary": "PR template és release dokumentáció Jira linkeléssel",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-13",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-19",
+      "id": "10018",
+      "summary": "Story/task Markdown fájlok törlése a migráció után",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-14",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-20",
+      "id": "10019",
+      "summary": "Jira import validáció és lezárási riport",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic3-story-15",
+        "epic-story",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-21",
+      "id": "10020",
+      "summary": "React frontend base",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-1",
+        "docs",
+        "frontend",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-22",
+      "id": "10021",
+      "summary": "Spring backend base",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-2",
+        "backend",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-23",
+      "id": "10022",
+      "summary": "Docker deploy foundation",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-3",
+        "deploy",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-24",
+      "id": "10023",
+      "summary": "Deploy workflow SSH fix",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-4",
+        "deploy",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-25",
+      "id": "10024",
+      "summary": "Private deploy jump fix",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-5",
+        "deploy",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-26",
+      "id": "10025",
+      "summary": "Manual deploy and network ingress fix",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-6",
+        "deploy",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-27",
+      "id": "10026",
+      "summary": "Security audit findings",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-7",
+        "docs",
+        "migration",
+        "security"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-28",
+      "id": "10027",
+      "summary": "Spring Cloud API Gateway behind Caddy (make backend only reachable via gateway)",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-8",
+        "backend",
+        "docs",
+        "gateway",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-29",
+      "id": "10028",
+      "summary": "Private OpenCode REST AI service",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "ai",
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-9",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-30",
+      "id": "10029",
+      "summary": "OpenCode Vault-backed deploy fix",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-10",
+        "deploy",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-31",
+      "id": "10030",
+      "summary": "Private workspace block volume",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-11",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-32",
+      "id": "10031",
+      "summary": "Feature flag es personalization kutatas",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-12",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-33",
+      "id": "10032",
+      "summary": "Keycloak OIDC integráció",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-13",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-34",
+      "id": "10033",
+      "summary": "Auto deploy merge utani pushokra",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-14",
+        "deploy",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-35",
+      "id": "10034",
+      "summary": "Landing page cleanup",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-15",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-36",
+      "id": "10035",
+      "summary": "Agent operating rules",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-16",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-37",
+      "id": "10036",
+      "summary": "Version tracking",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-18",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-38",
+      "id": "10037",
+      "summary": "Keycloak web client configuration",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-20",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-39",
+      "id": "10038",
+      "summary": "Automatic version bump rule",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-21",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-40",
+      "id": "10039",
+      "summary": "Documentation and architecture refresh",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-22",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-41",
+      "id": "10040",
+      "summary": "AI tooling stack integration",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "ai",
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-23",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-48",
+      "id": "10047",
+      "summary": "CI/CD branch policy es workflow stabilitas",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-1",
+        "bug",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-49",
+      "id": "10048",
+      "summary": "SSH deploy host split for public/private workflows",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-2",
+        "bug",
+        "deploy",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-50",
+      "id": "10049",
+      "summary": "Caddy GATEWAY_DOMAIN hiányzik a docker-compose configban",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "ai",
+        "autoforge",
+        "autoforge-id-bug-3",
+        "bug",
+        "docs",
+        "gateway",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-51",
+      "id": "10050",
+      "summary": "Frontend azonnal redirectel Keycloak-ra",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-4",
+        "bug",
+        "docs",
+        "frontend",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-52",
+      "id": "10051",
+      "summary": "Keycloak fragment callback handling",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-5",
+        "bug",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-53",
+      "id": "10052",
+      "summary": "Workflow version quoting fix",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-6",
+        "bug",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-54",
+      "id": "10053",
+      "summary": "Sign-in button shown to authenticated users",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auth",
+        "autoforge",
+        "autoforge-id-bug-7",
+        "bug",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-55",
+      "id": "10054",
+      "summary": "Improve error message for 404 API route failures",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "ai",
+        "autoforge",
+        "autoforge-id-bug-8",
+        "bug",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-56",
+      "id": "10055",
+      "summary": "Gateway route configuration missing from image",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-9",
+        "bug",
+        "docs",
+        "gateway",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-57",
+      "id": "10056",
+      "summary": "Public deploy trigger misses gateway image changes",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-10",
+        "bug",
+        "deploy",
+        "docs",
+        "gateway",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-58",
+      "id": "10057",
+      "summary": "Private deploy trigger misses version changes",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-11",
+        "bug",
+        "deploy",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-59",
+      "id": "10058",
+      "summary": "Normalize public backend upstream",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-12",
+        "backend",
+        "bug",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-60",
+      "id": "10059",
+      "summary": "Gateway Spring dependency mismatch",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-13",
+        "bug",
+        "docs",
+        "gateway",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-61",
+      "id": "10060",
+      "summary": "Keycloak callback init falls back to public state",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-14",
+        "bug",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-62",
+      "id": "10061",
+      "summary": "Keycloak callback requires explicit login-required init",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-15",
+        "bug",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-63",
+      "id": "10062",
+      "summary": "Keycloak callback detection is too narrow",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-bug-16",
+        "bug",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-64",
+      "id": "10063",
+      "summary": "Backend JWT validation depends on remote JWKS availability",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "ai",
+        "autoforge",
+        "autoforge-id-bug-17",
+        "backend",
+        "bug",
+        "docs",
+        "migration"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-65",
+      "id": "10064",
+      "summary": "Önfejlesztő Autoforge webfelület",
+      "issueType": "Epic",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-1",
+        "epic",
+        "self-improving"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-66",
+      "id": "10065",
+      "summary": "Jira mező és leírás struktúra standardizálása",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "auto",
+        "autoforge",
+        "autoforge-id-auto-32",
+        "docs",
+        "migration"
+      ],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-67",
+      "id": "10066",
+      "summary": "Jira AI agent MCP implementálása",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [],
+      "parent": {
+        "key": "AUTO-5",
+        "summary": "Jira alapú epic és story kezelés"
+      },
+      "fixVersions": [
+        "0.1.24"
+      ]
+    },
+    {
+      "key": "AUTO-68",
+      "id": "10099",
+      "summary": "GraalVM és Spring Native erőforrás-optimalizálás",
+      "issueType": "Epic",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-2",
+        "epic",
+        "graalvm",
+        "resource-optimization"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-69",
+      "id": "10100",
+      "summary": "AI provider proxy és model router",
+      "issueType": "Epic",
+      "status": "To Do",
+      "labels": [
+        "ai-provider",
+        "autoforge",
+        "autoforge-id-epic-4",
+        "epic",
+        "model-router"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-70",
+      "id": "10101",
+      "summary": "AI job queue és audit store",
+      "issueType": "Epic",
+      "status": "To Do",
+      "labels": [
+        "audit-store",
+        "autoforge",
+        "autoforge-id-epic-5",
+        "epic",
+        "queue"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-71",
+      "id": "10102",
+      "summary": "RAG és vektoros keresés előkészítése",
+      "issueType": "Epic",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-6",
+        "epic",
+        "rag",
+        "vector-search"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-72",
+      "id": "10103",
+      "summary": "AI runtime security sandbox és hardening",
+      "issueType": "Epic",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-7",
+        "epic",
+        "sandbox",
+        "security"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-73",
+      "id": "10104",
+      "summary": "Git és PR broker AI változtatásokhoz",
+      "issueType": "Epic",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-8",
+        "epic",
+        "git",
+        "pr-broker"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-74",
+      "id": "10106",
+      "summary": "JVM baseline mérési script backendhez",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-2-story-1",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-68",
+        "summary": "GraalVM és Spring Native erőforrás-optimalizálás"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-75",
+      "id": "10108",
+      "summary": "JVM baseline mérési script gatewayhez",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-2-story-2",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-68",
+        "summary": "GraalVM és Spring Native erőforrás-optimalizálás"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-76",
+      "id": "10110",
+      "summary": "Backend native build spike konfiguráció",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-2-story-3",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-68",
+        "summary": "GraalVM és Spring Native erőforrás-optimalizálás"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-77",
+      "id": "10112",
+      "summary": "Gateway native kompatibilitás ellenőrzés",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-2-story-4",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-68",
+        "summary": "GraalVM és Spring Native erőforrás-optimalizálás"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-78",
+      "id": "10114",
+      "summary": "GraalVM döntési jegy elkészítése",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-2-story-5",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-68",
+        "summary": "GraalVM és Spring Native erőforrás-optimalizálás"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-79",
+      "id": "10116",
+      "summary": "Provider credential boundary dokumentálása",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-4-story-1",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-69",
+        "summary": "AI provider proxy és model router"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-80",
+      "id": "10118",
+      "summary": "Minimális provider proxy API contract",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-4-story-2",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-69",
+        "summary": "AI provider proxy és model router"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-81",
+      "id": "10120",
+      "summary": "Provider routing konfiguráció séma",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-4-story-3",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-69",
+        "summary": "AI provider proxy és model router"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-82",
+      "id": "10122",
+      "summary": "Rate limit és backoff policy váz",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-4-story-4",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-69",
+        "summary": "AI provider proxy és model router"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-83",
+      "id": "10124",
+      "summary": "Provider proxy audit mezők",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-4-story-5",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-69",
+        "summary": "AI provider proxy és model router"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-84",
+      "id": "10126",
+      "summary": "AI job state machine definiálása",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-5-story-1",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-85",
+      "id": "10128",
+      "summary": "Job store adattábla váz",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-5-story-2",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-86",
+      "id": "10130",
+      "summary": "Audit log schema váz",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-5-story-3",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-87",
+      "id": "10132",
+      "summary": "SQLite vs Autonomous DB döntési spike",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-5-story-4",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-88",
+      "id": "10134",
+      "summary": "Retry és not_before mezők definiálása",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-5-story-5",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-89",
+      "id": "10136",
+      "summary": "Job history API minimális contract",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-5-story-6",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-90",
+      "id": "10138",
+      "summary": "RAG allowlist és denylist definiálása",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-6-story-1",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-71",
+        "summary": "RAG és vektoros keresés előkészítése"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-91",
+      "id": "10140",
+      "summary": "Dokumentum chunking szabály váz",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-6-story-2",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-71",
+        "summary": "RAG és vektoros keresés előkészítése"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-92",
+      "id": "10142",
+      "summary": "Embedded vector store spike",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-6-story-3",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-71",
+        "summary": "RAG és vektoros keresés előkészítése"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-93",
+      "id": "10144",
+      "summary": "Autonomous DB vector capability check",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-6-story-4",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-71",
+        "summary": "RAG és vektoros keresés előkészítése"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-94",
+      "id": "10146",
+      "summary": "RAG refresh policy definiálása",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-6-story-5",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-71",
+        "summary": "RAG és vektoros keresés előkészítése"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-95",
+      "id": "10148",
+      "summary": "AI workspace denylist szabályok",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-7-story-1",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-72",
+        "summary": "AI runtime security sandbox és hardening"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-96",
+      "id": "10150",
+      "summary": "Metadata endpoint blokkolás terve",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-7-story-2",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-72",
+        "summary": "AI runtime security sandbox és hardening"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-97",
+      "id": "10152",
+      "summary": "Command allowlist első verzió",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-7-story-3",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-72",
+        "summary": "AI runtime security sandbox és hardening"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-98",
+      "id": "10154",
+      "summary": "No Docker socket policy",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-7-story-4",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-72",
+        "summary": "AI runtime security sandbox és hardening"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-99",
+      "id": "10156",
+      "summary": "Secret scan gate contract",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-7-story-5",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-72",
+        "summary": "AI runtime security sandbox és hardening"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-100",
+      "id": "10158",
+      "summary": "Security sandbox smoke checklist",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-7-story-6",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-72",
+        "summary": "AI runtime security sandbox és hardening"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-101",
+      "id": "10160",
+      "summary": "GitHub credential boundary dokumentálása",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-8-story-1",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-73",
+        "summary": "Git és PR broker AI változtatásokhoz"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-102",
+      "id": "10162",
+      "summary": "Git broker API contract",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-8-story-2",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-73",
+        "summary": "Git és PR broker AI változtatásokhoz"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-103",
+      "id": "10164",
+      "summary": "Branch naming policy enforcement",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-8-story-3",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-73",
+        "summary": "Git és PR broker AI változtatásokhoz"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-104",
+      "id": "10166",
+      "summary": "PR body template brokerhez",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-8-story-4",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-73",
+        "summary": "Git és PR broker AI változtatásokhoz"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-105",
+      "id": "10168",
+      "summary": "Allowlisted repository policy",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-8-story-5",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-73",
+        "summary": "Git és PR broker AI változtatásokhoz"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-106",
+      "id": "10170",
+      "summary": "Broker audit event lista",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "autoforge",
+        "autoforge-id-epic-8-story-6",
+        "epic-story"
+      ],
+      "parent": {
+        "key": "AUTO-73",
+        "summary": "Git és PR broker AI változtatásokhoz"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-124",
+      "id": "10239",
+      "summary": "Autonomous DB JSON audit schema és retention policy",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "audit",
+        "autoforge",
+        "autoforge-id-epic-5-story-7",
+        "autonomous-db",
+        "json-workload"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-126",
+      "id": "10243",
+      "summary": "OCI ADB JSON audit store provisioning",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "adb",
+        "audit-store",
+        "autoforge",
+        "autoforge-id-epic-5-story-9"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-127",
+      "id": "10245",
+      "summary": "ADB audit credential és wallet Vault kezelés",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "adb",
+        "audit-store",
+        "autoforge",
+        "autoforge-id-epic-5-story-10"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-128",
+      "id": "10247",
+      "summary": "ADB audit smoke query és connection proof",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "adb",
+        "audit-store",
+        "autoforge",
+        "autoforge-id-epic-5-story-11"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-129",
+      "id": "10281",
+      "summary": "OCI Object Storage prompt bucket lifecycle",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "ai-runtime",
+        "autoforge",
+        "security"
+      ],
+      "parent": {
+        "key": "AUTO-70",
+        "summary": "AI job queue és audit store"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-131",
+      "id": "10285",
+      "summary": "Firecracker workspace image builder",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "ai-runtime",
+        "autoforge",
+        "security"
+      ],
+      "parent": {
+        "key": "AUTO-72",
+        "summary": "AI runtime security sandbox és hardening"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-132",
+      "id": "10287",
+      "summary": "opencode-policy command interceptor",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "ai-runtime",
+        "autoforge",
+        "security"
+      ],
+      "parent": {
+        "key": "AUTO-72",
+        "summary": "AI runtime security sandbox és hardening"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-133",
+      "id": "10289",
+      "summary": "Egress proxy és TAP iptables enforcement",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "ai-runtime",
+        "autoforge",
+        "security"
+      ],
+      "parent": {
+        "key": "AUTO-72",
+        "summary": "AI runtime security sandbox és hardening"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-134",
+      "id": "10291",
+      "summary": "Package registry proxy és lifecycle script policy",
+      "issueType": "Task",
+      "status": "To Do",
+      "labels": [
+        "ai-runtime",
+        "autoforge",
+        "security"
+      ],
+      "parent": {
+        "key": "AUTO-72",
+        "summary": "AI runtime security sandbox és hardening"
+      },
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-135",
+      "id": "10292",
+      "summary": "Terraform reproducible sandbox infrastructure provisioning",
+      "issueType": "Epic",
+      "status": "To Do",
+      "labels": [
+        "ai-runtime",
+        "firecracker",
+        "infrastructure",
+        "security",
+        "terraform"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-138",
+      "id": "10295",
+      "summary": "Metrics collection for OCI Always Free",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "always-free",
+        "observability",
+        "oci",
+        "terraform"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-139",
+      "id": "10296",
+      "summary": "Centralized logs and retention",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "always-free",
+        "observability",
+        "oci",
+        "terraform"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-140",
+      "id": "10297",
+      "summary": "Alerting and notifications",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "always-free",
+        "observability",
+        "oci",
+        "terraform"
+      ],
+      "parent": null,
+      "fixVersions": []
+    },
+    {
+      "key": "AUTO-141",
+      "id": "10298",
+      "summary": "Terraform observability foundation",
+      "issueType": "Story",
+      "status": "To Do",
+      "labels": [
+        "always-free",
+        "observability",
+        "oci",
+        "terraform"
+      ],
+      "parent": null,
+      "fixVersions": []
+    }
+  ]
+}

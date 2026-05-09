@@ -1,6 +1,8 @@
 # Architecture
 
-![Autoforge OCI architecture](assets/autoforge-oci-architecture.svg)
+The live architecture diagram is published in Confluence:
+
+- https://autoforge.atlassian.net/wiki/spaces/autoforge/pages/458753/Autoforge+Architecture+Diagrams
 
 ## Deployment shape
 
@@ -56,7 +58,7 @@
 
 ## Diagram Rule
 
-- If the architecture changes, update this diagram in the same change set.
+- If the architecture changes, update the Confluence diagram in the same change set.
 
 ## Versioning Rule
 
