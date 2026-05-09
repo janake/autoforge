@@ -35,6 +35,7 @@ For any non-trivial code, infra, workflow, or documentation task, do the followi
 7. Commit with a message that starts with the Jira task ID.
 8. Push the branch.
 9. Open or update a PR with a title that starts with the Jira task ID and body that includes the target version.
+10. Do not continue unrelated work on a branch that was created for a different Jira task; move the task to its own dedicated branch before finishing it.
 
 ## Versioning
 
