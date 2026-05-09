@@ -35,6 +35,7 @@ For any non-trivial code, infra, workflow, or documentation task, do the followi
 7. Commit with a message that starts with the Jira task ID.
 8. Push the branch.
 9. Open or update a PR with a title that starts with the Jira task ID and body that includes the target version.
+10. Do not continue unrelated work on a branch that was created for a different Jira task; move the task to its own dedicated branch before finishing it.
 
 ## Versioning
 
@@ -90,6 +91,7 @@ Record the commands and outcomes in the task file `Lepesnaplo` section. Do not r
 - Do not leave stale references to wrong IDs, wrong PRs, or closed/superseded branches.
 - For any infrastructure, host readiness, OCI, runtime provisioning, or similar repeatable environment change, also create a Terraform script or Terraform module that can reproduce the change from scratch.
 - Architecture diagrams that are published in Confluence should not remain duplicated in git; update the Confluence page instead and keep only the summary/reference links in repo docs.
+- If a task changes the filesystem, repository files, or any tracked artifact, finish the task with a PR so the change is reviewable and traceable.
 
 ## Jira Decision And Spike Rules
 
