@@ -268,3 +268,14 @@ Taskok
 Megjegyzes
 - Az infrastruktúra-, host readiness-, OCI- és runtime provisioning jellegű változásokhoz Terraform script vagy modul kötelező, hogy a módosítás nulláról reprodukálható legyen.
 - Az observability stratégia az OCI Always Free korlátaihoz igazodik, és self-hosted vagy könnyű komponensekre épít.
+
+## 0.1.23
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-162`: Task changes require merged PR before Done
+
+Megjegyzes
+- A filesystemet vagy tracked artifactot változtató nem-spike taskok csak merge és review után markolhatók Done-nak.
