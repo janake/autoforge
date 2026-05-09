@@ -58,6 +58,19 @@ get_vault_secret() {
     --raw-output | base64 --decode
 }
 
+ensure_metadata_block() {
+  local metadata_ip="169.254.169.254"
+
+  if command -v iptables >/dev/null 2>&1; then
+    if ! iptables -C OUTPUT -d "$metadata_ip" -j REJECT 2>/dev/null; then
+      iptables -I OUTPUT 1 -d "$metadata_ip" -j REJECT
+    fi
+  else
+    echo "iptables is required to block the metadata endpoint." >&2
+    exit 1
+  fi
+}
+
 append_secret_env() {
   local key="$1"
   local value="$2"
@@ -102,6 +115,8 @@ if [ -n "$GEMINI_API_KEY_SECRET_OCID" ]; then
   GEMINI_API_KEY_VALUE="$(get_vault_secret "$GEMINI_API_KEY_SECRET_OCID")"
   append_secret_env "GEMINI_API_KEY" "$GEMINI_API_KEY_VALUE"
 fi
+
+ensure_metadata_block
 
 if [ -f "$BACKEND_IMAGE_ARCHIVE" ]; then
   docker load --input "$BACKEND_IMAGE_ARCHIVE"
