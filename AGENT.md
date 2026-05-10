@@ -87,6 +87,7 @@ Record the commands and outcomes in the task file `Lepesnaplo` section. Do not r
 ## Documentation Rules
 
 - If architecture, deploy behavior, workflow behavior, auth flow, or public UI behavior changes, update the relevant docs in the same task.
+- Before starting work, every AI must read `docs/project-readme.md` to understand what Autoforge is and how to approach the task.
 - Keep task docs consistent with the actual branch and PR.
 - Do not leave stale references to wrong IDs, wrong PRs, or closed/superseded branches.
 - For any infrastructure, host readiness, OCI, runtime provisioning, or similar repeatable environment change, also create a Terraform script or Terraform module that can reproduce the change from scratch.
