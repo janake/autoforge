@@ -33,7 +33,7 @@ public class SecurityConfig {
       .cors(Customizer.withDefaults())
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .authorizeHttpRequests(authorize -> authorize
-        .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
+        .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info", "/api/v1/health").permitAll()
         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
         .anyRequest().authenticated())
       .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))

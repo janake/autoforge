@@ -26,4 +26,13 @@ class StatusControllerTest {
       .andExpect(jsonPath("$.status").value("ok"))
       .andExpect(jsonPath("$.stack").value("spring"));
   }
+
+  @Test
+  void returnsApiHealth() throws Exception {
+    mockMvc.perform(get("/api/v1/health"))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.service").value("autoforge-backend"))
+      .andExpect(jsonPath("$.status").value("UP"))
+      .andExpect(jsonPath("$.stack").value("spring"));
+  }
 }
