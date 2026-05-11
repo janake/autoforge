@@ -1,4 +1,4 @@
-package org.autoforge.backend.api;
+package org.autoforge.backend.dto;
 
 import java.util.List;
 import java.util.Map;
