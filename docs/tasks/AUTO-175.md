@@ -18,7 +18,7 @@ feature/order-mvp-implementation
 
 ## PR
 
-- (Nincs még)
+- PR #72
 
 ## Cél
 
@@ -57,6 +57,8 @@ A backend legyen buildelhető, tesztelhető és API-konvencióban egységes, hog
   git diff --check
   ```
   Leírás: a módosításokban nem maradt whitespace vagy patch-formázási hiba.
+- [x] GitHub PR létrehozás.
+  Leírás: a branchhez elkészült a PR #72.
 
 ## Eredmény
 
