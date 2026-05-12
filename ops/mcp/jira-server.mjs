@@ -73,6 +73,19 @@ const tools = [
       required: ["issueKey", "body"],
     },
   },
+  {
+    name: "jira_export_issues",
+    description: "Export Jira epics, tasks/stories, bugs, and subtasks as structured JSON using a project key or JQL.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        projectKey: { type: "string", description: "Jira project key, for example AUTO. Used when jql is omitted." },
+        jql: { type: "string", description: "JQL query to export, for example: project = AUTO ORDER BY key ASC" },
+        maxIssues: { type: "number", description: "Optional safety limit for exported issues. Default: all matching issues." },
+        pageSize: { type: "number", description: "Jira page size per request. Default: 100." },
+      },
+    },
+  },
 ];
 
 function getSecret(name) {
@@ -178,6 +191,110 @@ function adfText(body) {
   };
 }
 
+function issueUrl(baseUrl, issueKey) {
+  return `${baseUrl}/browse/${issueKey}`;
+}
+
+function fieldName(value) {
+  return value?.name || null;
+}
+
+function fieldNames(values) {
+  return (values || []).map((value) => value.name).filter(Boolean);
+}
+
+function normalizeIssue(issue, baseUrl) {
+  const fields = issue.fields || {};
+  const issueType = fields.issuetype || {};
+  const parent = fields.parent || null;
+  return {
+    id: issue.id,
+    key: issue.key,
+    url: issueUrl(baseUrl, issue.key),
+    type: issueType.name || null,
+    isSubtask: Boolean(issueType.subtask),
+    summary: fields.summary || null,
+    status: fieldName(fields.status),
+    priority: fieldName(fields.priority),
+    assignee: fields.assignee?.displayName || null,
+    reporter: fields.reporter?.displayName || null,
+    labels: fields.labels || [],
+    components: fieldNames(fields.components),
+    fixVersions: fieldNames(fields.fixVersions),
+    parentKey: parent?.key || null,
+    parentSummary: parent?.fields?.summary || null,
+    created: fields.created || null,
+    updated: fields.updated || null,
+    description: fields.description || null,
+    subtasks: (fields.subtasks || []).map((subtask) => ({
+      key: subtask.key,
+      summary: subtask.fields?.summary || null,
+      status: fieldName(subtask.fields?.status),
+      type: fieldName(subtask.fields?.issuetype),
+    })),
+  };
+}
+
+async function searchAllIssues(jql, pageSize, maxIssues) {
+  const issues = [];
+  let nextPageToken = null;
+
+  do {
+    const remaining = maxIssues ? maxIssues - issues.length : pageSize;
+    const currentPageSize = Math.min(pageSize, remaining || pageSize);
+    const params = new URLSearchParams({
+      jql,
+      maxResults: String(currentPageSize),
+      fields: [
+        "summary",
+        "status",
+        "issuetype",
+        "parent",
+        "priority",
+        "assignee",
+        "reporter",
+        "labels",
+        "components",
+        "fixVersions",
+        "created",
+        "updated",
+        "description",
+        "subtasks",
+      ].join(","),
+    });
+    if (nextPageToken) params.set("nextPageToken", nextPageToken);
+
+    const data = await jiraRequest("GET", `/rest/api/3/search/jql?${params.toString()}`);
+    issues.push(...(data.issues || []));
+    nextPageToken = data.nextPageToken || null;
+    if (data.isLast || (maxIssues && issues.length >= maxIssues)) break;
+  } while (nextPageToken);
+
+  return maxIssues ? issues.slice(0, maxIssues) : issues;
+}
+
+function groupExportedIssues(issues, baseUrl) {
+  const normalized = issues.map((issue) => normalizeIssue(issue, baseUrl));
+  const epics = normalized.filter((issue) => issue.type === "Epic");
+  const subtasks = normalized.filter((issue) => issue.isSubtask);
+  const standardIssues = normalized.filter((issue) => issue.type !== "Epic" && !issue.isSubtask);
+  const childrenByParent = new Map();
+
+  for (const issue of normalized) {
+    if (!issue.parentKey) continue;
+    const children = childrenByParent.get(issue.parentKey) || [];
+    children.push(issue.key);
+    childrenByParent.set(issue.parentKey, children);
+  }
+
+  return {
+    epics: epics.map((issue) => ({ ...issue, childKeys: childrenByParent.get(issue.key) || [] })),
+    issues: standardIssues.map((issue) => ({ ...issue, childKeys: childrenByParent.get(issue.key) || [] })),
+    subtasks,
+    allIssues: normalized,
+  };
+}
+
 async function callTool(name, args = {}) {
   if (name === "jira_search") {
     const maxResults = args.maxResults || 50;
@@ -230,6 +347,26 @@ async function callTool(name, args = {}) {
       body: adfText(args.body),
     });
     return textResult(`Comment added to ${args.issueKey}.`);
+  }
+
+  if (name === "jira_export_issues") {
+    const jql = args.jql || (args.projectKey ? `project = ${args.projectKey} ORDER BY key ASC` : "project = AUTO ORDER BY key ASC");
+    const pageSize = Math.min(Math.max(args.pageSize || 100, 1), 100);
+    const issues = await searchAllIssues(jql, pageSize, args.maxIssues || null);
+    const { baseUrl } = jiraConfig();
+    const grouped = groupExportedIssues(issues, baseUrl);
+    return textResult(JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      jql,
+      issueCount: grouped.allIssues.length,
+      epicCount: grouped.epics.length,
+      standardIssueCount: grouped.issues.length,
+      subtaskCount: grouped.subtasks.length,
+      epics: grouped.epics,
+      issues: grouped.issues,
+      subtasks: grouped.subtasks,
+      allIssues: grouped.allIssues,
+    }, null, 2));
   }
 
   throw new Error(`Unknown tool: ${name}`);
