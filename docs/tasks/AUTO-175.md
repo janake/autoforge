@@ -59,6 +59,8 @@ A backend legyen buildelhető, tesztelhető és API-konvencióban egységes, hog
   Leírás: a módosításokban nem maradt whitespace vagy patch-formázási hiba.
 - [x] GitHub PR létrehozás.
   Leírás: a branchhez elkészült a PR #72.
+- [x] Jira MCP frissítés és státuszkezelés.
+  Leírás: az MCP Jira API v3 searchre váltott, támogatja a transition/comment műveleteket, az `AUTO-175` Jira story `Under test` státuszba került.
 
 ## Eredmény
 

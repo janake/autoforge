@@ -28,7 +28,7 @@ const tools = [
   },
   {
     name: "jira_update_issue",
-    description: "Update fields of a Jira issue using Jira REST API v2 field names.",
+    description: "Update fields of a Jira issue using Jira REST API field names.",
     inputSchema: {
       type: "object",
       properties: {
@@ -36,6 +36,41 @@ const tools = [
         fields: { type: "object", description: "Jira fields payload, for example { summary: 'New title' }" },
       },
       required: ["issueKey", "fields"],
+    },
+  },
+  {
+    name: "jira_list_transitions",
+    description: "List available workflow transitions for a Jira issue.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        issueKey: { type: "string", description: "Jira issue key, for example AUTO-5" },
+      },
+      required: ["issueKey"],
+    },
+  },
+  {
+    name: "jira_transition_issue",
+    description: "Transition a Jira issue by transition name, for example Under Test.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        issueKey: { type: "string", description: "Jira issue key, for example AUTO-5" },
+        transitionName: { type: "string", description: "Transition name, for example Under Test" },
+      },
+      required: ["issueKey", "transitionName"],
+    },
+  },
+  {
+    name: "jira_add_comment",
+    description: "Add a plain text comment to a Jira issue.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        issueKey: { type: "string", description: "Jira issue key, for example AUTO-5" },
+        body: { type: "string", description: "Plain text comment body." },
+      },
+      required: ["issueKey", "body"],
     },
   },
 ];
@@ -130,10 +165,23 @@ function textResult(text) {
   return { content: [{ type: "text", text }] };
 }
 
+function adfText(body) {
+  return {
+    type: "doc",
+    version: 1,
+    content: [
+      {
+        type: "paragraph",
+        content: [{ type: "text", text: body }],
+      },
+    ],
+  };
+}
+
 async function callTool(name, args = {}) {
   if (name === "jira_search") {
     const maxResults = args.maxResults || 50;
-    const data = await jiraRequest("GET", `/rest/api/2/search?jql=${encodeURIComponent(args.jql)}&maxResults=${maxResults}`);
+    const data = await jiraRequest("GET", `/rest/api/3/search/jql?jql=${encodeURIComponent(args.jql)}&maxResults=${maxResults}&fields=summary,status`);
     const issues = (data.issues || []).map((issue) => ({
       key: issue.key,
       summary: issue.fields.summary,
@@ -143,13 +191,45 @@ async function callTool(name, args = {}) {
   }
 
   if (name === "jira_get_issue") {
-    const data = await jiraRequest("GET", `/rest/api/2/issue/${encodeURIComponent(args.issueKey)}`);
+    const data = await jiraRequest("GET", `/rest/api/3/issue/${encodeURIComponent(args.issueKey)}`);
     return textResult(JSON.stringify({ key: data.key, fields: data.fields }, null, 2));
   }
 
   if (name === "jira_update_issue") {
-    await jiraRequest("PUT", `/rest/api/2/issue/${encodeURIComponent(args.issueKey)}`, { fields: args.fields });
+    await jiraRequest("PUT", `/rest/api/3/issue/${encodeURIComponent(args.issueKey)}`, { fields: args.fields });
     return textResult(`Issue ${args.issueKey} updated successfully.`);
+  }
+
+  if (name === "jira_list_transitions") {
+    const data = await jiraRequest("GET", `/rest/api/3/issue/${encodeURIComponent(args.issueKey)}/transitions`);
+    const transitions = (data.transitions || []).map((transition) => ({
+      id: transition.id,
+      name: transition.name,
+      to: transition.to?.name,
+    }));
+    return textResult(JSON.stringify(transitions, null, 2));
+  }
+
+  if (name === "jira_transition_issue") {
+    const data = await jiraRequest("GET", `/rest/api/3/issue/${encodeURIComponent(args.issueKey)}/transitions`);
+    const transitions = data.transitions || [];
+    const transition = transitions.find((candidate) => candidate.name.toLowerCase() === args.transitionName.toLowerCase());
+    if (!transition) {
+      const available = transitions.map((candidate) => candidate.name).join(", ") || "none";
+      throw new Error(`Transition '${args.transitionName}' is not available for ${args.issueKey}. Available transitions: ${available}`);
+    }
+
+    await jiraRequest("POST", `/rest/api/3/issue/${encodeURIComponent(args.issueKey)}/transitions`, {
+      transition: { id: transition.id },
+    });
+    return textResult(`Issue ${args.issueKey} transitioned with '${transition.name}'.`);
+  }
+
+  if (name === "jira_add_comment") {
+    await jiraRequest("POST", `/rest/api/3/issue/${encodeURIComponent(args.issueKey)}/comment`, {
+      body: adfText(args.body),
+    });
+    return textResult(`Comment added to ${args.issueKey}.`);
   }
 
   throw new Error(`Unknown tool: ${name}`);
