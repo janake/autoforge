@@ -9,6 +9,7 @@ ENV_FILE="$APP_DIR/.env"
 BACKEND_IMAGE_ARCHIVE="$APP_DIR/autoforge-backend-image.tar.gz"
 OPENCODE_IMAGE_ARCHIVE="$APP_DIR/autoforge-opencode-image.tar.gz"
 PRIVATE_IMAGES_PRELOADED="${PRIVATE_IMAGES_PRELOADED:-false}"
+WALLET_DIR="$APP_DIR/wallet"
 
 if [ -f .deploy.env ]; then
   set -a
@@ -83,9 +84,39 @@ append_secret_env() {
   printf '%s=%s\n' "$key" "$value" >> "$RUNTIME_ENV"
 }
 
+ensure_wallet_dir() {
+  rm -rf "$WALLET_DIR"
+  mkdir -p "$WALLET_DIR"
+  chmod 700 "$WALLET_DIR"
+}
+
+download_wallet() {
+  local wallet_url="$1"
+  local wallet_password="$2"
+
+  if ! command -v curl >/dev/null 2>&1; then
+    echo "curl is required to download the ADB wallet zip." >&2
+    exit 1
+  fi
+
+  if ! command -v unzip >/dev/null 2>&1; then
+    echo "unzip is required to extract the ADB wallet zip." >&2
+    exit 1
+  fi
+
+  curl -fsSL "$wallet_url" -o "$APP_DIR/autoforge-adb-wallet.zip"
+  unzip -o -P "$wallet_password" "$APP_DIR/autoforge-adb-wallet.zip" -d "$WALLET_DIR" >/dev/null
+  rm -f "$APP_DIR/autoforge-adb-wallet.zip"
+}
+
 OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_OCID || true)"
 OPENAI_API_KEY_SECRET_OCID="$(get_env_value OPENAI_API_KEY_SECRET_OCID || true)"
 GEMINI_API_KEY_SECRET_OCID="$(get_env_value GEMINI_API_KEY_SECRET_OCID || true)"
+DB_WALLET_URL="$(get_env_value AUTOFORGE_DB_WALLET_URL || true)"
+DB_WALLET_PASSWORD_SECRET_OCID="$(get_env_value AUTOFORGE_DB_WALLET_PASSWORD_SECRET_OCID || true)"
+DB_PASSWORD_SECRET_OCID="$(get_env_value AUTOFORGE_DB_PASSWORD_SECRET_OCID || true)"
+DB_USERNAME="$(get_env_value AUTOFORGE_DB_USERNAME || true)"
+DB_SERVICE_ALIAS="$(get_env_value AUTOFORGE_DB_SERVICE_ALIAS || true)"
 
 RUNTIME_ENV="$(mktemp "$APP_DIR/.runtime.env.XXXXXX")"
 trap 'rm -f "$APP_DIR/.deploy.env" "${RUNTIME_ENV:-}"' EXIT
@@ -114,6 +145,25 @@ fi
 if [ -n "$GEMINI_API_KEY_SECRET_OCID" ]; then
   GEMINI_API_KEY_VALUE="$(get_vault_secret "$GEMINI_API_KEY_SECRET_OCID")"
   append_secret_env "GEMINI_API_KEY" "$GEMINI_API_KEY_VALUE"
+fi
+
+if [ -n "$DB_WALLET_URL" ]; then
+  : "${DB_WALLET_PASSWORD_SECRET_OCID:?AUTOFORGE_DB_WALLET_PASSWORD_SECRET_OCID is required when AUTOFORGE_DB_WALLET_URL is set}"
+  : "${DB_USERNAME:=ADMIN}"
+  : "${DB_SERVICE_ALIAS:=autoforge_high}"
+
+  DB_WALLET_PASSWORD_VALUE="$(get_vault_secret "$DB_WALLET_PASSWORD_SECRET_OCID")"
+  ensure_wallet_dir
+  download_wallet "$DB_WALLET_URL" "$DB_WALLET_PASSWORD_VALUE"
+
+  append_secret_env "TNS_ADMIN" "$WALLET_DIR"
+  append_secret_env "AUTOFORGE_DB_URL" "jdbc:oracle:thin:@${DB_SERVICE_ALIAS}?TNS_ADMIN=${WALLET_DIR}"
+  append_secret_env "AUTOFORGE_DB_USERNAME" "$DB_USERNAME"
+
+  if [ -n "$DB_PASSWORD_SECRET_OCID" ]; then
+    DB_PASSWORD_VALUE="$(get_vault_secret "$DB_PASSWORD_SECRET_OCID")"
+    append_secret_env "AUTOFORGE_DB_PASSWORD" "$DB_PASSWORD_VALUE"
+  fi
 fi
 
 ensure_metadata_block

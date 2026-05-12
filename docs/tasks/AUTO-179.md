@@ -52,6 +52,8 @@ A backend tartós job modellt használjon JPA repository-val, és erre épülhes
   npm run build:backend
   ```
   Leírás: a backend Maven build és a kapcsolódó Spring tesztek sikeresen lefutottak.
+- [x] ADB wallet deployment flow.
+  Leírás: a private deploy script letölti a wallet zipet object storage-ból, kicsomagolja host oldalon, és `TNS_ADMIN` + runtime env változók formájában adja át a backendnek.
 - [x] GitHub PR létrehozás.
   Leírás: a branchhez elkészült a PR #74.
 - [x] Jira story és subtaskok státuszkezelése.
