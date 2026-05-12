@@ -18,7 +18,7 @@ feature/AUTO-179-job-persistence
 
 ## PR
 
-- (Nincs még)
+- PR #74
 
 ## Cél
 
@@ -52,6 +52,10 @@ A backend tartós job modellt használjon JPA repository-val, és erre épülhes
   npm run build:backend
   ```
   Leírás: a backend Maven build és a kapcsolódó Spring tesztek sikeresen lefutottak.
+- [x] GitHub PR létrehozás.
+  Leírás: a branchhez elkészült a PR #74.
+- [x] Jira story és subtaskok státuszkezelése.
+  Leírás: az `AUTO-179`, `AUTO-180`, `AUTO-181`, `AUTO-182` issue-k `Under test` státuszba kerültek.
 
 ## Eredmény
 
