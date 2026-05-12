@@ -1,10 +1,11 @@
-package org.autoforge.backend.api;
+package org.autoforge.backend.controller;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import org.autoforge.backend.dto.MeResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;

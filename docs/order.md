@@ -1,7 +1,6 @@
 megvalósítási sorrend:
 Aktuális MVP sorrend Jira kulcsokkal
 
-AUTO-171 - Lokális MVP docker-compose és konfiguráció
 AUTO-175 - Spring Boot backend alap és API konvenciók
 AUTO-179 - Job entity, repository és adatbázis séma
 AUTO-242 - MVP Jira issue key validáció és tárolás
