@@ -19,6 +19,7 @@ feature/order-mvp-implementation
 ## PR
 
 - PR #72
+- PR #73
 
 ## Cél
 
@@ -59,6 +60,10 @@ A backend legyen buildelhető, tesztelhető és API-konvencióban egységes, hog
   Leírás: a módosításokban nem maradt whitespace vagy patch-formázási hiba.
 - [x] GitHub PR létrehozás.
   Leírás: a branchhez elkészült a PR #72.
+- [x] Jira MCP frissítés és státuszkezelés.
+  Leírás: az MCP Jira API v3 searchre váltott, támogatja a transition/comment műveleteket, az `AUTO-175` Jira story `Under test` státuszba került.
+- [x] Jira MCP export támogatás.
+  Leírás: az MCP `jira_export_issues` toolt kapott, amely project key vagy JQL alapján JSON-ba exportálja az epiceket, normál issue-kat és subtaskokat.
 
 ## Eredmény
 
