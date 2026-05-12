@@ -94,6 +94,7 @@ Record the commands and outcomes in the task file `Lepesnaplo` section. Do not r
 - For any infrastructure, host readiness, OCI, runtime provisioning, or similar repeatable environment change, also create a Terraform script or Terraform module that can reproduce the change from scratch.
 - Architecture diagrams that are published in Confluence should not remain duplicated in git; update the Confluence page instead and keep only the summary/reference links in repo docs.
 - If a task changes the filesystem, repository files, or any tracked artifact, finish the task with a PR so the change is reviewable and traceable.
+- Treat "done" work on a Jira story as incomplete until the branch has a PR and the Jira story is moved to `Under Test` while the PR is open.
 
 ## Jira Decision And Spike Rules
 
@@ -129,6 +130,7 @@ When finishing a task, report:
 ## Jira Status Rule
 
 Ha bármilyen Jira **story**-t kezdessz el dolgozni, akkor előtte (vagy a munka legelső lépésében) a Jira státuszt állítsd át **In Progress**-ra.
+- Ha a storyhoz PR nyílik, a Jira státuszt állítsd át **Under Test**-re, és tartsd ott a review/verification ideje alatt.
 
 ## Task Completion Rule
 
