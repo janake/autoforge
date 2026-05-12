@@ -37,6 +37,7 @@ Autoforge is an AI-assisted application platform that is building a self-improvi
 
 - Treat Jira as the source of truth for task scope.
 - Prefer dedicated branches per task.
+- When a task has an open PR, move the Jira story to `Under Test` until review and verification finish.
 - Keep implementation small, explicit, and reviewable.
 - Do not add secrets, host-specific values, or manual-only steps unless the task explicitly requires them.
 

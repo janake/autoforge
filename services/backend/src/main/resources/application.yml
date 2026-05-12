@@ -22,7 +22,6 @@ management:
 
 autoforge:
   mvp:
-    db-path: ${AUTOFORGE_DB_PATH:/data/autoforge.sqlite}
     github:
       token: ${AUTOFORGE_GITHUB_TOKEN:}
       owner: ${AUTOFORGE_GITHUB_OWNER:}
@@ -30,4 +29,4 @@ autoforge:
       base-branch: ${AUTOFORGE_BASE_BRANCH:main}
   security:
     cors:
-      allowed-origins: ${AUTOFORGE_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:4173,http://localhost:8081,http://127.0.0.1:8081,https://oci.prodet.org}
+      allowed-origins: ${AUTOFORGE_CORS_ALLOWED_ORIGINS:https://oci.prodet.org}

@@ -2,11 +2,11 @@
 
 ## Feladat leírása
 
-Rendezd a Spring Boot backend alapját úgy, hogy a lokális MVP-hez egységes `/api/v1` konvenciót, health endpointot és JSON-alapú hibaválaszokat adjon, miközben a későbbi job store/config réteghez is előkészíti a package struktúrát.
+Rendezd a Spring Boot backend alapját úgy, hogy egységes `/api/v1` konvenciót, health endpointot és JSON-alapú hibaválaszokat adjon, miközben a későbbi job store/config réteghez is előkészíti a package struktúrát.
 
 ## Statusz
 
-in_progress
+completed
 
 ## Verzió
 
@@ -30,7 +30,7 @@ A backend legyen buildelhető, tesztelhető és API-konvencióban egységes, hog
 - `/api/v1/status` és `/api/v1/me` controller konvenció
 - központi JSON hibaválasz formátum
 - `controller`, `service`, `repository`, `domain`, `dto`, `config` package struktúra
-- lokális MVP konfigurációs property-k
+- MVP GitHub konfigurációs property-k
 
 ## Elfogadási kritériumok
 

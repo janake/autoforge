@@ -308,24 +308,13 @@ Taskok
 Megjegyzes
 - A filesystemet vagy tracked artifactot változtató nem-spike taskok csak merge és review után markolhatók Done-nak.
 
-## 0.1.25
-
-Statusz
-- in progress
-
-Taskok
-- `AUTO-171`: Lokális MVP docker-compose és konfiguráció
-
-Megjegyzes
-- A gyökérszintű compose fájl, a placeholder `.env.example` és a backend lokális MVP konfigurációja itt kerül nyilvántartásra.
-
 ## 0.1.26
 
 Statusz
-- in progress
+- completed
 
 Taskok
 - `AUTO-175`: Spring Boot backend alap és API konvenciók
 
 Megjegyzes
-- A backend controller/service/dto/config struktúrája és a lokális `/api/v1/health` konvenció itt kerül nyilvántartásra.
+- A backend controller/service/dto/config struktúrája és a `/api/v1/health` konvenció itt kerül nyilvántartásra.

@@ -71,4 +71,4 @@ A legkisebb helyi fejlesztői környezet a gyökérben lévő `docker-compose.ym
 5. Nézd a logokat, ha kell: `docker compose logs -f backend web`
 6. Állítsd le a stack-et: `docker compose down`
 
-A lokális compose a backendnek külön SQLite volume-ot ad, így a későbbi job/store fejlesztéseknek van tartós helye anélkül, hogy secret beégne a repo-ba.
+Ez a runbook csak helyi fejlesztésre vonatkozik; a szerveres adatkezelés az Oracle Always Free / Autonomous Database irányhoz igazodik.

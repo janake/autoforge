@@ -4,7 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "autoforge.mvp")
 public record BackendMvpProperties(
-  String dbPath,
   Github github
 ) {
 
