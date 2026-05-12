@@ -269,34 +269,6 @@ Megjegyzes
 - Az infrastruktúra-, host readiness-, OCI- és runtime provisioning jellegű változásokhoz Terraform script vagy modul kötelező, hogy a módosítás nulláról reprodukálható legyen.
 - Az observability stratégia az OCI Always Free korlátaihoz igazodik, és self-hosted vagy könnyű komponensekre épít.
 
-## 0.1.24
-
-Statusz
-- in progress
-
-Taskok
-- `AUTO-163`: Core application feature epic
-
-Megjegyzes
-- A core application feature epic a user-facing termékfunkciókat csoportosítja külön a platform hardening epicektől.
-
-## 0.1.24
-
-Statusz
-- in progress
-
-Taskok
-- `AUTO-163`: Core application feature epic
-- `AUTO-164`: Project dashboard and navigation shell
-- `AUTO-165`: Task workspace list and detail view
-- `AUTO-166`: Jira-linked feature flow
-- `AUTO-167`: User session and profile surface
-- `AUTO-168`: Command runner and execution status view
-- `AUTO-169`: Prompt/history workspace view
-
-Megjegyzes
-- A core application feature epic a user-facing termékfunkciókat csoportosítja külön a platform hardening epicektől.
-
 ## 0.1.23
 
 Statusz
@@ -307,25 +279,3 @@ Taskok
 
 Megjegyzes
 - A filesystemet vagy tracked artifactot változtató nem-spike taskok csak merge és review után markolhatók Done-nak.
-
-## 0.1.25
-
-Statusz
-- in progress
-
-Taskok
-- `AUTO-171`: Lokális MVP docker-compose és konfiguráció
-
-Megjegyzes
-- A gyökérszintű compose fájl, a placeholder `.env.example` és a backend lokális MVP konfigurációja itt kerül nyilvántartásra.
-
-## 0.1.26
-
-Statusz
-- in progress
-
-Taskok
-- `AUTO-175`: Spring Boot backend alap és API konvenciók
-
-Megjegyzes
-- A backend controller/service/dto/config struktúrája és a lokális `/api/v1/health` konvenció itt kerül nyilvántartásra.
