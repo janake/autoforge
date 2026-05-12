@@ -29,3 +29,6 @@ ops/mcp/jira-local.sh
 # local generated backlog exports
 docs/autoforge-fully-elaborated-mvp-backlog.json
 docs/jira-mvp-backlog.json
+
+# local Oracle ADB wallet archives
+security/Wallet_*.zip

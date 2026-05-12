@@ -139,12 +139,17 @@ Vault secret azonosito GitHub secret-ek:
 - `OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-opencode-server-password` secret OCID-ja
 - `OCI_OPENAI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-openai-api-key` secret OCID-ja
 - `OCI_GEMINI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-gemini-api-key` secret OCID-ja
+- `AUTOFORGE_DB_WALLET_URL`: a private ADB wallet zip object storage URL-je
+- `AUTOFORGE_DB_WALLET_PASSWORD_SECRET_OCID`: a wallet zip jelszavát tarolo OCI Vault secret OCID-ja
+- `AUTOFORGE_DB_PASSWORD_SECRET_OCID`: opcionális DB password secret OCID, ha a DB jelszó is Vaultban van
 
 Fontos:
 
 - A GitHub secret-ekben csak a Vault secret OCID-k szerepelnek, nem az OpenCode jelszo vagy provider API kulcs ertekei.
 - A deploy workflow ezeket az OCID-ket masolja a private host `.env` fajljaba.
 - A private host `deploy.sh` scriptje olvassa ki a konkret secret ertekeket OCI Vaultbol, `--auth instance_principal` hasznalataval.
+- Az ADB wallet zipet a private host `deploy.sh` letolti object storage-bol, kicsomagolja az `APP_DIR/wallet` mappaba, majd a backend kontenernek `TNS_ADMIN`-nel atadja.
+- A backend nem olvas Vaultot runtime alatt; csak runtime env valtozokat kap.
 - A webes hostname es az SSH-cel nem ugyanaz: a Cloudflare-kezelt publikus domain nem alkalmas SSH deploy celra, ehhez kulon SSH host kell.
 - Ha a Cloudflare token es zone id rendelkezésre all, a public deploy script automatikusan az `oci.prodet.org` es `api.oci.prodet.org` rekordokat a publikus origin IP-re allitja, proxied rekordokkal.
 - Ha külön `CLOUDFLARE_SSL_MODE` is meg van adva, a zone SSL setting is frissul.
@@ -154,6 +159,7 @@ Fontos:
 - `autoforge-opencode-server-password`: az OpenCode REST szerver HTTP basic auth jelszava. Legalabb 32 karakteres, veletlen, newline nelkuli ertek legyen.
 - `autoforge-openai-api-key`: az OpenAI API kulcs, amelyet az OpenCode provider hasznal. Newline nelkuli ertek legyen.
 - `autoforge-gemini-api-key`: a Google Gemini API kulcs, amelyet az OpenCode provider hasznal. Newline nelkuli ertek legyen.
+- `db-wallet-pwd`: az ADB wallet zip kicsomagolasi jelszava.
 
 Megjegyzes:
 

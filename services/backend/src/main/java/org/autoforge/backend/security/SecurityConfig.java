@@ -1,13 +1,20 @@
 package org.autoforge.backend.security;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Base64;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
@@ -16,6 +23,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -41,6 +50,11 @@ public class SecurityConfig {
   }
 
   @Bean
+  JwtDecoder jwtDecoder() throws Exception {
+    return NimbusJwtDecoder.withPublicKey(readPublicKey()).build();
+  }
+
+  @Bean
   CorsConfigurationSource corsConfigurationSource(SecurityProperties properties) {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(properties.allowedOrigins());
@@ -59,6 +73,18 @@ public class SecurityConfig {
     converter.setPrincipalClaimName("preferred_username");
     converter.setJwtGrantedAuthoritiesConverter(new KeycloakJwtGrantedAuthoritiesConverter());
     return converter;
+  }
+
+  private RSAPublicKey readPublicKey() throws Exception {
+    try (InputStream inputStream = new DefaultResourceLoader().getResource("classpath:keycloak-public.pem").getInputStream()) {
+      String pem = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
+        .replace("-----BEGIN PUBLIC KEY-----", "")
+        .replace("-----END PUBLIC KEY-----", "")
+        .replaceAll("\\s", "");
+      byte[] decoded = Base64.getDecoder().decode(pem);
+      X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
+      return (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(spec);
+    }
   }
 
   @Bean

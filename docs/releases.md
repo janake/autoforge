@@ -318,3 +318,14 @@ Taskok
 
 Megjegyzes
 - A backend controller/service/dto/config struktúrája és a `/api/v1/health` konvenció itt kerül nyilvántartásra.
+
+## 0.1.27
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-179`: Job entity, repository és adatbázis séma
+
+Megjegyzes
+- A job persistence réteg és az Oracle Autonomous Database / OCI Free Tier irány ebben a verzióban kerül bevezetésre.
