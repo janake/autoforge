@@ -59,16 +59,3 @@ autoforge/
 ## Indulasi megjegyzes
 
 A jelenlegi fókusz a live web + gateway + backend + OpenCode lánc stabil működése. Az auth/deploy hibák után a fő dokumentáció most már a tényleges production állapotot követi; a következő nagyobb lépések a feature work és a worker runtime aktiválása lehetnek.
-
-## Helyi MVP
-
-A legkisebb helyi fejlesztői környezet a gyökérben lévő `docker-compose.yml` alapján indul.
-
-1. Másold a példa környezeti változókat: `cp .env.example .env`
-2. Indítsd el a stack-et: `docker compose up --build`
-3. Nyisd meg a frontend felületet: `http://localhost:8081`
-4. Ellenőrizd a backend health-et: `curl http://localhost:8080/actuator/health` vagy `curl http://localhost:8080/api/v1/health`
-5. Nézd a logokat, ha kell: `docker compose logs -f backend web`
-6. Állítsd le a stack-et: `docker compose down`
-
-A lokális compose a backendnek külön SQLite volume-ot ad, így a későbbi job/store fejlesztéseknek van tartós helye anélkül, hogy secret beégne a repo-ba.
