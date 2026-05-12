@@ -329,3 +329,14 @@ Taskok
 
 Megjegyzes
 - A job persistence réteg és az Oracle Autonomous Database / OCI Free Tier irány ebben a verzióban kerül bevezetésre.
+
+## 0.1.28
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-242`: MVP Jira issue key validáció és tárolás
+
+Megjegyzes
+- A job létrehozó API Jira key validációval és tárolással ebben a verzióban kerül bevezetésre.

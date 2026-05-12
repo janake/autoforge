@@ -61,6 +61,10 @@ public class Job {
     this.status = status;
   }
 
+  public static Job createQueued(String jiraIssueKey, String prompt, String targetRepository, String baseBranch) {
+    return new Job(jiraIssueKey, prompt, targetRepository, baseBranch, JobStatus.QUEUED);
+  }
+
   @PrePersist
   void prePersist() {
     if (id == null || id.isBlank()) {
