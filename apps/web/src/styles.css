@@ -42,6 +42,55 @@ code {
   padding: 56px 0 48px;
 }
 
+.dashboard-shell-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 18px;
+  align-items: end;
+  margin-bottom: 28px;
+  padding: 20px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
+}
+
+.dashboard-shell-header h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 3.5vw, 3rem);
+  line-height: 1;
+}
+
+.shell-subtitle {
+  margin: 10px 0 0;
+  color: rgba(245, 239, 227, 0.72);
+}
+
+.dashboard-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.dashboard-nav a {
+  color: #f5efe3;
+  text-decoration: none;
+  font-size: 0.92rem;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dashboard-shell-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: end;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.8fr);
@@ -252,10 +301,16 @@ code {
 }
 
 @media (max-width: 920px) {
+  .dashboard-shell-header,
   .hero,
   .status-grid,
   .workspace-grid {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-nav,
+  .dashboard-shell-actions {
+    justify-content: flex-start;
   }
 
   .app-shell {
