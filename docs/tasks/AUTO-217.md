@@ -18,7 +18,7 @@ feature/auto-217-branch-push-pr
 
 ## PR
 
-- pending
+- PR #86
 
 ## Cél
 
@@ -44,6 +44,7 @@ A patchből és commitból ténylegesen megnyitható, linkelhető PR készüljö
 - [x] Áttekintettem az AUTO-217 backlog scope-ját.
 - [x] Létrehoztam a branch push és PR publish szolgáltatást.
 - [x] Hozzáadtam a GitHub client és a publish service unit tesztjét.
+- [x] A PR megnyitva review-ra.
 
 ## Eredmény
 
