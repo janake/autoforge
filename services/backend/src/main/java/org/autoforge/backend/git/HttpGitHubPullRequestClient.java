@@ -91,7 +91,7 @@ public class HttpGitHubPullRequestClient implements GitHubPullRequestClient {
 
   private void ensureToken() {
     if (githubToken == null || githubToken.isBlank()) {
-      throw new GitBrokerException("Missing GitHub token configuration");
+      throw new GitBrokerException("Missing AUTOFORGE_GITHUB_TOKEN configuration");
     }
   }
 
