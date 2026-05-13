@@ -2,7 +2,7 @@ package org.autoforge.backend.controller;
 
 import jakarta.validation.Valid;
 import org.autoforge.backend.dto.CreateJobRequest;
-import org.autoforge.backend.dto.JobResponse;
+import org.autoforge.backend.dto.CreateJobResponse;
 import org.autoforge.backend.service.JobService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +23,7 @@ public class JobController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public JobResponse createJob(@Valid @RequestBody CreateJobRequest request) {
+  public CreateJobResponse createJob(@Valid @RequestBody CreateJobRequest request) {
     return jobService.createJob(request);
   }
 }

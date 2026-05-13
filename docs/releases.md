@@ -340,3 +340,14 @@ Taskok
 
 Megjegyzes
 - A job létrehozó API Jira key validációval és tárolással ebben a verzióban bevezetésre került.
+
+## 0.1.29
+
+Statusz
+- completed
+
+Taskok
+- `AUTO-183`: Job létrehozó API implementálása - done
+
+Megjegyzes
+- A `POST /api/v1/jobs` endpoint valid requestből perzisztált, `QUEUED` státuszú jobot hoz létre, és explicit `jobId` mezőt ad vissza.
