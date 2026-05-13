@@ -20,12 +20,16 @@ public class HttpGitHubPullRequestClient implements GitHubPullRequestClient {
 
   public HttpGitHubPullRequestClient(
     GitHubRepositoryCoordinates repositoryCoordinates,
-    @Value("${github.token:}") String githubToken
+    @Value("${autoforge.mvp.github.api-base-url:https://api.github.com}") String apiBaseUrl,
+    @Value("${autoforge.mvp.github.token:}") String githubToken
   ) {
     this.httpClient = HttpClient.newHttpClient();
     this.repositoryCoordinates = repositoryCoordinates;
+    this.apiBaseUrl = apiBaseUrl;
     this.githubToken = githubToken;
   }
+
+  private final String apiBaseUrl;
 
   @Override
   public GitHubPullRequestResponse createPullRequest(CreatePullRequestRequest request) {
@@ -46,7 +50,7 @@ public class HttpGitHubPullRequestClient implements GitHubPullRequestClient {
     );
 
     HttpRequest httpRequest = HttpRequest.newBuilder()
-      .uri(URI.create("https://api.github.com/repos/%s/%s/pulls".formatted(repositoryCoordinates.owner(), repositoryCoordinates.repository())))
+      .uri(URI.create("%s/repos/%s/%s/pulls".formatted(apiBaseUrl, repositoryCoordinates.owner(), repositoryCoordinates.repository())))
       .header("Authorization", "Bearer " + githubToken)
       .header("Accept", "application/vnd.github+json")
       .header("Content-Type", "application/json")

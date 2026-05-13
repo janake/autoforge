@@ -439,3 +439,14 @@ Taskok
 
 Megjegyzes
 - A Git broker a remote branchet pusholja és GitHub PR-t nyit a megadott title/body értékekkel.
+
+## 0.1.38
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-211`: Job processor a teljes MVP backend flow összekötésére
+
+Megjegyzes
+- A job processor a queued jobokat futtatott státuszokon, patch generáláson és Git broker híváson keresztül PR_OPENED vagy FAILED állapotba viszi.

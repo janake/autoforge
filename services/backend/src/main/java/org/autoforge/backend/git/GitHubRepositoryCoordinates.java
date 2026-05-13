@@ -10,8 +10,8 @@ public class GitHubRepositoryCoordinates {
   private final String repository;
 
   public GitHubRepositoryCoordinates(
-    @Value("${github.owner:janake}") String owner,
-    @Value("${github.repository:autoforge}") String repository
+    @Value("${autoforge.mvp.github.owner}") String owner,
+    @Value("${autoforge.mvp.github.repo}") String repository
   ) {
     this.owner = owner;
     this.repository = repository;

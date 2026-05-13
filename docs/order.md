@@ -12,7 +12,7 @@ AUTO-204 - Git broker API contract - done
 AUTO-208 - Git repository clone és branch létrehozás
 AUTO-212 - Patch alkalmazása és commit létrehozása
 AUTO-217 - Branch push és GitHub PR nyitás
-AUTO-198 - Job processor
+AUTO-211 - Job processor
 AUTO-221 - React dashboard és navigációs shell
 AUTO-225 - Jira kulcsos prompt beküldő felület
 AUTO-230 - Job státusz oldal pollinggal és PR linkkel
