@@ -333,10 +333,10 @@ Megjegyzes
 ## 0.1.28
 
 Statusz
-- in progress
+- completed
 
 Taskok
-- `AUTO-242`: MVP Jira issue key validáció és tárolás
+- `AUTO-242`: MVP Jira issue key validáció és tárolás - done
 
 Megjegyzes
-- A job létrehozó API Jira key validációval és tárolással ebben a verzióban kerül bevezetésre.
+- A job létrehozó API Jira key validációval és tárolással ebben a verzióban bevezetésre került.
