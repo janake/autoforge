@@ -9,12 +9,13 @@ AUTO-187 - Job lekérdező API - done
 AUTO-190 - Minimális audit log - done
 AUTO-194 - Mock AI patch generator - done
 AUTO-204 - Git broker API contract - done
-AUTO-208 - Git repository clone és branch létrehozás
-AUTO-212 - Patch alkalmazása és commit létrehozása
-AUTO-217 - Branch push és GitHub PR nyitás
-AUTO-211 - Job processor
-AUTO-221 - React dashboard és navigációs shell
-AUTO-225 - Jira kulcsos prompt beküldő felület
-AUTO-230 - Job státusz oldal pollinggal és PR linkkel
-AUTO-235 - MVP security baseline
-AUTO-269 - End-to-end MVP smoke test
+AUTO-208 - Git repository clone és branch létrehozás - done
+AUTO-212 - Patch alkalmazása és commit létrehozása - done
+AUTO-217 - Branch push és GitHub PR nyitás - done
+AUTO-211 - Job processor - pending
+AUTO-221 - React dashboard és navigációs shell - done
+AUTO-225 - Jira kulcsos prompt beküldő felület - done
+AUTO-230 - Job státusz oldal pollinggal és PR linkkel - pending
+AUTO-235 - MVP security baseline - pending
+AUTO-269 - End-to-end MVP smoke test - pending
+AUTO-270 - Jira-first docs cleanup - review

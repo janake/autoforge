@@ -451,17 +451,6 @@ Taskok
 Megjegyzes
 - A job processor a queued jobokat futtatott státuszokon, patch generáláson és Git broker híváson keresztül PR_OPENED vagy FAILED állapotba viszi.
 
-## 0.1.40
-
-Statusz
-- in progress
-
-Taskok
-- `AUTO-225`: Jira kulcsos prompt beküldő felület
-
-Megjegyzes
-- A web UI authenticated prompt submit formot kap, amely Jira issue key-vel hoz létre queued jobot a backendben.
-
 ## 0.1.39
 
 Statusz
@@ -473,13 +462,24 @@ Taskok
 Megjegyzes
 - A frontend egységes dashboard keretet és navigációt kap a későbbi job, Jira és PR nézetekhez.
 
-## 0.1.38
+## 0.1.40
 
 Statusz
 - in progress
 
 Taskok
-- `AUTO-211`: Job processor a teljes MVP backend flow összekötésére
+- `AUTO-225`: Jira kulcsos prompt beküldő felület
 
 Megjegyzes
-- A job processor a queued jobokat futtatott státuszokon, patch generáláson és Git broker híváson keresztül PR_OPENED vagy FAILED állapotba viszi.
+- A web UI authenticated prompt submit formot kap, amely Jira issue key-vel hoz létre queued jobot a backendben.
+
+## 0.1.41
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-270`: Jira-first docs cleanup
+
+Megjegyzes
+- A repo eltávolítja a helyi task és epic markdownokat, és a manifestekre/Jira state-re támaszkodik.
