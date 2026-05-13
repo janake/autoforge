@@ -446,7 +446,7 @@ Statusz
 - in progress
 
 Taskok
-- `AUTO-198`: Job processor a teljes MVP backend flow összekötésére
+- `AUTO-211`: Job processor a teljes MVP backend flow összekötésére
 
 Megjegyzes
 - A job processor a queued jobokat futtatott státuszokon, patch generáláson és Git broker híváson keresztül PR_OPENED vagy FAILED állapotba viszi.
