@@ -18,7 +18,7 @@ auto-187-job-query
 
 ## PR
 
-- (Nyitás alatt)
+- https://github.com/janake/autoforge/pull/79
 
 ## Cél
 
