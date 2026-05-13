@@ -22,3 +22,16 @@ export type CreateJobResponse = {
   jiraIssueKey: string;
   status: string;
 };
+
+export type JobResponse = {
+  jobId: string;
+  jiraIssueKey: string;
+  prompt: string;
+  targetRepository: string;
+  baseBranch: string;
+  status: string;
+  prUrl: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+};

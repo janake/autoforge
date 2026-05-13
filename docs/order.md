@@ -15,7 +15,7 @@ AUTO-217 - Branch push és GitHub PR nyitás - done
 AUTO-198 - Job processor - pending
 AUTO-221 - React dashboard és navigációs shell - done
 AUTO-225 - Jira kulcsos prompt beküldő felület - done
-AUTO-230 - Job státusz oldal pollinggal és PR linkkel - pending
+AUTO-230 - Job státusz oldal pollinggal és PR linkkel - done
 AUTO-235 - MVP security baseline - pending
 AUTO-269 - End-to-end MVP smoke test - pending
 AUTO-270 - Jira-first docs cleanup - done

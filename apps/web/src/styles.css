@@ -201,6 +201,10 @@ code {
   align-items: start;
 }
 
+.job-status-panel {
+  grid-column: 1 / -1;
+}
+
 .workspace-panel#prompt {
   grid-column: 1 / -1;
 }
@@ -229,6 +233,22 @@ code {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
+}
+
+.status-pill.done {
+  color: #9ef1a5;
+}
+
+.status-pill.failed {
+  color: #ffb0a4;
+}
+
+.status-pill.running {
+  color: #8ecae6;
+}
+
+.status-pill.pending {
+  color: #f6d07f;
 }
 
 .card h2,
@@ -292,6 +312,15 @@ code {
 
 .profile-list.compact {
   margin-top: 14px;
+}
+
+.job-link {
+  color: #8ecae6;
+  text-decoration: none;
+}
+
+.job-link:hover {
+  text-decoration: underline;
 }
 
 .prompt-form {
