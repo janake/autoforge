@@ -273,7 +273,7 @@ Feladata:
 - Jira-first backlog, epic, story, bug, task es spike eletciklus kezelese
 - Markdown -> Jira migracio tamogatasa external ID alapu idempotens frissitesekkel
 - Jira statuszok osszehangolasa branch, PR, review, merge es verifikacios allapottal
-- Jira issue key kotelezo hasznalata branch, commit, PR cim es PR torzs szinten
+- prompt-first task creation es a Jira issue key tovabbi hasznalata job, branch, commit es PR szinten
 
 ### `docs-sync`
 
