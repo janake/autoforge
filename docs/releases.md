@@ -373,3 +373,14 @@ Taskok
 
 Megjegyzes
 - Bevezetésre került az audit log entitás, repository és service, valamint a Lombok használata az új audit rétegben.
+
+## 0.1.32
+
+Statusz
+- completed
+
+Taskok
+- `AUTO-194`: Mock AI patch generator - done
+
+Megjegyzes
+- Elkészült a determinisztikus mock patch generator, amely valid unified diffet ad vissza a backend flow teszteléséhez.

@@ -7,7 +7,7 @@ AUTO-242 - MVP Jira issue key validáció és tárolás - done
 AUTO-183 - Job létrehozó API - done
 AUTO-187 - Job lekérdező API - done
 AUTO-190 - Minimális audit log - done
-AUTO-194 - Mock AI patch generator
+AUTO-194 - Mock AI patch generator - done
 AUTO-204 - Git broker API contract
 AUTO-208 - Git repository clone és branch létrehozás
 AUTO-212 - Patch alkalmazása és commit létrehozása
