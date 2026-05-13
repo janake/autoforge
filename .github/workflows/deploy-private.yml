@@ -181,4 +181,4 @@ jobs:
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
         run: |
-          ssh -F ~/.ssh/config autoforge-private "APP_DIR='$DEPLOY_PATH' bash '$DEPLOY_PATH/deploy.sh'"
+          ssh -F ~/.ssh/config autoforge-private "APP_DIR='$DEPLOY_PATH' bash -lc 'bash \"$DEPLOY_PATH/deploy.sh\"'"
