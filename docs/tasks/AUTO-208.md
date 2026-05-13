@@ -6,7 +6,7 @@ A Git broker klónozza a repositoryt egy ideiglenes workspace-be, checkoutolja a
 
 ## Statusz
 
-in progress
+review
 
 ## Verzió
 
@@ -18,7 +18,7 @@ feature/auto-208-git-repository-clone-branch
 
 ## PR
 
-- pending
+- PR #83
 
 ## Cél
 
@@ -45,6 +45,7 @@ A későbbi patch alkalmazás és commit lépés már egy előkészített helyi 
 - [x] Áttekintettem a backlog JSON és order manifest scope-ját.
 - [x] Bevezettem a temp workspace, clone és branch creation szolgáltatásokat.
 - [x] Hozzáadtam a git CLI alapú integrációs teszteket.
+- [x] A PR megnyitva review-ra.
 
 ## Eredmény
 
