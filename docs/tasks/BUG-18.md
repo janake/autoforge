@@ -18,7 +18,7 @@ bug/BUG-18-prompt-first-flow-doc-fix
 
 ## PR
 
-- pending
+- PR #84
 
 ## Cél
 
@@ -43,6 +43,7 @@ A dokumentáció és a backlog leírása legyen összhangban a tényleges prompt
 - [x] Azonosítottam a régi Jira-key-first megfogalmazásokat.
 - [x] Átírtam a README, tooling és order dokumentációt prompt-first modellre.
 - [x] Frissítettem a backlog nyitó leírását is.
+- [x] A PR megnyitva review-ra.
 
 ## Eredmény
 
