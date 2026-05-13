@@ -17,5 +17,5 @@ AUTO-221 - React dashboard és navigációs shell - done
 AUTO-225 - Jira kulcsos prompt beküldő felület - done
 AUTO-230 - Job státusz oldal pollinggal és PR linkkel - done
 AUTO-235 - MVP security baseline - done
-AUTO-269 - End-to-end MVP smoke test - pending
+AUTO-269 - End-to-end MVP smoke test - done
 AUTO-270 - Jira-first docs cleanup - done
