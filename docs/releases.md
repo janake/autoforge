@@ -417,3 +417,14 @@ Taskok
 
 Megjegyzes
 - A repo dokumentáció prompt-first modellre lett igazítva: a user promptot ad meg, ebből Jira task jön létre, és a Jira issue key megy tovább a flow-ban.
+
+## 0.1.36
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-212`: Patch alkalmazása és commit létrehozása
+
+Megjegyzes
+- A Git broker a klónozott repositoryban unified diffből commitot készít, és a commit SHA-t visszaadja a további PR flow-hoz.
