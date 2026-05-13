@@ -4,7 +4,7 @@ Aktuális MVP sorrend Jira kulcsokkal
 AUTO-175 - Spring Boot backend alap és API konvenciók
 AUTO-179 - Job entity, repository és adatbázis séma
 AUTO-242 - MVP Jira issue key validáció és tárolás
-AUTO-183 - Job létrehozó API
+AUTO-183 - Job létrehozó API - done
 AUTO-187 - Job lekérdező API
 AUTO-190 - Minimális audit log
 AUTO-194 - Mock AI patch generator
