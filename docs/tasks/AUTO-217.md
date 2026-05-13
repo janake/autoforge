@@ -18,7 +18,7 @@ feature/auto-217-branch-push-pr
 
 ## PR
 
-- PR #86
+- PR #87
 
 ## Cél
 
