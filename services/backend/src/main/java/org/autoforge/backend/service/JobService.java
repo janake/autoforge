@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 import org.autoforge.backend.domain.Job;
 import org.autoforge.backend.dto.CreateJobRequest;
 import org.autoforge.backend.dto.CreateJobResponse;
+import org.autoforge.backend.dto.JobResponse;
 import org.autoforge.backend.repository.JobRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,24 @@ public class JobService {
       saved.getId(),
       saved.getJiraIssueKey(),
       saved.getStatus().name()
+    );
+  }
+
+  @Transactional(readOnly = true)
+  public JobResponse getJob(String jobId) {
+    Job job = jobRepository.findById(jobId).orElseThrow(() -> new JobNotFoundException(jobId));
+
+    return new JobResponse(
+      job.getId(),
+      job.getJiraIssueKey(),
+      job.getPrompt(),
+      job.getTargetRepository(),
+      job.getBaseBranch(),
+      job.getStatus().name(),
+      job.getPrUrl(),
+      job.getErrorMessage(),
+      job.getCreatedAt(),
+      job.getUpdatedAt()
     );
   }
 }
