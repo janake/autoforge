@@ -428,3 +428,25 @@ Taskok
 
 Megjegyzes
 - A Git broker a klónozott repositoryban unified diffből commitot készít, és a commit SHA-t visszaadja a további PR flow-hoz.
+
+## 0.1.37
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-217`: Branch push és GitHub PR nyitás
+
+Megjegyzes
+- A Git broker a remote branchet pusholja és GitHub PR-t nyit a megadott title/body értékekkel.
+
+## 0.1.38
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-211`: Job processor a teljes MVP backend flow összekötésére
+
+Megjegyzes
+- A job processor a queued jobokat futtatott státuszokon, patch generáláson és Git broker híváson keresztül PR_OPENED vagy FAILED állapotba viszi.

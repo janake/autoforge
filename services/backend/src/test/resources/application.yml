@@ -12,3 +12,13 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
+
+autoforge:
+  mvp:
+    job-processor:
+      enabled: false
+    github:
+      owner: prodet
+      repo: autoforge
+      api-base-url: https://api.github.com
+      token: test-token
