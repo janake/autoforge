@@ -185,3 +185,19 @@ skills:
       - Update architecture diagrams when topology or flow changes.
       - Catch stale wording such as “prepared” when something is already live.
       - Preserve traceability from code/runtime changes back to docs and releases.
+
+  - id: clean-code
+    enabled: true
+    owners:
+      - developers
+      - backend
+      - frontend
+    uses_mcps:
+      - github
+      - maven-java-deps
+    description: Code readability, minimalism, naming, and maintainability guidance for Autoforge changes.
+    responsibilities:
+      - Prefer the smallest correct change and avoid unnecessary abstraction.
+      - Keep methods short, names explicit, and data flow easy to follow.
+      - Use Lombok only where it removes obvious boilerplate without hiding behavior.
+      - Review code for duplicated logic, unclear naming, and accidental complexity before shipping.

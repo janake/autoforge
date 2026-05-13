@@ -6,19 +6,18 @@ import org.autoforge.backend.dto.CreateJobRequest;
 import org.autoforge.backend.dto.CreateJobResponse;
 import org.autoforge.backend.dto.JobResponse;
 import org.autoforge.backend.repository.JobRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class JobService {
 
   private static final Pattern JIRA_KEY_PATTERN = Pattern.compile("^[A-Z][A-Z0-9]+-[0-9]+$");
 
   private final JobRepository jobRepository;
-
-  public JobService(JobRepository jobRepository) {
-    this.jobRepository = jobRepository;
-  }
+  private final AuditService auditService;
 
   @Transactional
   public CreateJobResponse createJob(CreateJobRequest request) {
@@ -32,6 +31,8 @@ public class JobService {
       request.targetRepository(),
       request.baseBranch()
     ));
+
+    auditService.logJobCreated(saved, "system", request.prompt(), request.targetRepository(), request.baseBranch());
 
     return new CreateJobResponse(
       saved.getId(),

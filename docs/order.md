@@ -6,7 +6,7 @@ AUTO-179 - Job entity, repository és adatbázis séma - done
 AUTO-242 - MVP Jira issue key validáció és tárolás - done
 AUTO-183 - Job létrehozó API - done
 AUTO-187 - Job lekérdező API - done
-AUTO-190 - Minimális audit log
+AUTO-190 - Minimális audit log - done
 AUTO-194 - Mock AI patch generator
 AUTO-204 - Git broker API contract
 AUTO-208 - Git repository clone és branch létrehozás
