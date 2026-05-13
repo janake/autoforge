@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { getRuntimeConfig } from "./runtime-config";
 import { initializeKeycloak, loadAuthedJson, signIn, signOut } from "./auth/keycloak";
 import type { BackendMeResponse } from "./types";
@@ -22,6 +22,14 @@ const publicSignals = [
     title: "JWT-backed APIs",
     body: "The backend still validates bearer tokens for private endpoints.",
   },
+];
+
+const dashboardNav = [
+  { label: "Overview", href: "#overview" },
+  { label: "Jobs", href: "#jobs" },
+  { label: "Jira", href: "#jira" },
+  { label: "Git", href: "#git" },
+  { label: "Runtime", href: "#runtime" },
 ];
 
 function isKeycloakCallback(): boolean {
@@ -57,6 +65,47 @@ function PublicHero({ onSignIn }: { onSignIn: () => void }) {
   );
 }
 
+function DashboardShell({
+  mode,
+  actionLabel,
+  onAction,
+  children,
+}: {
+  mode: string;
+  actionLabel: string;
+  onAction: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <>
+      <header className="dashboard-shell-header">
+        <div>
+          <p className="eyebrow">Autoforge</p>
+          <h1>MVP control room</h1>
+          <p className="shell-subtitle">Prompt-first Jira, job lifecycle, Git broker, and release flow.</p>
+        </div>
+
+        <nav className="dashboard-nav" aria-label="Primary navigation">
+          {dashboardNav.map((item) => (
+            <a key={item.href} href={item.href}>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="dashboard-shell-actions">
+          <span className="pill">{mode}</span>
+          <button className="primary-button" type="button" onClick={onAction}>
+            {actionLabel}
+          </button>
+        </div>
+      </header>
+
+      {children}
+    </>
+  );
+}
+
 function PrivateWorkspace({
   profile,
   onSignOut,
@@ -73,10 +122,9 @@ function PrivateWorkspace({
       : "member";
 
   return (
-    <>
+    <DashboardShell mode="authenticated" actionLabel="Sign out" onAction={onSignOut}>
       <section className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">Autoforge</p>
           <h1>Signed-in workspace for building the platform itself.</h1>
           <p className="lead">
             Keycloak backs the session, the backend validates tokens, and the UI adapts to the
@@ -106,7 +154,7 @@ function PrivateWorkspace({
         </div>
       </section>
 
-      <section className="status-grid" aria-label="Platform signals">
+      <section className="status-grid" aria-label="Platform signals" id="overview">
         {publicSignals.map((signal) => (
           <article className="card" key={signal.title}>
             <p className="card-kicker">ready</p>
@@ -117,7 +165,7 @@ function PrivateWorkspace({
       </section>
 
       <section className="workspace-grid" aria-label="User workspace">
-        <article className="workspace-panel">
+        <article className="workspace-panel" id="jobs">
           <div className="section-head">
             <h2>Profile</h2>
             <button className="secondary-button" type="button" onClick={onSignOut}>
@@ -145,7 +193,7 @@ function PrivateWorkspace({
           </dl>
         </article>
 
-        <article className="workspace-panel">
+        <article className="workspace-panel" id="jira">
           <div className="section-head">
             <h2>Current API</h2>
             <span className="pill">private</span>
@@ -170,7 +218,7 @@ function PrivateWorkspace({
           </dl>
         </article>
 
-        <article className="workspace-panel">
+        <article className="workspace-panel" id="runtime">
           <div className="section-head">
             <h2>Runtime</h2>
             <span className="pill">docker</span>
@@ -194,8 +242,29 @@ function PrivateWorkspace({
             </div>
           </dl>
         </article>
+
+        <article className="workspace-panel" id="git">
+          <div className="section-head">
+            <h2>Git broker</h2>
+            <span className="pill">ready</span>
+          </div>
+          <p className="muted">
+            Branch preparation, patch application, branch push, and PR publish are handled by the
+            backend git broker pipeline.
+          </p>
+          <dl className="profile-list compact">
+            <div>
+              <dt>Branch flow</dt>
+              <dd>feature branch, commit, push, PR</dd>
+            </div>
+            <div>
+              <dt>Status flow</dt>
+              <dd>QUEUED → RUNNING → PATCH_GENERATED → PR_OPENED</dd>
+            </div>
+          </dl>
+        </article>
       </section>
-    </>
+    </DashboardShell>
   );
 }
 
@@ -248,9 +317,9 @@ function App() {
   return (
     <main className="app-shell">
       {session.status === "loading" && (
-        <>
+        <DashboardShell mode="loading" actionLabel="Sign in" onAction={() => void signIn()}>
           <PublicHero onSignIn={() => void signIn()} />
-          <section className="status-grid" aria-label="Platform signals">
+          <section className="status-grid" aria-label="Platform signals" id="overview">
             {publicSignals.map((signal) => (
               <article className="card" key={signal.title}>
                 <p className="card-kicker">loading</p>
@@ -259,13 +328,13 @@ function App() {
               </article>
             ))}
           </section>
-        </>
+        </DashboardShell>
       )}
 
       {session.status === "public" && (
-        <>
+        <DashboardShell mode="public" actionLabel="Sign in" onAction={() => void signIn()}>
           <PublicHero onSignIn={() => void signIn()} />
-          <section className="status-grid" aria-label="Platform signals">
+          <section className="status-grid" aria-label="Platform signals" id="overview">
             {publicSignals.map((signal) => (
               <article className="card" key={signal.title}>
                 <p className="card-kicker">public</p>
@@ -274,7 +343,7 @@ function App() {
               </article>
             ))}
           </section>
-        </>
+        </DashboardShell>
       )}
 
       {session.status === "ready" && (
@@ -282,7 +351,7 @@ function App() {
       )}
 
       {session.status === "error" && (
-        <>
+        <DashboardShell mode="error" actionLabel="Sign in" onAction={() => void signIn()}>
           <PublicHero onSignIn={() => void signIn()} />
           <section className="workspace-grid">
             <article className="workspace-panel">
@@ -296,7 +365,7 @@ function App() {
               <p className="muted">{session.message}</p>
             </article>
           </section>
-        </>
+        </DashboardShell>
       )}
     </main>
   );

@@ -450,3 +450,25 @@ Taskok
 
 Megjegyzes
 - A job processor a queued jobokat futtatott státuszokon, patch generáláson és Git broker híváson keresztül PR_OPENED vagy FAILED állapotba viszi.
+
+## 0.1.39
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-221`: React dashboard és navigációs shell
+
+Megjegyzes
+- A frontend egységes dashboard keretet és navigációt kap a későbbi job, Jira és PR nézetekhez.
+
+## 0.1.38
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-211`: Job processor a teljes MVP backend flow összekötésére
+
+Megjegyzes
+- A job processor a queued jobokat futtatott státuszokon, patch generáláson és Git broker híváson keresztül PR_OPENED vagy FAILED állapotba viszi.
