@@ -53,6 +53,23 @@ export async function signOut(): Promise<void> {
 }
 
 export async function loadAuthedJson<T>(path: string): Promise<T> {
+  const response = await authedFetch(path);
+  return (await response.json()) as T;
+}
+
+export async function postAuthedJson<T>(path: string, body: unknown): Promise<T> {
+  const response = await authedFetch(path, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return (await response.json()) as T;
+}
+
+async function authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const client = createKeycloak();
   const runtimeConfig = getRuntimeConfig();
   const url = `${runtimeConfig.apiBaseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
@@ -62,9 +79,11 @@ export async function loadAuthedJson<T>(path: string): Promise<T> {
   }
 
   const response = await fetch(url, {
+    ...init,
     headers: {
       Authorization: `Bearer ${client.token ?? ""}`,
       "Content-Type": "application/json",
+      ...(init.headers ?? {}),
     },
   });
 
@@ -72,5 +91,5 @@ export async function loadAuthedJson<T>(path: string): Promise<T> {
     throw new Error(`Request failed with ${response.status}`);
   }
 
-  return (await response.json()) as T;
+  return response;
 }
