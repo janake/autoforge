@@ -18,7 +18,7 @@ feature/auto-225-jira-prompt-submit
 
 ## PR
 
-- pending
+- PR #89
 
 ## Cél
 
@@ -43,6 +43,7 @@ A prompt-first flow legyen a webes felületen is használható: a user a Jira ke
 - [x] Áttekintettem az `AUTO-225` scope-ját az order manifest alapján.
 - [x] Bevezettem az authenticated prompt submit panelt.
 - [x] Hozzáadtam az authed POST helper-t a frontendhez.
+- [x] A PR megnyitva review-ra.
 
 ## Eredmény
 
