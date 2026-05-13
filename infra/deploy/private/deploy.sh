@@ -11,6 +11,12 @@ OPENCODE_IMAGE_ARCHIVE="$APP_DIR/autoforge-opencode-image.tar.gz"
 PRIVATE_IMAGES_PRELOADED="${PRIVATE_IMAGES_PRELOADED:-false}"
 WALLET_DIR="$APP_DIR/wallet"
 
+if [ -d "$HOME/.local/bin" ]; then
+  PATH="$HOME/.local/bin:$PATH"
+fi
+
+export PATH
+
 if [ -f .deploy.env ]; then
   set -a
   . ./.deploy.env
