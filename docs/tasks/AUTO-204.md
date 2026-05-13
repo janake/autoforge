@@ -6,7 +6,7 @@ Definiálni kell a Git broker create PR contractját, DTO-it és validációját
 
 ## Statusz
 
-review
+completed
 
 ## Verzió
 
@@ -18,7 +18,7 @@ feature/auto-204-git-broker-contract
 
 ## PR
 
-- PR #82
+- PR #82 (merged)
 
 ## Cél
 
@@ -47,7 +47,8 @@ A job processor később egy stabil belső contracton keresztül tudjon PR létr
 - [x] Hozzáadtam a validation unit tesztet.
 - [x] Frissítettem a README contract összefoglalóját.
 - [x] A PR megnyitva review-ra.
+- [x] A PR merged.
 
 ## Eredmény
 
-A Git broker PR contract készen áll a későbbi implementációra.
+A Git broker PR contract készen áll, és a broker implementáció erre épül.

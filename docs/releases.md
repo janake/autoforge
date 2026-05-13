@@ -388,10 +388,21 @@ Megjegyzes
 ## 0.1.33
 
 Statusz
-- in progress
+- completed
 
 Taskok
-- `AUTO-204`: Git broker API contract
+- `AUTO-204`: Git broker API contract - done
 
 Megjegyzes
 - Definiálásra került a Git broker create PR request/response contractja és a hozzá tartozó validation boundary.
+
+## 0.1.34
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-208`: Git repository clone és branch létrehozás
+
+Megjegyzes
+- A Git broker a repository klónozását, base branch checkoutot és feature branch létrehozást végzi temp workspace-ben.
