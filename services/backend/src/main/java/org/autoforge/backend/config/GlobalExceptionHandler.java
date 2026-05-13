@@ -3,6 +3,7 @@ package org.autoforge.backend.config;
 import java.time.Instant;
 import jakarta.servlet.http.HttpServletRequest;
 import org.autoforge.backend.dto.ApiErrorResponse;
+import org.autoforge.backend.service.JobNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,6 +31,11 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
     return build(HttpStatus.BAD_REQUEST, "Request validation failed", request.getRequestURI());
+  }
+
+  @ExceptionHandler(JobNotFoundException.class)
+  public ResponseEntity<ApiErrorResponse> handleNotFound(JobNotFoundException ex, HttpServletRequest request) {
+    return build(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
   }
 
   private ResponseEntity<ApiErrorResponse> build(HttpStatus status, String message, String path) {

@@ -3,7 +3,7 @@ package org.autoforge.backend.dto;
 import java.time.Instant;
 
 public record JobResponse(
-  String id,
+  String jobId,
   String jiraIssueKey,
   String prompt,
   String targetRepository,

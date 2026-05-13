@@ -351,3 +351,14 @@ Taskok
 
 Megjegyzes
 - A `POST /api/v1/jobs` endpoint valid requestből perzisztált, `QUEUED` státuszú jobot hoz létre, és explicit `jobId` mezőt ad vissza.
+
+## 0.1.30
+
+Statusz
+- completed
+
+Taskok
+- `AUTO-187`: Job lekérdező API implementálása - done
+
+Megjegyzes
+- A `GET /api/v1/jobs/{jobId}` endpoint visszaadja a job részletes állapotát, és 404-et ad nem létező job ID-ra.

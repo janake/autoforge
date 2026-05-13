@@ -2,6 +2,7 @@ package org.autoforge.backend.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -86,5 +87,30 @@ class JobControllerTest {
           """))
       .andExpect(status().isBadRequest())
       .andExpect(jsonPath("$.status").value(400));
+  }
+
+  @Test
+  void returnsJobById() throws Exception {
+    var saved = jobRepository.saveAndFlush(
+      org.autoforge.backend.domain.Job.createQueued("AUTO-187", "Check job status", "janake/autoforge", "main")
+    );
+
+    mockMvc.perform(get("/api/v1/jobs/{jobId}", saved.getId())
+        .with(jwt()))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.jobId").value(saved.getId()))
+      .andExpect(jsonPath("$.jiraIssueKey").value("AUTO-187"))
+      .andExpect(jsonPath("$.prompt").value("Check job status"))
+      .andExpect(jsonPath("$.status").value("QUEUED"))
+      .andExpect(jsonPath("$.targetRepository").value("janake/autoforge"))
+      .andExpect(jsonPath("$.baseBranch").value("main"));
+  }
+
+  @Test
+  void returnsNotFoundForMissingJob() throws Exception {
+    mockMvc.perform(get("/api/v1/jobs/{jobId}", "missing-job-id")
+        .with(jwt()))
+      .andExpect(status().isNotFound())
+      .andExpect(jsonPath("$.status").value(404));
   }
 }
