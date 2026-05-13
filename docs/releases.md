@@ -362,3 +362,14 @@ Taskok
 
 Megjegyzes
 - A `GET /api/v1/jobs/{jobId}` endpoint visszaadja a job részletes állapotát, és 404-et ad nem létező job ID-ra.
+
+## 0.1.31
+
+Statusz
+- completed
+
+Taskok
+- `AUTO-190`: Minimális audit log implementálása SQLite alapon - done
+
+Megjegyzes
+- Bevezetésre került az audit log entitás, repository és service, valamint a Lombok használata az új audit rétegben.

@@ -284,6 +284,15 @@ Feladata:
 - “prepared/scaffolded” jellegu stale allitasok kiszurese
 - runtime valtozasok visszairasa a dokumentacioba
 
+### `clean-code`
+
+Feladata:
+
+- egyszeru, olvashato, minimalis kodalak kialakitasa
+- felesleges absztrakciok, duplikaciok es rejtett mellekhatasok kiszurese
+- Lombok hasznalat csak ott, ahol a boilerplate csokkentese tenyleg olvashatosagot javit
+- review elotti kodhigienia es elnevezesi konzisztencia ellenorzese
+
 ## Groupok
 
 ### `app-surface`

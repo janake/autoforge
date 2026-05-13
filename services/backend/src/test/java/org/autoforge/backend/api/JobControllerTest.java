@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.autoforge.backend.repository.AuditLogRepository;
 import org.autoforge.backend.repository.JobRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,9 +27,13 @@ class JobControllerTest {
   @Autowired
   private JobRepository jobRepository;
 
+  @Autowired
+  private AuditLogRepository auditLogRepository;
+
   @BeforeEach
   void cleanJobs() {
     jobRepository.deleteAll();
+    auditLogRepository.deleteAll();
   }
 
   @Test
@@ -53,6 +58,11 @@ class JobControllerTest {
       assertThat(job.getPrompt()).isEqualTo("Implement job creation API");
       assertThat(job.getStatus().name()).isEqualTo("QUEUED");
     });
+
+    var job = jobRepository.findByJiraIssueKey("AUTO-183").orElseThrow();
+    var auditLogs = auditLogRepository.findByJobIdOrderByTimestampAsc(job.getId());
+    assertThat(auditLogs).hasSize(1);
+    assertThat(auditLogs.get(0).getEventType().name()).isEqualTo("JOB_CREATED");
   }
 
   @Test
