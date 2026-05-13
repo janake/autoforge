@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { getRuntimeConfig } from "./runtime-config";
-import { initializeKeycloak, loadAuthedJson, signIn, signOut } from "./auth/keycloak";
-import type { BackendMeResponse } from "./types";
+import { initializeKeycloak, loadAuthedJson, postAuthedJson, signIn, signOut } from "./auth/keycloak";
+import type { BackendMeResponse, CreateJobRequest, CreateJobResponse } from "./types";
 
 type SessionState =
   | { status: "loading" }
@@ -62,6 +62,124 @@ function PublicHero({ onSignIn }: { onSignIn: () => void }) {
         </div>
       </div>
     </section>
+  );
+}
+
+type JobSubmissionState =
+  | { status: "idle" }
+  | { status: "submitting" }
+  | { status: "success"; jobId: string; jiraIssueKey: string }
+  | { status: "error"; message: string };
+
+function PromptSubmissionPanel() {
+  const [form, setForm] = useState<CreateJobRequest>({
+    jiraIssueKey: "AUTO-225",
+    prompt: "",
+    targetRepository: "",
+    baseBranch: "main",
+  });
+  const [submission, setSubmission] = useState<JobSubmissionState>({ status: "idle" });
+
+  const updateField = <K extends keyof CreateJobRequest>(field: K, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmission({ status: "submitting" });
+
+    try {
+      const response = await postAuthedJson<CreateJobResponse>("/v1/jobs", form);
+      setSubmission({ status: "success", jobId: response.jobId, jiraIssueKey: response.jiraIssueKey });
+    } catch (error) {
+      setSubmission({
+        status: "error",
+        message: error instanceof Error ? error.message : "Unable to submit prompt.",
+      });
+    }
+  };
+
+  return (
+    <article className="workspace-panel" id="prompt">
+      <div className="section-head">
+        <h2>Submit prompt</h2>
+        <span className="pill">Jira</span>
+      </div>
+      <p className="muted">
+        Enter the Jira issue key, prompt, target repository, and base branch. The backend will
+        create the queued job from that request.
+      </p>
+
+      <form className="prompt-form" onSubmit={onSubmit}>
+        <label>
+          <span>Jira issue key</span>
+          <input
+            name="jiraIssueKey"
+            type="text"
+            value={form.jiraIssueKey}
+            onChange={(event) => updateField("jiraIssueKey", event.target.value)}
+            placeholder="AUTO-225"
+            autoComplete="off"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Prompt</span>
+          <textarea
+            name="prompt"
+            value={form.prompt}
+            onChange={(event) => updateField("prompt", event.target.value)}
+            placeholder="Describe the task you want the agent to carry out"
+            rows={6}
+            required
+          />
+        </label>
+
+        <label>
+          <span>Target repository</span>
+          <input
+            name="targetRepository"
+            type="text"
+            value={form.targetRepository}
+            onChange={(event) => updateField("targetRepository", event.target.value)}
+            placeholder="owner/repo"
+            autoComplete="off"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Base branch</span>
+          <input
+            name="baseBranch"
+            type="text"
+            value={form.baseBranch}
+            onChange={(event) => updateField("baseBranch", event.target.value)}
+            placeholder="main"
+            autoComplete="off"
+            required
+          />
+        </label>
+
+        <div className="prompt-actions">
+          <button className="primary-button" type="submit" disabled={submission.status === "submitting"}>
+            {submission.status === "submitting" ? "Submitting..." : "Create job"}
+          </button>
+          <span className="muted">
+            The request is authenticated with the current Keycloak session.
+          </span>
+        </div>
+      </form>
+
+      {submission.status === "success" && (
+        <p className="success-title">
+          Job {submission.jiraIssueKey} created as {submission.jobId}.
+        </p>
+      )}
+
+      {submission.status === "error" && <p className="error-title">{submission.message}</p>}
+    </article>
   );
 }
 
@@ -165,6 +283,8 @@ function PrivateWorkspace({
       </section>
 
       <section className="workspace-grid" aria-label="User workspace">
+        <PromptSubmissionPanel />
+
         <article className="workspace-panel" id="jobs">
           <div className="section-head">
             <h2>Profile</h2>

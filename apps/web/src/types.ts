@@ -9,3 +9,16 @@ export type BackendMeResponse = {
     authorizedParty: string;
   };
 };
+
+export type CreateJobRequest = {
+  jiraIssueKey: string;
+  prompt: string;
+  targetRepository: string;
+  baseBranch: string;
+};
+
+export type CreateJobResponse = {
+  jobId: string;
+  jiraIssueKey: string;
+  status: string;
+};

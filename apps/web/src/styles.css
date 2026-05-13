@@ -201,6 +201,10 @@ code {
   align-items: start;
 }
 
+.workspace-panel#prompt {
+  grid-column: 1 / -1;
+}
+
 .card,
 .workspace-panel {
   padding: 22px;
@@ -290,9 +294,66 @@ code {
   margin-top: 14px;
 }
 
+.prompt-form {
+  display: grid;
+  gap: 14px;
+}
+
+.prompt-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.prompt-form span {
+  color: rgba(245, 239, 227, 0.72);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.prompt-form input,
+.prompt-form textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  background: rgba(12, 16, 24, 0.5);
+  color: #f5efe3;
+  padding: 12px 14px;
+  outline: none;
+}
+
+.prompt-form input:focus,
+.prompt-form textarea:focus {
+  border-color: rgba(255, 183, 134, 0.8);
+  box-shadow: 0 0 0 3px rgba(255, 183, 134, 0.14);
+}
+
+.prompt-form textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.prompt-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.prompt-actions .primary-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .error-title {
   margin: 0 0 6px;
   color: #ff9f8f;
+  font-weight: 600;
+}
+
+.success-title {
+  margin: 12px 0 0;
+  color: #7ee081;
   font-weight: 600;
 }
 

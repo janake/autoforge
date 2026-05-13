@@ -451,6 +451,17 @@ Taskok
 Megjegyzes
 - A job processor a queued jobokat futtatott státuszokon, patch generáláson és Git broker híváson keresztül PR_OPENED vagy FAILED állapotba viszi.
 
+## 0.1.40
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-225`: Jira kulcsos prompt beküldő felület
+
+Megjegyzes
+- A web UI authenticated prompt submit formot kap, amely Jira issue key-vel hoz létre queued jobot a backendben.
+
 ## 0.1.39
 
 Statusz
