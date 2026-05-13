@@ -20,7 +20,7 @@ public class Job {
   @Column(name = "id", nullable = false, updatable = false, length = 36)
   private String id;
 
-  @Column(name = "jira_issue_key", nullable = false, length = 32, unique = true)
+  @Column(name = "jira_issue_key", length = 32, unique = true)
   private String jiraIssueKey;
 
   @Column(name = "prompt", nullable = false, length = 4000)
@@ -63,6 +63,10 @@ public class Job {
 
   public static Job createQueued(String jiraIssueKey, String prompt, String targetRepository, String baseBranch) {
     return new Job(jiraIssueKey, prompt, targetRepository, baseBranch, JobStatus.QUEUED);
+  }
+
+  public static Job createQueued(String prompt, String targetRepository, String baseBranch) {
+    return createQueued(null, prompt, targetRepository, baseBranch);
   }
 
   @PrePersist

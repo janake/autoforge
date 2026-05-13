@@ -1,6 +1,6 @@
 package org.autoforge.backend.service;
 
-import java.util.regex.Pattern;
+import org.autoforge.backend.config.BackendMvpProperties;
 import org.autoforge.backend.domain.Job;
 import org.autoforge.backend.domain.JobStatus;
 import org.autoforge.backend.dto.CreateJobRequest;
@@ -15,29 +15,22 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class JobService {
 
-  private static final Pattern JIRA_KEY_PATTERN = Pattern.compile("^[A-Z][A-Z0-9]+-[0-9]+$");
-
   private final JobRepository jobRepository;
   private final AuditService auditService;
+  private final BackendMvpProperties properties;
 
   @Transactional
   public CreateJobResponse createJob(CreateJobRequest request) {
-    if (!JIRA_KEY_PATTERN.matcher(request.jiraIssueKey()).matches()) {
-      throw new IllegalArgumentException("Invalid Jira issue key");
-    }
-
     Job saved = jobRepository.save(Job.createQueued(
-      request.jiraIssueKey(),
       request.prompt(),
-      request.targetRepository(),
-      request.baseBranch()
+      configuredTargetRepository(),
+      configuredBaseBranch()
     ));
 
-    auditService.logJobCreated(saved, "system", request.prompt(), request.targetRepository(), request.baseBranch());
+    auditService.logJobCreated(saved, "system", request.prompt(), saved.getTargetRepository(), saved.getBaseBranch());
 
     return new CreateJobResponse(
       saved.getId(),
-      saved.getJiraIssueKey(),
       saved.getStatus().name()
     );
   }
@@ -48,7 +41,6 @@ public class JobService {
 
     return new JobResponse(
       job.getId(),
-      job.getJiraIssueKey(),
       job.getPrompt(),
       job.getTargetRepository(),
       job.getBaseBranch(),
@@ -58,6 +50,23 @@ public class JobService {
       job.getCreatedAt(),
       job.getUpdatedAt()
     );
+  }
+
+  private String configuredTargetRepository() {
+    BackendMvpProperties.Github github = properties.github();
+    if (github == null || github.owner() == null || github.owner().isBlank()) {
+      throw new IllegalStateException("Missing AUTOFORGE_GITHUB_OWNER configuration");
+    }
+    if (github.repo() == null || github.repo().isBlank()) {
+      throw new IllegalStateException("Missing AUTOFORGE_GITHUB_REPO configuration");
+    }
+
+    return "%s/%s".formatted(github.owner(), github.repo());
+  }
+
+  private String configuredBaseBranch() {
+    String baseBranch = properties.github() == null ? null : properties.github().baseBranch();
+    return (baseBranch == null || baseBranch.isBlank()) ? "main" : baseBranch;
   }
 
   @Transactional

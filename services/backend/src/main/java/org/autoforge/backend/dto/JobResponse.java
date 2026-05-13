@@ -4,7 +4,6 @@ import java.time.Instant;
 
 public record JobResponse(
   String jobId,
-  String jiraIssueKey,
   String prompt,
   String targetRepository,
   String baseBranch,

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.mockito.ArgumentCaptor;
 import org.autoforge.backend.domain.Job;
 import org.autoforge.backend.domain.JobStatus;
 import org.autoforge.backend.dto.GeneratedPatchResponse;
@@ -67,7 +68,6 @@ class JobProcessorServiceTest {
       );
 
       Job job = jobRepository.saveAndFlush(Job.createQueued(
-        "AUTO-211",
         "Process queued job",
         sourceRepository.toUri().toString(),
         "main"
@@ -89,7 +89,9 @@ class JobProcessorServiceTest {
       Job updated = jobRepository.findById(job.getId()).orElseThrow();
       assertThat(updated.getStatus()).isEqualTo(JobStatus.PR_OPENED);
       assertThat(updated.getPrUrl()).isEqualTo("https://github.com/org/repo/pull/123");
-      verify(gitPublishService).pushBranchAndOpenPr(any(), any(), any());
+      ArgumentCaptor<CreatePullRequestRequest> requestCaptor = ArgumentCaptor.forClass(CreatePullRequestRequest.class);
+      verify(gitPublishService).pushBranchAndOpenPr(any(), requestCaptor.capture(), any());
+      assertThat(requestCaptor.getValue().branchName()).startsWith("autoforge/JOB-");
     } finally {
       GitPaths.deleteRecursively(sourceRepository);
     }

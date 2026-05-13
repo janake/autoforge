@@ -11,21 +11,16 @@ export type BackendMeResponse = {
 };
 
 export type CreateJobRequest = {
-  jiraIssueKey: string;
   prompt: string;
-  targetRepository: string;
-  baseBranch: string;
 };
 
 export type CreateJobResponse = {
   jobId: string;
-  jiraIssueKey: string;
   status: string;
 };
 
 export type JobResponse = {
   jobId: string;
-  jiraIssueKey: string;
   prompt: string;
   targetRepository: string;
   baseBranch: string;

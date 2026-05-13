@@ -1,5 +1,6 @@
 package org.autoforge.backend.service;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.autoforge.backend.domain.AuditEventType;
 import org.autoforge.backend.domain.AuditLog;
@@ -28,13 +29,16 @@ public class AuditService {
 
   @Transactional
   public AuditLog logJobCreated(Job job, String userSubject, String prompt, String targetRepository, String baseBranch) {
-    return logEvent(job.getId(), userSubject, AuditEventType.JOB_CREATED, Map.of(
-      "jiraIssueKey", job.getJiraIssueKey(),
-      "prompt", prompt,
-      "targetRepository", targetRepository,
-      "baseBranch", baseBranch,
-      "status", job.getStatus().name()
-    ));
+    Map<String, String> details = new HashMap<>();
+    details.put("prompt", prompt);
+    details.put("targetRepository", targetRepository);
+    details.put("baseBranch", baseBranch);
+    details.put("status", job.getStatus().name());
+    if (job.getJiraIssueKey() != null && !job.getJiraIssueKey().isBlank()) {
+      details.put("jiraIssueKey", job.getJiraIssueKey());
+    }
+
+    return logEvent(job.getId(), userSubject, AuditEventType.JOB_CREATED, details);
   }
 
   @Transactional
