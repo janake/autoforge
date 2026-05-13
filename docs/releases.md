@@ -428,3 +428,14 @@ Taskok
 
 Megjegyzes
 - A Git broker a klónozott repositoryban unified diffből commitot készít, és a commit SHA-t visszaadja a további PR flow-hoz.
+
+## 0.1.37
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-217`: Branch push és GitHub PR nyitás
+
+Megjegyzes
+- A Git broker a remote branchet pusholja és GitHub PR-t nyit a megadott title/body értékekkel.
