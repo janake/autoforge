@@ -18,7 +18,7 @@ feature/auto-212-patch-application
 
 ## PR
 
-- pending
+- PR #85
 
 ## Cél
 
@@ -45,6 +45,7 @@ A repo előkészítés után a patch ténylegesen érvényesüljenek, és vissza
 - [x] Áttekintettem az AUTO-212 backlog scope-ját.
 - [x] Létrehoztam a patch application és commit service-t.
 - [x] Hozzáadtam a backend unit teszteket.
+- [x] A PR megnyitva review-ra.
 
 ## Eredmény
 
