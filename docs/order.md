@@ -1,5 +1,5 @@
 megvalósítási sorrend:
-Aktuális MVP sorrend Jira kulcsokkal
+Aktuális MVP sorrend promptból induló Jira task flow-val
 
 AUTO-175 - Spring Boot backend alap és API konvenciók - done
 AUTO-179 - Job entity, repository és adatbázis séma - done

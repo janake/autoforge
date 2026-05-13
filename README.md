@@ -78,3 +78,10 @@ Ez a runbook csak helyi fejlesztésre vonatkozik; a szerveres adatkezelés az Or
 - `POST /api/v1/git/pr`
 - Request mezők: `repositoryUrl`, `baseBranch`, `branchName`, `commitMessage`, `pullRequestTitle`, `pullRequestBody`, `patch`
 - Response mezők: `prUrl`, `branchName`, `commitSha`
+
+## Prompt-first MVP flow
+
+- A user promptot ad meg.
+- A rendszer ebből Jira taskot hoz létre.
+- A Jira automatikusan issue key-t ad a tasknak.
+- Az Autoforge ezt az issue key-t használja a jobhoz, branchhez, commit message-hez és PR-hez.

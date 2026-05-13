@@ -406,3 +406,14 @@ Taskok
 
 Megjegyzes
 - A Git broker a repository klónozását, base branch checkoutot és feature branch létrehozást végzi temp workspace-ben.
+
+## 0.1.35
+
+Statusz
+- in progress
+
+Taskok
+- `BUG-18`: Prompt-first MVP flow documentation mismatch
+
+Megjegyzes
+- A repo dokumentáció prompt-first modellre lett igazítva: a user promptot ad meg, ebből Jira task jön létre, és a Jira issue key megy tovább a flow-ban.
