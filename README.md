@@ -72,3 +72,9 @@ A legkisebb helyi fejlesztői környezet a gyökérben lévő `docker-compose.ym
 6. Állítsd le a stack-et: `docker compose down`
 
 Ez a runbook csak helyi fejlesztésre vonatkozik; a szerveres adatkezelés az Oracle Always Free / Autonomous Database irányhoz igazodik.
+
+## Git broker contract
+
+- `POST /api/v1/git/pr`
+- Request mezők: `repositoryUrl`, `baseBranch`, `branchName`, `commitMessage`, `pullRequestTitle`, `pullRequestBody`, `patch`
+- Response mezők: `prUrl`, `branchName`, `commitSha`
