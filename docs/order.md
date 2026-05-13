@@ -18,4 +18,4 @@ AUTO-225 - Jira kulcsos prompt beküldő felület - done
 AUTO-230 - Job státusz oldal pollinggal és PR linkkel - pending
 AUTO-235 - MVP security baseline - pending
 AUTO-269 - End-to-end MVP smoke test - pending
-AUTO-270 - Jira-first docs cleanup - review
+AUTO-270 - Jira-first docs cleanup - done
