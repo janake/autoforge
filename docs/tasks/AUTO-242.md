@@ -1,4 +1,4 @@
-# [AUTO-242] MVP Jira issue key validáció és tárolás
+# [AUTO-242] MVP Jira issue key validáció és tárolás - done
 
 ## Feladat leírása
 
@@ -6,7 +6,7 @@ A user által megadott Jira issue key legyen formailag validálva, és a jobhoz 
 
 ## Statusz
 
-in_progress
+completed
 
 ## Verzió
 
@@ -14,11 +14,11 @@ in_progress
 
 ## Branch
 
-feature/AUTO-242-jira-key-validation
+auto-242-job-intake
 
 ## PR
 
-- (Nincs még)
+- https://github.com/janake/autoforge/pull/75
 
 ## Cél
 
@@ -44,4 +44,4 @@ A backend job létrehozó folyamata megbízható Jira kulcsot fogadjon, és azt 
 
 ## Eredmény
 
-A job intake útvonal készen áll a Jira key alapú munkafolyamatra.
+A job intake útvonal merge-elve van, és a Jira key alapú munkafolyamatra készen áll.
