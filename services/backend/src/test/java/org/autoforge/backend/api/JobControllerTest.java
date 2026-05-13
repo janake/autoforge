@@ -43,30 +43,27 @@ class JobControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
-            "jiraIssueKey": "AUTO-183",
-            "prompt": "Implement job creation API",
-            "targetRepository": "janake/autoforge",
-            "baseBranch": "main"
+            "prompt": "Implement job creation API"
           }
           """))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.jobId").isNotEmpty())
-      .andExpect(jsonPath("$.jiraIssueKey").value("AUTO-183"))
       .andExpect(jsonPath("$.status").value("QUEUED"));
 
-    assertThat(jobRepository.findByJiraIssueKey("AUTO-183")).hasValueSatisfying(job -> {
-      assertThat(job.getPrompt()).isEqualTo("Implement job creation API");
-      assertThat(job.getStatus().name()).isEqualTo("QUEUED");
-    });
+    var job = jobRepository.findAll().getFirst();
+    assertThat(job.getJiraIssueKey()).isNull();
+    assertThat(job.getPrompt()).isEqualTo("Implement job creation API");
+    assertThat(job.getTargetRepository()).isEqualTo("prodet/autoforge");
+    assertThat(job.getBaseBranch()).isEqualTo("main");
+    assertThat(job.getStatus().name()).isEqualTo("QUEUED");
 
-    var job = jobRepository.findByJiraIssueKey("AUTO-183").orElseThrow();
     var auditLogs = auditLogRepository.findByJobIdOrderByTimestampAsc(job.getId());
     assertThat(auditLogs).hasSize(1);
     assertThat(auditLogs.get(0).getEventType().name()).isEqualTo("JOB_CREATED");
   }
 
   @Test
-  void rejectsInvalidJiraKey() throws Exception {
+  void ignoresClientSuppliedJiraKeyAndRepositoryFields() throws Exception {
     mockMvc.perform(post("/api/v1/jobs")
         .with(jwt())
         .contentType(MediaType.APPLICATION_JSON)
@@ -74,12 +71,17 @@ class JobControllerTest {
           {
             "jiraIssueKey": "bad-key",
             "prompt": "Implement job intake",
-            "targetRepository": "janake/autoforge",
-            "baseBranch": "main"
+            "targetRepository": "attacker/repo",
+            "baseBranch": "feature/evil"
           }
           """))
-      .andExpect(status().isBadRequest())
-      .andExpect(jsonPath("$.status").value(400));
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("QUEUED"));
+
+    var job = jobRepository.findAll().getFirst();
+    assertThat(job.getJiraIssueKey()).isNull();
+    assertThat(job.getTargetRepository()).isEqualTo("prodet/autoforge");
+    assertThat(job.getBaseBranch()).isEqualTo("main");
   }
 
   @Test
@@ -89,10 +91,7 @@ class JobControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
-            "jiraIssueKey": "AUTO-183",
-            "prompt": "",
-            "targetRepository": "janake/autoforge",
-            "baseBranch": "main"
+            "prompt": ""
           }
           """))
       .andExpect(status().isBadRequest())
@@ -109,7 +108,6 @@ class JobControllerTest {
         .with(jwt()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.jobId").value(saved.getId()))
-      .andExpect(jsonPath("$.jiraIssueKey").value("AUTO-187"))
       .andExpect(jsonPath("$.prompt").value("Check job status"))
       .andExpect(jsonPath("$.status").value("QUEUED"))
       .andExpect(jsonPath("$.targetRepository").value("janake/autoforge"))

@@ -85,13 +85,13 @@ Happy path:
 
 1. Start the local stack.
 2. Sign in to the web app.
-3. Submit a job with a valid Jira key, prompt, sample repo target, and `main`.
+3. Submit a job with a prompt; repository and base branch come from backend configuration.
 4. Wait for the job status panel to show `PR_OPENED`.
 5. Open the PR link and verify the generated branch and patch.
 
 Failure check:
 
-1. Submit the form with an invalid Jira key.
+1. Submit the form with an empty prompt.
 2. Confirm the backend rejects the request with a 400 response.
 
 Automated smoke coverage:
@@ -117,6 +117,6 @@ Automated smoke coverage:
 ## Prompt-first MVP flow
 
 - A user promptot ad meg.
-- A rendszer ebből Jira taskot hoz létre.
-- A Jira automatikusan issue key-t ad a tasknak.
-- Az Autoforge ezt az issue key-t használja a jobhoz, branchhez, commit message-hez és PR-hez.
+- A backend queued jobot hoz létre, a repositoryt és base branchet konfigurációból veszi.
+- A Jira issue key-t később Jira generálja, nem user input.
+- Amikor a Jira issue létrehozás be lesz kötve, az Autoforge azt használja branchhez, commit message-hez és PR-hez.

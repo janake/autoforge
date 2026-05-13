@@ -57,17 +57,26 @@ public class JobProcessorService {
   }
 
   private CreatePullRequestRequest createPullRequestRequest(Job job, GeneratedPatchResponse generatedPatch) {
-    String branchName = "autoforge/%s-job".formatted(job.getJiraIssueKey());
+    String reference = jobReference(job);
+    String branchName = "autoforge/%s-job".formatted(reference);
 
     return new CreatePullRequestRequest(
       toRepositoryUrl(job.getTargetRepository()),
       job.getBaseBranch(),
       branchName,
-      "%s Apply generated patch".formatted(job.getJiraIssueKey()),
-      "%s: %s".formatted(job.getJiraIssueKey(), generatedPatch.summary()),
+      "%s Apply generated patch".formatted(reference),
+      "%s: %s".formatted(reference, generatedPatch.summary()),
       job.getPrompt(),
       generatedPatch.patch()
     );
+  }
+
+  private String jobReference(Job job) {
+    if (job.getJiraIssueKey() != null && !job.getJiraIssueKey().isBlank()) {
+      return job.getJiraIssueKey();
+    }
+
+    return "JOB-%s".formatted(job.getId().substring(0, 8));
   }
 
   private String toRepositoryUrl(String targetRepository) {

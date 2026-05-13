@@ -69,7 +69,7 @@ function PublicHero({ onSignIn }: { onSignIn: () => void }) {
 type JobSubmissionState =
   | { status: "idle" }
   | { status: "submitting" }
-  | { status: "success"; jobId: string; jiraIssueKey: string }
+  | { status: "success"; jobId: string }
   | { status: "error"; message: string };
 
 type TrackedJobState =
@@ -219,10 +219,7 @@ function JobStatusPanel({ jobId }: { jobId: string }) {
 
 function PromptSubmissionPanel({ onJobCreated }: { onJobCreated: (jobId: string) => void }) {
   const [form, setForm] = useState<CreateJobRequest>({
-    jiraIssueKey: "AUTO-225",
     prompt: "",
-    targetRepository: "",
-    baseBranch: "main",
   });
   const [submission, setSubmission] = useState<JobSubmissionState>({ status: "idle" });
 
@@ -236,7 +233,7 @@ function PromptSubmissionPanel({ onJobCreated }: { onJobCreated: (jobId: string)
 
     try {
       const response = await postAuthedJson<CreateJobResponse>("/v1/jobs", form);
-      setSubmission({ status: "success", jobId: response.jobId, jiraIssueKey: response.jiraIssueKey });
+      setSubmission({ status: "success", jobId: response.jobId });
       onJobCreated(response.jobId);
     } catch (error) {
       setSubmission({
@@ -250,27 +247,13 @@ function PromptSubmissionPanel({ onJobCreated }: { onJobCreated: (jobId: string)
     <article className="workspace-panel" id="prompt">
       <div className="section-head">
         <h2>Submit prompt</h2>
-        <span className="pill">Jira</span>
+        <span className="pill">Prompt</span>
       </div>
       <p className="muted">
-        Enter the Jira issue key, prompt, target repository, and base branch. The backend will
-        create the queued job from that request.
+        Enter the prompt. The backend will create the queued job and use repository settings from configuration.
       </p>
 
       <form className="prompt-form" onSubmit={onSubmit}>
-        <label>
-          <span>Jira issue key</span>
-          <input
-            name="jiraIssueKey"
-            type="text"
-            value={form.jiraIssueKey}
-            onChange={(event) => updateField("jiraIssueKey", event.target.value)}
-            placeholder="AUTO-225"
-            autoComplete="off"
-            required
-          />
-        </label>
-
         <label>
           <span>Prompt</span>
           <textarea
@@ -279,32 +262,6 @@ function PromptSubmissionPanel({ onJobCreated }: { onJobCreated: (jobId: string)
             onChange={(event) => updateField("prompt", event.target.value)}
             placeholder="Describe the task you want the agent to carry out"
             rows={6}
-            required
-          />
-        </label>
-
-        <label>
-          <span>Target repository</span>
-          <input
-            name="targetRepository"
-            type="text"
-            value={form.targetRepository}
-            onChange={(event) => updateField("targetRepository", event.target.value)}
-            placeholder="owner/repo"
-            autoComplete="off"
-            required
-          />
-        </label>
-
-        <label>
-          <span>Base branch</span>
-          <input
-            name="baseBranch"
-            type="text"
-            value={form.baseBranch}
-            onChange={(event) => updateField("baseBranch", event.target.value)}
-            placeholder="main"
-            autoComplete="off"
             required
           />
         </label>
@@ -321,7 +278,7 @@ function PromptSubmissionPanel({ onJobCreated }: { onJobCreated: (jobId: string)
 
       {submission.status === "success" && (
         <p className="success-title">
-          Job {submission.jiraIssueKey} created as {submission.jobId}.
+          Job created as {submission.jobId}.
         </p>
       )}
 

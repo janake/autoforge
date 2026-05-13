@@ -68,6 +68,7 @@ For any non-trivial code, infra, workflow, or documentation task, do the followi
 - If the current branch belongs to a different Jira task, stop and create a dedicated branch for the new task before editing files.
 - If a mistaken branch or PR was created, close it and create the correct one instead of continuing the mistake.
 - If the target code change is already on `main`, do not fabricate a duplicate code diff. Document the situation honestly in the task and PR.
+- If any tracked repository file is changed, the task must end with a commit, branch push, and open PR. Do not wait for the user to ask for the PR separately.
 
 ## Verification
 

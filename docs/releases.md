@@ -336,10 +336,10 @@ Statusz
 - completed
 
 Taskok
-- `AUTO-242`: MVP Jira issue key validáció és tárolás - done
+- `AUTO-242`: MVP prompt alapú job létrehozás - done
 
 Megjegyzes
-- A job létrehozó API Jira key validációval és tárolással ebben a verzióban bevezetésre került.
+- A job létrehozó API prompt alapján hoz létre queued jobot; Jira key-t nem kér a usertől.
 
 ## 0.1.29
 
@@ -416,7 +416,7 @@ Taskok
 - `BUG-18`: Prompt-first MVP flow documentation mismatch
 
 Megjegyzes
-- A repo dokumentáció prompt-first modellre lett igazítva: a user promptot ad meg, ebből Jira task jön létre, és a Jira issue key megy tovább a flow-ban.
+- A repo dokumentáció prompt-first modellre lett igazítva: a user promptot ad meg, a Jira issue key-t pedig Jira generálja, nem user input.
 
 ## 0.1.36
 
@@ -468,10 +468,10 @@ Statusz
 - in progress
 
 Taskok
-- `AUTO-225`: Jira kulcsos prompt beküldő felület
+- `AUTO-225`: Prompt beküldő felület
 
 Megjegyzes
-- A web UI authenticated prompt submit formot kap, amely Jira issue key-vel hoz létre queued jobot a backendben.
+- A web UI authenticated prompt submit formot kap, amely queued jobot hoz létre a backendben.
 
 ## 0.1.41
 
