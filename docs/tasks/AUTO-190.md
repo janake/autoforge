@@ -18,7 +18,7 @@ auto-190-audit-log-lombok
 
 ## PR
 
-- (Nyitás alatt)
+- https://github.com/janake/autoforge/pull/80
 
 ## Cél
 
