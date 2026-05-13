@@ -73,6 +73,41 @@ A legkisebb helyi fejlesztői környezet a gyökérben lévő `docker-compose.ym
 
 Ez a runbook csak helyi fejlesztésre vonatkozik; a szerveres adatkezelés az Oracle Always Free / Autonomous Database irányhoz igazodik.
 
+## MVP Smoke Test
+
+Sample target:
+
+- Repository URL: `https://github.com/janake/autoforge`
+- Base branch: `main`
+- Mock patch target: `autoforge-mock-ai.txt`
+
+Happy path:
+
+1. Start the local stack.
+2. Sign in to the web app.
+3. Submit a job with a valid Jira key, prompt, sample repo target, and `main`.
+4. Wait for the job status panel to show `PR_OPENED`.
+5. Open the PR link and verify the generated branch and patch.
+
+Failure check:
+
+1. Submit the form with an invalid Jira key.
+2. Confirm the backend rejects the request with a 400 response.
+
+Automated smoke coverage:
+
+- `mvn -q -f services/backend/pom.xml -Dtest=JobProcessorServiceTest test`
+
+## MVP Release Checklist
+
+- Build passes for web and backend.
+- `docker compose up --build` starts the local stack.
+- Health endpoint returns OK.
+- Job creation succeeds from the UI.
+- Job processing reaches `PR_OPENED`.
+- PR link is visible in the UI.
+- Secret values do not appear in logs.
+
 ## Git broker contract
 
 - `POST /api/v1/git/pr`
