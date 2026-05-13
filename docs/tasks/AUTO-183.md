@@ -18,7 +18,7 @@ auto-183-create-job-api
 
 ## PR
 
-- (Nyitás alatt)
+- https://github.com/janake/autoforge/pull/77
 
 ## Cél
 
