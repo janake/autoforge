@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { getRuntimeConfig } from "./runtime-config";
 import { initializeKeycloak, loadAuthedJson, postAuthedJson, signIn, signOut } from "./auth/keycloak";
-import type { BackendMeResponse, CreateJobRequest, CreateJobResponse } from "./types";
+import type { BackendMeResponse, CreateJobRequest, CreateJobResponse, JobResponse } from "./types";
 
 type SessionState =
   | { status: "loading" }
@@ -27,6 +27,7 @@ const publicSignals = [
 const dashboardNav = [
   { label: "Overview", href: "#overview" },
   { label: "Jobs", href: "#jobs" },
+  { label: "Status", href: "#job-status" },
   { label: "Jira", href: "#jira" },
   { label: "Git", href: "#git" },
   { label: "Runtime", href: "#runtime" },
@@ -71,7 +72,152 @@ type JobSubmissionState =
   | { status: "success"; jobId: string; jiraIssueKey: string }
   | { status: "error"; message: string };
 
-function PromptSubmissionPanel() {
+type TrackedJobState =
+  | { status: "idle" }
+  | { status: "loading"; jobId: string }
+  | { status: "ready"; job: JobResponse }
+  | { status: "error"; jobId: string; message: string };
+
+function readJobIdFromUrl(): string {
+  return new URLSearchParams(window.location.search).get("jobId") ?? "";
+}
+
+function formatTimestamp(iso: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(iso));
+}
+
+function syncJobIdInUrl(jobId: string): void {
+  const url = new URL(window.location.href);
+
+  if (jobId) {
+    url.searchParams.set("jobId", jobId);
+  } else {
+    url.searchParams.delete("jobId");
+  }
+
+  window.history.replaceState({}, "", url);
+}
+
+function JobStatusPanel({ jobId }: { jobId: string }) {
+  const [state, setState] = useState<TrackedJobState>({ status: "loading", jobId });
+
+  useEffect(() => {
+    let cancelled = false;
+    let timer: number | undefined;
+
+    const poll = async () => {
+      try {
+        const job = await loadAuthedJson<JobResponse>(`/v1/jobs/${jobId}`);
+
+        if (cancelled) {
+          return;
+        }
+
+        setState({ status: "ready", job });
+
+        if (job.status !== "PR_OPENED" && job.status !== "FAILED") {
+          timer = window.setTimeout(poll, 4000);
+        }
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setState({
+          status: "error",
+          jobId,
+          message: error instanceof Error ? error.message : "Unable to load job status.",
+        });
+        timer = window.setTimeout(poll, 6000);
+      }
+    };
+
+    setState({ status: "loading", jobId });
+    void poll();
+
+    return () => {
+      cancelled = true;
+
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+      }
+    };
+  }, [jobId]);
+
+  const resolvedStatus = state.status === "ready" ? state.job.status : "LOADING";
+  const statusTone =
+    resolvedStatus === "PR_OPENED"
+      ? "done"
+      : resolvedStatus === "FAILED"
+        ? "failed"
+        : resolvedStatus === "LOADING"
+          ? "pending"
+          : "running";
+
+  return (
+    <article className="workspace-panel job-status-panel" id="job-status">
+      <div className="section-head">
+        <h2>Job status</h2>
+        <span className={`pill status-pill ${statusTone}`}>{statusTone}</span>
+      </div>
+      <p className="muted">Polling job {jobId} until the PR link becomes available.</p>
+
+      {state.status === "error" && <p className="error-title">{state.message}</p>}
+
+      {state.status === "ready" ? (
+        <dl className="profile-list compact">
+          <div>
+            <dt>Job</dt>
+            <dd>{state.job.jobId}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>{state.job.status}</dd>
+          </div>
+          <div>
+            <dt>Repository</dt>
+            <dd>{state.job.targetRepository}</dd>
+          </div>
+          <div>
+            <dt>Base branch</dt>
+            <dd>{state.job.baseBranch}</dd>
+          </div>
+          <div>
+            <dt>Updated</dt>
+            <dd>{formatTimestamp(state.job.updatedAt)}</dd>
+          </div>
+          <div>
+            <dt>PR</dt>
+            <dd>
+              {state.job.prUrl ? (
+                <a className="job-link" href={state.job.prUrl} target="_blank" rel="noreferrer">
+                  Open pull request
+                </a>
+              ) : (
+                "waiting for PR_OPENED"
+              )}
+            </dd>
+          </div>
+          {state.job.errorMessage && (
+            <div>
+              <dt>Failure</dt>
+              <dd>{state.job.errorMessage}</dd>
+            </div>
+          )}
+        </dl>
+      ) : state.status === "loading" ? (
+        <p className="muted">Loading job details...</p>
+      ) : (
+        <p className="muted">Retrying the job lookup in a few seconds.</p>
+      )}
+    </article>
+  );
+}
+
+function PromptSubmissionPanel({ onJobCreated }: { onJobCreated: (jobId: string) => void }) {
   const [form, setForm] = useState<CreateJobRequest>({
     jiraIssueKey: "AUTO-225",
     prompt: "",
@@ -91,6 +237,7 @@ function PromptSubmissionPanel() {
     try {
       const response = await postAuthedJson<CreateJobResponse>("/v1/jobs", form);
       setSubmission({ status: "success", jobId: response.jobId, jiraIssueKey: response.jiraIssueKey });
+      onJobCreated(response.jobId);
     } catch (error) {
       setSubmission({
         status: "error",
@@ -227,9 +374,13 @@ function DashboardShell({
 function PrivateWorkspace({
   profile,
   onSignOut,
+  jobId,
+  onJobCreated,
 }: {
   profile: BackendMeResponse;
   onSignOut: () => void;
+  jobId: string;
+  onJobCreated: (jobId: string) => void;
 }) {
   const config = useMemo(() => getRuntimeConfig(), []);
 
@@ -283,7 +434,14 @@ function PrivateWorkspace({
       </section>
 
       <section className="workspace-grid" aria-label="User workspace">
-        <PromptSubmissionPanel />
+        <PromptSubmissionPanel
+          onJobCreated={(createdJobId) => {
+            onJobCreated(createdJobId);
+            syncJobIdInUrl(createdJobId);
+          }}
+        />
+
+        {jobId && <JobStatusPanel jobId={jobId} />}
 
         <article className="workspace-panel" id="jobs">
           <div className="section-head">
@@ -390,6 +548,7 @@ function PrivateWorkspace({
 
 function App() {
   const [session, setSession] = useState<SessionState>({ status: "loading" });
+  const [jobId, setJobId] = useState(() => readJobIdFromUrl());
   const apiRouteError =
     session.status === "error" && /Request failed with 404/.test(session.message);
 
@@ -467,7 +626,12 @@ function App() {
       )}
 
       {session.status === "ready" && (
-        <PrivateWorkspace profile={session.profile} onSignOut={() => void signOut()} />
+        <PrivateWorkspace
+          profile={session.profile}
+          onSignOut={() => void signOut()}
+          jobId={jobId}
+          onJobCreated={setJobId}
+        />
       )}
 
       {session.status === "error" && (
