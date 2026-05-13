@@ -384,3 +384,14 @@ Taskok
 
 Megjegyzes
 - Elkészült a determinisztikus mock patch generator, amely valid unified diffet ad vissza a backend flow teszteléséhez.
+
+## 0.1.33
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-204`: Git broker API contract
+
+Megjegyzes
+- Definiálásra került a Git broker create PR request/response contractja és a hozzá tartozó validation boundary.
