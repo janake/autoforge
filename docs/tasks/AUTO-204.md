@@ -18,7 +18,7 @@ feature/auto-204-git-broker-contract
 
 ## PR
 
-- pending
+- PR #82
 
 ## Cél
 
@@ -46,6 +46,7 @@ A job processor később egy stabil belső contracton keresztül tudjon PR létr
 - [x] Létrehoztam a request/response DTO-kat és a client interface-t.
 - [x] Hozzáadtam a validation unit tesztet.
 - [x] Frissítettem a README contract összefoglalóját.
+- [x] A PR megnyitva review-ra.
 
 ## Eredmény
 
