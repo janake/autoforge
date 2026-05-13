@@ -18,7 +18,7 @@ feature/auto-270-jira-docs-cleanup
 
 ## PR
 
-- pending
+- PR #90
 
 ## Cél
 
@@ -43,6 +43,7 @@ A repo docs oldala a Jira-first működéshez igazodjon: a részletes lokális t
 - [x] Áttekintettem a Jira MCP-n keresztül a merged PR-ek státuszát.
 - [x] A lokális task/epic artifactok törlésre kerültek a worktree-ben.
 - [x] Az order és release manifestet a jelenlegi Jira state-hez igazítottam.
+- [x] A PR megnyitva review-ra.
 
 ## Eredmény
 
