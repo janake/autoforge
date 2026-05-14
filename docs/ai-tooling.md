@@ -37,6 +37,24 @@ Feladata:
 - merge utani deploy viselkedes kovetese
 - release es release-note traceability tamogatasa
 
+### `github-actions`
+
+Feladata:
+
+- workflow run, job, step es artifact allapotok celzott diagnosztikaja
+- trigger, path filter, permission, secret/variable es runner kornyezet ellenorzese
+- main merge utani deploy viselkedes bizonyitasa logok alapjan
+- build, registry es deploy jobok kozti handoff hibak izolalasa
+
+### `ghcr-registry`
+
+Feladata:
+
+- GHCR package, image tag, digest es visibility allapot ellenorzese
+- deploy token scope, package permission es pull/push hiba szetvalasztasa
+- verziozott image tag es `package.json` verzio osszevetese registry allapottal
+- third-party image preload es cache viselkedes ellenorzese private host deploynal
+
 ### `jira`
 
 Feladata:
@@ -65,6 +83,24 @@ Feladata:
 - kontenerlogok es exec ellenorzesek
 - deploy eredmenyenek validalasa kontenerszinten
 
+### `docker-engine`
+
+Feladata:
+
+- Docker image, network, volume es daemon allapot ellenorzese
+- rovid eletu utility kontenerek futtatasi mintainak validalasa host telepites helyett
+- `DOCKER-USER` chain es metadata endpoint izolacio ellenorzese
+- Docker permission, image preload es local cache problemak szetvalasztasa
+
+### `firecracker`
+
+Feladata:
+
+- Firecracker microVM alapu izolacios dontesek elokeszitese
+- jailer, tap network, kernel/rootfs es metadata izolacio vizsgalata
+- kontener vs microVM trust boundary osszehasonlitasa AI/code execution munkaknal
+- kesobbi OpenCode vagy worker sandboxolas infrastrukturajanak tervezese
+
 ### `http-api`
 
 Feladata:
@@ -92,6 +128,15 @@ Feladata:
 - private/public kapcsolat es host elhelyezes validalasa
 - runtime problemak OCI-oldali okainak kizarasa vagy bizonyitasa
 
+### `oracle-cloud`
+
+Feladata:
+
+- OCI runtime, Always Free es host readiness dontesek ellenorzese
+- Dynamic Group, policy, instance principal es metadata endpoint feltetelek validalasa
+- VCN routing, security list, NSG, jump-host es private host eleres vizsgalata
+- OCI control-plane es SSH/Docker runtime bizonyitekok osszekapcsolasa
+
 ### `cloudflare`
 
 Feladata:
@@ -118,6 +163,34 @@ Feladata:
 - dependency tree ellenorzes
 - BOM drift kimutatasa
 - Java runtime osztalykonyvtar hibak gyors diagnosztikaja
+- Java 21-25, Maven compiler/toolchain es Lombok annotation processor kompatibilitas ellenorzese
+
+### `spring-framework`
+
+Feladata:
+
+- Spring Framework, Spring Boot, Spring Security, Spring Data es Spring Cloud diagnosztika
+- auto-configuration, profile, property binding es actuator viselkedes ellenorzese
+- datasource, JPA, transaction es repository problemak szetvalasztasa
+- Spring Cloud Gateway es backend Spring verzioillesztes kovetese
+
+### `java-platform`
+
+Feladata:
+
+- Java 21-25 nyelvi/runtime kompatibilitas ellenorzese
+- Maven compiler, toolchain, bytecode target, CI JDK es Docker runtime JDK osszhang vizsgalata
+- virtual threads, records, pattern matching, sealed types es uj JVM feature tradeoffok review-ja
+- classfile version, module path, GC, memory es container JVM viselkedes diagnosztikaja
+
+### `lombok`
+
+Feladata:
+
+- Lombok annotation processing es generalt kod ellenorzese
+- constructor, builder, equals/hashCode, logging es nullability feltetelezesek review-ja
+- Spring/JPA modellekben a Lombok mellekhatasok kiszurese
+- minimalis, explicit es Java/Spring kompatibilis Lombok hasznalat tamogatasa
 
 ### `node-workspace`
 
@@ -127,6 +200,24 @@ Feladata:
 - lockfile drift csokkentese
 - frontend csomagok telepitett allapotanak ellenorzese
 - verziozasi es package szintu meglepetesek csokkentese
+
+### `react-web`
+
+Feladata:
+
+- React, Vite es TypeScript web UI viselkedes diagnosztikaja
+- komponens, hook, form, routing, auth bootstrap es API integracio ellenorzese
+- browser runtime, CORS es gateway request hibak szetvalasztasa
+- modern React mintak hasznalata felesleges memoization nelkul, repo mintak szerint
+
+### `react-native`
+
+Feladata:
+
+- React Native / mobile surface tervezesi es diagnosztikai dontesek tamogatasa
+- shared React/domain kod es web-only Vite/browser feltetelezesek szetvalasztasa
+- navigation, Metro, native module, platform permission es mobile auth feltetelek review-ja
+- mobil API contract es auth flow elokeszitese explicit feladat eseten
 
 ### `diagram-architecture`
 
@@ -211,6 +302,42 @@ Feladata:
 - host env drift es compose drift ellenorzese
 - DNS, OCI, Vault es deploy script egyuttmozgasanak validalasa
 
+### `github-actions-ghcr-debug`
+
+Feladata:
+
+- GitHub Actions run/job logok elso valodi hibajanak izolalasa
+- GHCR image tag, digest, package visibility es deploy token scope ellenorzese
+- build -> registry -> private/public host image handoff bizonyitasa
+- workflow permission, secret, variable es path-filter drift kiszurese
+
+### `oracle-cloud-runtime-debug`
+
+Feladata:
+
+- Oracle Cloud compute, VCN, Vault, Dynamic Group es policy allapot ellenorzese
+- instance principal es metadata endpoint viselkedes validalasa deploy hibak elott
+- public/private host elhelyezes, jump-host es security list/NSG problemak szetvalasztasa
+- Always Free korlatok es reprodukalhato host readiness feltetelek figyelembe vetele
+
+### `container-runtime-debug`
+
+Feladata:
+
+- Docker image, Compose stack, daemon es host permission hibak izolalasa
+- ephemeral utility kontener mintak hasznalata host csomagtelepites helyett
+- kontener metadata endpoint kitettség es `DOCKER-USER` chain ellenorzese
+- image preload, local cache es tag drift verifikalasa deploy hibaknal
+
+### `microvm-runtime-isolation`
+
+Feladata:
+
+- Firecracker microVM izolacio szuksegessegenek eldontese magas kockazatu AI/code execution munkaknal
+- konteneres es microVM-es sandboxolas tradeoffjainak dokumentalasa
+- jailer, halozat, rootfs/kernel es metadata eleres felteteleinek review-ja
+- follow-up infra feladatok kijelolese, ha microVM iranyt valasztunk
+
 ### `backend-auth-runtime`
 
 Feladata:
@@ -219,6 +346,42 @@ Feladata:
 - local vs production tokenelfogadas kulonbsegenek feltarasa
 - issuer/JWKS/static key hibak szetvalasztasa
 - backend auth config es Keycloak realm viselkedes osszehangolasa
+
+### `spring-boot-java-runtime`
+
+Feladata:
+
+- Spring Boot profile, property, actuator, datasource es auto-config problemak vizsgalata
+- Spring Boot, Spring Cloud, Maven BOM, Java 21-25 es Docker runtime JDK osszhang ellenorzese
+- Java nyelvi/runtime verzio emeles hatasainak review-ja Java 25-ig
+- Lombok annotation processing es generalt kod hatasanak ellenorzese Spring/JPA komponensekben
+
+### `react-web-engineering`
+
+Feladata:
+
+- React web komponens, hook, form es routing viselkedes validalasa
+- Vite, TypeScript, API base URL, CORS es gateway integracio osszhangban tartasa
+- UI/auth hibaknal browser bizonyitek gyujtese kodolvasas helyett
+- repo design system es React mintak megorzese explicit valtoztatasi igenyig
+
+### `react-native-mobile-readiness`
+
+Feladata:
+
+- React Native bevezetes elotti web-only es reusable kodhatarok feltarasa
+- mobile auth, deep link, API, storage es platform permission feltetelek tisztazasa
+- Metro/native module es dependency dontesek explicit dokumentalasa
+- mobil scaffold hozzaadasanak elkerulese konkret task nelkul
+
+### `lombok-java-hygiene`
+
+Feladata:
+
+- Lombok Maven/CI annotation processor konfiguracio ellenorzese
+- `@Data`, builder, constructor, equals/hashCode es logging annotaciok hatasainak review-ja
+- explicit Java kod preferalasa, ha Lombok domain vagy persistence viselkedest takar el
+- Lombok kompatibilitas kovetese aktiv Java es Spring/JPA modellek mellett
 
 ### `e2e-repro`
 
@@ -302,6 +465,7 @@ Feladata:
 - public UI, browser runtime es auth callback felulet kezelese
 - frontend oldali request-trigger logika kezelese
 - user oldali regressziok reprodukcioja
+- React web es kesobbi React Native/mobile surface dontesek kezelese
 
 ### `api-auth`
 
@@ -310,6 +474,7 @@ Feladata:
 - backend API, JWT, claim es Keycloak contract kezelese
 - `/api/v1/me` es kapcsolodo auth endpointok viselkedese
 - frontend/backend auth szerzodes tisztan tartasa
+- Spring Boot, Java platform es Lombok hatasok figyelembe vetele backend valtozasoknal
 
 ### `edge-routing`
 
@@ -326,6 +491,8 @@ Feladata:
 - GitHub Actions, GHCR, OCI, Docker Compose es deploy pipeline felugyelete
 - public/private host runtime allapot validalasa
 - image tag drift, env drift es trigger drift kezelese
+- Docker Engine, ephemeral utility kontener es Firecracker/microVM izolacios dontesek kezelese
+- Oracle Cloud control-plane, GitHub Actions es GHCR registry bizonyitekok osszekapcsolasa deploy hibaknal
 
 ### `knowledge-governance`
 
@@ -349,8 +516,16 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 | **Login hiba / Redirect loop** | `app-surface` | `auth-debug` | `playwright` $\rightarrow$ `http-api` $\rightarrow$ `keycloak-admin` |
 | **502 Bad Gateway / 404 Route** | `edge-routing` | `gateway-debug` | `http-api` $\rightarrow$ `ssh-remote-shell` $\rightarrow$ `docker-compose` |
 | **Deploy nem történt / Rossz verzió** | `delivery-runtime` | `oci-deploy-debug` | `github` $\rightarrow$ `docker-compose` $\rightarrow$ `ssh-remote-shell` |
+| **GitHub Actions / GHCR image hiba** | `delivery-runtime` | `github-actions-ghcr-debug` | `github-actions` $\rightarrow$ `ghcr-registry` $\rightarrow$ `github` |
+| **Oracle Cloud runtime / instance principal hiba** | `delivery-runtime` | `oracle-cloud-runtime-debug` | `oracle-cloud` $\rightarrow$ `oci` $\rightarrow$ `vault-secrets` |
+| **Docker runtime / utility kontener hiba** | `delivery-runtime` | `container-runtime-debug` | `docker-engine` $\rightarrow$ `docker-compose` $\rightarrow$ `ssh-remote-shell` |
+| **AI sandbox / microVM izoláció döntés** | `delivery-runtime` | `microvm-runtime-isolation` | `firecracker` $\rightarrow$ `docker-engine` $\rightarrow$ `ssh-remote-shell` |
 | **Jira backlog / story migráció** | `delivery-runtime` | `jira-management` | `jira` $\rightarrow$ `github` $\rightarrow$ `node-workspace` |
 | **JWT validációs hiba (Backend)** | `api-auth` | `backend-auth-runtime` | `http-api` $\rightarrow$ `maven-java-deps` $\rightarrow$ `keycloak-admin` |
+| **Spring Boot / Java runtime hiba** | `api-auth` | `spring-boot-java-runtime` | `spring-framework` $\rightarrow$ `maven-java-deps` $\rightarrow$ `java-platform` |
+| **React web UI hiba** | `app-surface` | `react-web-engineering` | `react-web` $\rightarrow$ `playwright` $\rightarrow$ `http-api` |
+| **React Native / mobile tervezés** | `app-surface` | `react-native-mobile-readiness` | `react-native` $\rightarrow$ `react-web` $\rightarrow$ `http-api` |
+| **Lombok / annotation processing hiba** | `api-auth` | `lombok-java-hygiene` | `lombok` $\rightarrow$ `maven-java-deps` $\rightarrow$ `java-platform` |
 | **Biztonsági audit / Sebezhetőség** | `security-compliance` | `security-audit` | `sast-scanner` $\rightarrow$ `dependency-audit` $\rightarrow$ `secret-scanner` |
 | **Prompt minőség / prompt injection** | `knowledge-governance` | `prompt-engineering` | `prompt-library` $\rightarrow$ `context7` $\rightarrow$ `secret-scanner` |
 | **Dokumentáció és realidadegyezetlen** | `knowledge-governance` | `docs-sync` | `oci` $\rightarrow$ `github` $\rightarrow$ `diagram-architecture` |
@@ -361,17 +536,27 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 
 - `playwright`
 - `github`
+- `github-actions`
+- `ghcr-registry`
 - `jira`
 - `ssh-remote-shell`
+- `docker-engine`
 - `docker-compose`
 - `http-api`
+- `react-web`
+- `spring-framework`
 
 ### Masodik kor
 
 - `keycloak-admin`
+- `oracle-cloud`
 - `oci`
 - `vault-secrets`
 - `cloudflare`
+- `firecracker`
+- `java-platform`
+- `lombok`
+- `react-native`
 
 ### Harmadik kor
 

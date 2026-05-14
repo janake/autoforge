@@ -8,46 +8,69 @@ groups:
     description: Public UI, browser runtime, callback state, and user-facing flow ownership.
     contains_mcps:
       - playwright
+      - react-web
+      - react-native
       - node-workspace
       - http-api
     contains_skills:
       - auth-debug
       - e2e-repro
+      - react-web-engineering
+      - react-native-mobile-readiness
 
   - id: api-auth
     enabled: true
     description: Backend API, JWT validation, claim handling, and Keycloak contract ownership.
     contains_mcps:
       - keycloak-admin
+      - spring-framework
       - maven-java-deps
+      - java-platform
+      - lombok
       - http-api
     contains_skills:
       - auth-debug
       - backend-auth-runtime
+      - spring-boot-java-runtime
+      - lombok-java-hygiene
 
   - id: edge-routing
     enabled: true
     description: Public ingress, Caddy, API gateway, path routing, and upstream behavior ownership.
     contains_mcps:
+      - spring-framework
       - docker-compose
       - ssh-remote-shell
       - http-api
     contains_skills:
       - gateway-debug
+      - spring-boot-java-runtime
 
   - id: delivery-runtime
     enabled: true
     description: GitHub Actions, OCI runtime, deploy triggers, image tags, and host state ownership.
     contains_mcps:
       - github
+      - github-actions
+      - ghcr-registry
       - jira
+      - oracle-cloud
       - oci
+      - docker-engine
       - docker-compose
+      - spring-framework
+      - java-platform
+      - firecracker
       - ssh-remote-shell
       - vault-secrets
       - cloudflare
     contains_skills:
       - oci-deploy-debug
+      - github-actions-ghcr-debug
+      - oracle-cloud-runtime-debug
+      - container-runtime-debug
+      - spring-boot-java-runtime
+      - microvm-runtime-isolation
       - release-versioning
       - git-management
       - jira-management
@@ -60,11 +83,14 @@ groups:
       - prompt-library
       - github
       - jira
+      - spring-framework
+      - react-web
     contains_skills:
       - docs-sync
       - release-versioning
       - prompt-engineering
       - jira-management
+      - react-web-engineering
 
   - id: security-compliance
     enabled: true
@@ -73,5 +99,10 @@ groups:
       - sast-scanner
       - secret-scanner
       - dependency-audit
+      - oracle-cloud
+      - docker-engine
+      - firecracker
     contains_skills:
       - security-audit
+      - oracle-cloud-runtime-debug
+      - microvm-runtime-isolation

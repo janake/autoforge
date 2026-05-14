@@ -25,6 +25,28 @@ mcps:
       - Correlate merged changes with workflow runs on main.
       - Check whether deploy workflows actually fired after merges.
 
+  - id: github-actions
+    enabled: true
+    priority: critical
+    category: delivery
+    description: GitHub Actions workflow, job, artifact, cache, permission, and runner diagnostics.
+    used_for:
+      - Read full workflow/job logs and isolate the first actionable failure.
+      - Verify workflow triggers, path filters, permissions, secrets, variables, and runner environment.
+      - Trace merge-to-deploy behavior across `main` pushes and PR checks.
+      - Diagnose artifact/image handoff failures between build, GHCR, and deploy jobs.
+
+  - id: ghcr-registry
+    enabled: true
+    priority: critical
+    category: delivery
+    description: GitHub Container Registry image, tag, digest, package permission, and pull/push diagnostics.
+    used_for:
+      - Verify GHCR package existence, tag availability, digests, and image ownership.
+      - Check deploy token scope, package visibility, and runner pull/push failures.
+      - Compare expected project version tags with registry state before deploy.
+      - Diagnose third-party image preload and cache behavior for private hosts.
+
   - id: jira
     enabled: true
     priority: critical
@@ -59,6 +81,28 @@ mcps:
       - Exec into gateway or backend containers for targeted checks.
       - Validate that deploy scripts resulted in the expected runtime state.
 
+  - id: docker-engine
+    enabled: true
+    priority: critical
+    category: runtime
+    description: Docker Engine inspection for images, networks, volumes, iptables integration, and one-shot utility containers.
+    used_for:
+      - Validate image availability, tags, digests, and local image cache state.
+      - Inspect Docker networks, volumes, and container runtime metadata exposure.
+      - Run short-lived utility containers such as OCI CLI without host package installation.
+      - Diagnose Docker daemon, permissions, and `DOCKER-USER` chain behavior.
+
+  - id: firecracker
+    enabled: true
+    priority: high
+    category: runtime-isolation
+    description: Firecracker microVM planning and diagnostics for stronger workload isolation.
+    used_for:
+      - Evaluate whether risky AI/code-execution workloads should run in microVMs instead of plain containers.
+      - Review jailer, tap networking, kernel/rootfs, and metadata isolation assumptions.
+      - Compare container, microVM, and host-level trust boundaries before runtime changes.
+      - Plan future sandboxing for OpenCode or self-improving worker execution.
+
   - id: http-api
     enabled: true
     priority: critical
@@ -92,6 +136,17 @@ mcps:
       - Confirm secret/Vault access assumptions for private runtime.
       - Trace OCI-side causes behind public/private connectivity problems.
 
+  - id: oracle-cloud
+    enabled: true
+    priority: critical
+    category: infra
+    description: Oracle Cloud runtime, identity, networking, instance principal, Always Free, and host readiness diagnostics.
+    used_for:
+      - Validate Dynamic Groups, policies, instance principal behavior, and metadata endpoint assumptions.
+      - Check private/public host placement, VCN routing, security lists, NSGs, and jump-host paths.
+      - Review Always Free resource constraints, block volumes, and host bootstrap requirements.
+      - Correlate OCI control-plane state with live SSH/Docker runtime state.
+
   - id: cloudflare
     enabled: true
     priority: high
@@ -118,12 +173,45 @@ mcps:
     enabled: true
     priority: high
     category: backend
-    description: Maven dependency and BOM inspection for Java services.
+    description: Maven dependency, Java toolchain, Lombok annotation processing, and BOM inspection for Java services.
     used_for:
       - Catch Spring Boot and Spring Cloud version mismatch issues.
       - Inspect runtime dependency trees for production-only breakage.
       - Validate gateway/backend dependency alignment before deploy.
-      - Support focused debugging of `NoSuchMethodError` and classpath conflicts.
+      - Support focused debugging of `NoSuchMethodError`, classpath, Java 21-25, and Lombok annotation processing conflicts.
+
+  - id: spring-framework
+    enabled: true
+    priority: high
+    category: backend
+    description: Spring Framework, Spring Boot, Spring Security, Spring Data, and Spring Cloud diagnostics.
+    used_for:
+      - Validate Spring Boot auto-configuration, profiles, properties, and actuator behavior.
+      - Diagnose Spring Security, JWT resource server, CORS, and filter-chain issues.
+      - Check Spring Data JPA, datasource, transaction, and repository behavior.
+      - Keep Spring Cloud Gateway and backend Spring dependency versions aligned.
+
+  - id: java-platform
+    enabled: true
+    priority: high
+    category: backend
+    description: Java language, JVM, toolchain, bytecode, and compatibility diagnostics up to Java 25.
+    used_for:
+      - Check Java 21 through Java 25 language/runtime compatibility before upgrades.
+      - Validate Maven compiler, toolchain, bytecode target, Docker runtime, and CI JDK alignment.
+      - Review virtual threads, records, pattern matching, sealed types, and newer JVM feature tradeoffs.
+      - Diagnose classfile version, module path, GC, memory, and container JVM behavior.
+
+  - id: lombok
+    enabled: true
+    priority: medium
+    category: backend
+    description: Lombok annotation processing, generated code, and maintainability review.
+    used_for:
+      - Validate Lombok dependency and annotation processor configuration.
+      - Review generated constructors, builders, equals/hashCode, logging, and nullability assumptions.
+      - Detect Lombok usage that hides domain behavior or persistence side effects.
+      - Keep Lombok use minimal, explicit, and compatible with Java/Spring tooling.
 
   - id: node-workspace
     enabled: true
@@ -135,6 +223,28 @@ mcps:
       - Detect frontend dependency drift across root and app-level packages.
       - Support reproducible installs for web and worker packages.
       - Reduce package-level surprises during CI and release bumps.
+
+  - id: react-web
+    enabled: true
+    priority: high
+    category: frontend
+    description: React, Vite, TypeScript, routing, state, and browser runtime diagnostics.
+    used_for:
+      - Validate React component behavior, hooks, forms, routing, and API integration.
+      - Check Vite/TypeScript build and browser runtime differences.
+      - Review modern React patterns, including avoiding unnecessary memoization unless the repo pattern requires it.
+      - Diagnose frontend state, auth bootstrap, CORS, and gateway request failures.
+
+  - id: react-native
+    enabled: true
+    priority: medium
+    category: mobile
+    description: React Native and Expo-style mobile surface planning and diagnostics.
+    used_for:
+      - Evaluate shared React/domain code boundaries before mobile work.
+      - Review navigation, native module, Metro, platform permission, and mobile auth assumptions.
+      - Keep React Native implementation separate from web-only Vite/browser assumptions.
+      - Plan API contracts and authentication flows that work for mobile clients.
 
   - id: diagram-architecture
     enabled: true
