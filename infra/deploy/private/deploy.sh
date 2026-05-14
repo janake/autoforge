@@ -70,7 +70,7 @@ ensure_metadata_block() {
   local iptables_cmd=(iptables)
 
   if ! command -v iptables >/dev/null 2>&1; then
-    echo "iptables is required to block the metadata endpoint." >&2
+    echo "iptables is required to block container access to the metadata endpoint." >&2
     exit 1
   fi
 
@@ -78,13 +78,18 @@ ensure_metadata_block() {
     if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
       iptables_cmd=(sudo -n iptables)
     else
-      echo "Passwordless sudo is required to block the metadata endpoint with iptables." >&2
+      echo "Passwordless sudo is required to block container access to the metadata endpoint with iptables." >&2
       exit 1
     fi
   fi
 
-  if ! "${iptables_cmd[@]}" -C OUTPUT -d "$metadata_ip" -j REJECT 2>/dev/null; then
-    "${iptables_cmd[@]}" -I OUTPUT 1 -d "$metadata_ip" -j REJECT
+  if ! "${iptables_cmd[@]}" -L DOCKER-USER -n >/dev/null 2>&1; then
+    echo "Docker DOCKER-USER iptables chain is required to block container metadata access." >&2
+    exit 1
+  fi
+
+  if ! "${iptables_cmd[@]}" -C DOCKER-USER -d "$metadata_ip" -j REJECT 2>/dev/null; then
+    "${iptables_cmd[@]}" -I DOCKER-USER 1 -d "$metadata_ip" -j REJECT
   fi
 }
 
