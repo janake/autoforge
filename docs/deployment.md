@@ -181,7 +181,7 @@ Minimum elofeltetelek:
 
 - A private instance legyen benne egy OCI Dynamic Groupban.
 - Legyen policy, amely engedi a Dynamic Groupnak a secret bundle olvasast abban a compartmentben vagy vaultban, ahol a ket secret van.
-- A private hoston legyen telepitve az OCI CLI, es az SSH-n futtatott non-interactive shell PATH-jaban is latszodjon.
+- Vault secret hasznalata eseten a private hoston legyen telepitve az OCI CLI, es az SSH-n futtatott non-interactive shell PATH-jaban is latszodjon.
 
 Pelda policy minta:
 
