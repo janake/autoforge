@@ -132,9 +132,15 @@ printf '\n' >> "$RUNTIME_ENV"
 
 COMPOSE_ARGS=(--env-file "$RUNTIME_ENV" -f docker-compose.private.yml)
 
-if ! command -v oci >/dev/null 2>&1; then
-  echo "OCI CLI is required on the private host to read OpenCode secrets from OCI Vault." >&2
-  exit 1
+if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] \
+  || [ -n "$OPENAI_API_KEY_SECRET_OCID" ] \
+  || [ -n "$GEMINI_API_KEY_SECRET_OCID" ] \
+  || [ -n "$DB_WALLET_PASSWORD_SECRET_OCID" ] \
+  || [ -n "$DB_PASSWORD_SECRET_OCID" ]; then
+  if ! command -v oci >/dev/null 2>&1; then
+    echo "OCI CLI is required on the private host to read configured secrets from OCI Vault." >&2
+    exit 1
+  fi
 fi
 
 if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ]; then
