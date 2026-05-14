@@ -67,14 +67,29 @@ get_vault_secret() {
 
 ensure_metadata_block() {
   local metadata_ip="169.254.169.254"
+  local iptables_cmd=(iptables)
 
-  if command -v iptables >/dev/null 2>&1; then
-    if ! iptables -C OUTPUT -d "$metadata_ip" -j REJECT 2>/dev/null; then
-      iptables -I OUTPUT 1 -d "$metadata_ip" -j REJECT
-    fi
-  else
-    echo "iptables is required to block the metadata endpoint." >&2
+  if ! command -v iptables >/dev/null 2>&1; then
+    echo "iptables is required to block container access to the metadata endpoint." >&2
     exit 1
+  fi
+
+  if [ "$EUID" -ne 0 ]; then
+    if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+      iptables_cmd=(sudo -n iptables)
+    else
+      echo "Passwordless sudo is required to block container access to the metadata endpoint with iptables." >&2
+      exit 1
+    fi
+  fi
+
+  if ! "${iptables_cmd[@]}" -L DOCKER-USER -n >/dev/null 2>&1; then
+    echo "Docker DOCKER-USER iptables chain is required to block container metadata access." >&2
+    exit 1
+  fi
+
+  if ! "${iptables_cmd[@]}" -C DOCKER-USER -d "$metadata_ip" -j REJECT 2>/dev/null; then
+    "${iptables_cmd[@]}" -I DOCKER-USER 1 -d "$metadata_ip" -j REJECT
   fi
 }
 
