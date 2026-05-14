@@ -10,6 +10,7 @@ BACKEND_IMAGE_ARCHIVE="$APP_DIR/autoforge-backend-image.tar.gz"
 OPENCODE_IMAGE_ARCHIVE="$APP_DIR/autoforge-opencode-image.tar.gz"
 PRIVATE_IMAGES_PRELOADED="${PRIVATE_IMAGES_PRELOADED:-false}"
 WALLET_DIR="$APP_DIR/wallet"
+OCI_CLI_VENV_DIR="$APP_DIR/.oci-cli"
 
 if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
@@ -53,6 +54,31 @@ get_env_value() {
   done < "$ENV_FILE"
 
   return 1
+}
+
+ensure_oci_cli() {
+  if command -v oci >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if [ -x "$OCI_CLI_VENV_DIR/bin/oci" ]; then
+    PATH="$OCI_CLI_VENV_DIR/bin:$PATH"
+    export PATH
+    return 0
+  fi
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "python3 is required to bootstrap OCI CLI on the private host." >&2
+    return 1
+  fi
+
+  python3 -m venv "$OCI_CLI_VENV_DIR"
+  "$OCI_CLI_VENV_DIR/bin/python" -m pip install --upgrade pip >/dev/null
+  "$OCI_CLI_VENV_DIR/bin/python" -m pip install oci-cli >/dev/null
+
+  PATH="$OCI_CLI_VENV_DIR/bin:$PATH"
+  export PATH
+  command -v oci >/dev/null 2>&1
 }
 
 get_vault_secret() {
@@ -219,8 +245,8 @@ elif [ -n "$DB_WALLET_URL" ] && [ -z "$DB_WALLET_PASSWORD_SECRET_OCID" ]; then
 fi
 
 if [ "$NEEDS_OCI" = "true" ]; then
-  if ! command -v oci >/dev/null 2>&1; then
-    echo "OCI CLI is required on the private host to read configured secrets from OCI Vault." >&2
+  if ! ensure_oci_cli; then
+    echo "OCI CLI is required on the private host to read configured secrets from OCI Vault, and automatic bootstrap failed." >&2
     exit 1
   fi
 fi
