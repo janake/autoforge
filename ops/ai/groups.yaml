@@ -40,7 +40,10 @@ groups:
     description: GitHub Actions, OCI runtime, deploy triggers, image tags, and host state ownership.
     contains_mcps:
       - github
+      - github-actions
+      - ghcr-registry
       - jira
+      - oracle-cloud
       - oci
       - docker-engine
       - docker-compose
@@ -50,6 +53,8 @@ groups:
       - cloudflare
     contains_skills:
       - oci-deploy-debug
+      - github-actions-ghcr-debug
+      - oracle-cloud-runtime-debug
       - container-runtime-debug
       - microvm-runtime-isolation
       - release-versioning
@@ -77,8 +82,10 @@ groups:
       - sast-scanner
       - secret-scanner
       - dependency-audit
+      - oracle-cloud
       - docker-engine
       - firecracker
     contains_skills:
       - security-audit
+      - oracle-cloud-runtime-debug
       - microvm-runtime-isolation

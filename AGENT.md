@@ -87,6 +87,8 @@ Record the commands and outcomes in the task file `Lepesnaplo` section. Do not r
 - For OCI checks, use the SSH target the user provides, for example `ssh ubuntu@oci.prodet.org "..."`.
 - Do not start or stop OCI services unless the user explicitly asks for that action.
 - Main branch merges may trigger deploy workflows; verify workflow triggers before claiming deploy behavior.
+- For Oracle Cloud runtime, instance principal, Vault, VCN, security list, NSG, jump-host, or host readiness work, use `oracle-cloud-runtime-debug` with `oracle-cloud`, `oci`, `vault-secrets`, and `ssh-remote-shell` from `docs/ai-tooling.md`.
+- For GitHub Actions, GHCR image tags/digests, package permissions, deploy token, or build-to-registry-to-host handoff work, use `github-actions-ghcr-debug` with `github-actions`, `ghcr-registry`, and `github` from `docs/ai-tooling.md`.
 - For Docker, Compose, image preload, one-shot utility container, or container metadata isolation work, use the `delivery-runtime` group with `container-runtime-debug`, `docker-engine`, `docker-compose`, and `ssh-remote-shell` from `docs/ai-tooling.md`.
 - For high-risk AI/code-execution sandboxing or stronger isolation decisions, use `microvm-runtime-isolation` with the `firecracker` MCP from `docs/ai-tooling.md` before choosing container-only isolation.
 

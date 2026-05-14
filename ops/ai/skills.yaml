@@ -44,9 +44,12 @@ skills:
       - delivery
     uses_mcps:
       - github
+      - github-actions
+      - ghcr-registry
       - ssh-remote-shell
       - docker-compose
       - oci
+      - oracle-cloud
       - cloudflare
       - vault-secrets
     description: OCI runtime and deploy diagnostics across public/private hosts and workflow automation.
@@ -55,6 +58,43 @@ skills:
       - Compare desired image tags with live runtime tags.
       - Inspect host env drift, compose drift, and deploy path filters.
       - Trace OCI networking, DNS, and secret-related deployment issues.
+
+  - id: github-actions-ghcr-debug
+    enabled: true
+    owners:
+      - delivery
+      - infra
+    uses_mcps:
+      - github-actions
+      - ghcr-registry
+      - github
+      - docker-engine
+      - docker-compose
+    description: GitHub Actions and GHCR diagnostics for image build, tag, package permission, and deploy handoff failures.
+    responsibilities:
+      - Inspect workflow runs, failed job logs, path filters, permissions, and runner environment before changing code.
+      - Verify GHCR image tags, digests, package visibility, and deploy token scopes.
+      - Trace build-to-registry-to-host image handoff and distinguish registry misses from host/runtime issues.
+      - Keep versioned image tags aligned with `package.json`, workflows, and deployment docs.
+
+  - id: oracle-cloud-runtime-debug
+    enabled: true
+    owners:
+      - infra
+      - delivery
+      - security
+    uses_mcps:
+      - oracle-cloud
+      - oci
+      - vault-secrets
+      - ssh-remote-shell
+      - docker-engine
+    description: Oracle Cloud runtime diagnostics for compute, networking, instance principal, Vault, and host readiness issues.
+    responsibilities:
+      - Validate OCI Dynamic Group, policy, Vault, and instance principal assumptions before changing deploy scripts.
+      - Check VCN/security list/NSG routing, jump-host access, private host reachability, and metadata endpoint exposure.
+      - Correlate OCI control-plane state with host Docker/Compose runtime evidence.
+      - Preserve Always Free and reproducibility constraints when proposing infrastructure changes.
 
   - id: container-runtime-debug
     enabled: true
@@ -67,6 +107,7 @@ skills:
       - docker-compose
       - ssh-remote-shell
       - github
+      - ghcr-registry
       - vault-secrets
     description: Docker runtime diagnostics for images, compose stacks, one-shot utility containers, and metadata isolation.
     responsibilities:
@@ -134,6 +175,8 @@ skills:
       - docs
     uses_mcps:
       - github
+      - github-actions
+      - ghcr-registry
       - node-workspace
     description: Version bump, release manifest, and workflow trigger consistency management.
     responsibilities:

@@ -37,6 +37,24 @@ Feladata:
 - merge utani deploy viselkedes kovetese
 - release es release-note traceability tamogatasa
 
+### `github-actions`
+
+Feladata:
+
+- workflow run, job, step es artifact allapotok celzott diagnosztikaja
+- trigger, path filter, permission, secret/variable es runner kornyezet ellenorzese
+- main merge utani deploy viselkedes bizonyitasa logok alapjan
+- build, registry es deploy jobok kozti handoff hibak izolalasa
+
+### `ghcr-registry`
+
+Feladata:
+
+- GHCR package, image tag, digest es visibility allapot ellenorzese
+- deploy token scope, package permission es pull/push hiba szetvalasztasa
+- verziozott image tag es `package.json` verzio osszevetese registry allapottal
+- third-party image preload es cache viselkedes ellenorzese private host deploynal
+
 ### `jira`
 
 Feladata:
@@ -109,6 +127,15 @@ Feladata:
 - Vault, volume es OCI infrastruktura metadata ellenorzese
 - private/public kapcsolat es host elhelyezes validalasa
 - runtime problemak OCI-oldali okainak kizarasa vagy bizonyitasa
+
+### `oracle-cloud`
+
+Feladata:
+
+- OCI runtime, Always Free es host readiness dontesek ellenorzese
+- Dynamic Group, policy, instance principal es metadata endpoint feltetelek validalasa
+- VCN routing, security list, NSG, jump-host es private host eleres vizsgalata
+- OCI control-plane es SSH/Docker runtime bizonyitekok osszekapcsolasa
 
 ### `cloudflare`
 
@@ -228,6 +255,24 @@ Feladata:
 - workflow trigger hianyok es image drift vizsgalata
 - host env drift es compose drift ellenorzese
 - DNS, OCI, Vault es deploy script egyuttmozgasanak validalasa
+
+### `github-actions-ghcr-debug`
+
+Feladata:
+
+- GitHub Actions run/job logok elso valodi hibajanak izolalasa
+- GHCR image tag, digest, package visibility es deploy token scope ellenorzese
+- build -> registry -> private/public host image handoff bizonyitasa
+- workflow permission, secret, variable es path-filter drift kiszurese
+
+### `oracle-cloud-runtime-debug`
+
+Feladata:
+
+- Oracle Cloud compute, VCN, Vault, Dynamic Group es policy allapot ellenorzese
+- instance principal es metadata endpoint viselkedes validalasa deploy hibak elott
+- public/private host elhelyezes, jump-host es security list/NSG problemak szetvalasztasa
+- Always Free korlatok es reprodukalhato host readiness feltetelek figyelembe vetele
 
 ### `container-runtime-debug`
 
@@ -363,6 +408,7 @@ Feladata:
 - public/private host runtime allapot validalasa
 - image tag drift, env drift es trigger drift kezelese
 - Docker Engine, ephemeral utility kontener es Firecracker/microVM izolacios dontesek kezelese
+- Oracle Cloud control-plane, GitHub Actions es GHCR registry bizonyitekok osszekapcsolasa deploy hibaknal
 
 ### `knowledge-governance`
 
@@ -386,6 +432,8 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 | **Login hiba / Redirect loop** | `app-surface` | `auth-debug` | `playwright` $\rightarrow$ `http-api` $\rightarrow$ `keycloak-admin` |
 | **502 Bad Gateway / 404 Route** | `edge-routing` | `gateway-debug` | `http-api` $\rightarrow$ `ssh-remote-shell` $\rightarrow$ `docker-compose` |
 | **Deploy nem történt / Rossz verzió** | `delivery-runtime` | `oci-deploy-debug` | `github` $\rightarrow$ `docker-compose` $\rightarrow$ `ssh-remote-shell` |
+| **GitHub Actions / GHCR image hiba** | `delivery-runtime` | `github-actions-ghcr-debug` | `github-actions` $\rightarrow$ `ghcr-registry` $\rightarrow$ `github` |
+| **Oracle Cloud runtime / instance principal hiba** | `delivery-runtime` | `oracle-cloud-runtime-debug` | `oracle-cloud` $\rightarrow$ `oci` $\rightarrow$ `vault-secrets` |
 | **Docker runtime / utility kontener hiba** | `delivery-runtime` | `container-runtime-debug` | `docker-engine` $\rightarrow$ `docker-compose` $\rightarrow$ `ssh-remote-shell` |
 | **AI sandbox / microVM izoláció döntés** | `delivery-runtime` | `microvm-runtime-isolation` | `firecracker` $\rightarrow$ `docker-engine` $\rightarrow$ `ssh-remote-shell` |
 | **Jira backlog / story migráció** | `delivery-runtime` | `jira-management` | `jira` $\rightarrow$ `github` $\rightarrow$ `node-workspace` |
@@ -400,6 +448,8 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 
 - `playwright`
 - `github`
+- `github-actions`
+- `ghcr-registry`
 - `jira`
 - `ssh-remote-shell`
 - `docker-engine`
@@ -409,6 +459,7 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 ### Masodik kor
 
 - `keycloak-admin`
+- `oracle-cloud`
 - `oci`
 - `vault-secrets`
 - `cloudflare`

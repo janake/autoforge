@@ -25,6 +25,28 @@ mcps:
       - Correlate merged changes with workflow runs on main.
       - Check whether deploy workflows actually fired after merges.
 
+  - id: github-actions
+    enabled: true
+    priority: critical
+    category: delivery
+    description: GitHub Actions workflow, job, artifact, cache, permission, and runner diagnostics.
+    used_for:
+      - Read full workflow/job logs and isolate the first actionable failure.
+      - Verify workflow triggers, path filters, permissions, secrets, variables, and runner environment.
+      - Trace merge-to-deploy behavior across `main` pushes and PR checks.
+      - Diagnose artifact/image handoff failures between build, GHCR, and deploy jobs.
+
+  - id: ghcr-registry
+    enabled: true
+    priority: critical
+    category: delivery
+    description: GitHub Container Registry image, tag, digest, package permission, and pull/push diagnostics.
+    used_for:
+      - Verify GHCR package existence, tag availability, digests, and image ownership.
+      - Check deploy token scope, package visibility, and runner pull/push failures.
+      - Compare expected project version tags with registry state before deploy.
+      - Diagnose third-party image preload and cache behavior for private hosts.
+
   - id: jira
     enabled: true
     priority: critical
@@ -113,6 +135,17 @@ mcps:
       - Validate Block Volume attachment and host placement.
       - Confirm secret/Vault access assumptions for private runtime.
       - Trace OCI-side causes behind public/private connectivity problems.
+
+  - id: oracle-cloud
+    enabled: true
+    priority: critical
+    category: infra
+    description: Oracle Cloud runtime, identity, networking, instance principal, Always Free, and host readiness diagnostics.
+    used_for:
+      - Validate Dynamic Groups, policies, instance principal behavior, and metadata endpoint assumptions.
+      - Check private/public host placement, VCN routing, security lists, NSGs, and jump-host paths.
+      - Review Always Free resource constraints, block volumes, and host bootstrap requirements.
+      - Correlate OCI control-plane state with live SSH/Docker runtime state.
 
   - id: cloudflare
     enabled: true
