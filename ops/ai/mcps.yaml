@@ -173,12 +173,45 @@ mcps:
     enabled: true
     priority: high
     category: backend
-    description: Maven dependency and BOM inspection for Java services.
+    description: Maven dependency, Java toolchain, Lombok annotation processing, and BOM inspection for Java services.
     used_for:
       - Catch Spring Boot and Spring Cloud version mismatch issues.
       - Inspect runtime dependency trees for production-only breakage.
       - Validate gateway/backend dependency alignment before deploy.
-      - Support focused debugging of `NoSuchMethodError` and classpath conflicts.
+      - Support focused debugging of `NoSuchMethodError`, classpath, Java 21-25, and Lombok annotation processing conflicts.
+
+  - id: spring-framework
+    enabled: true
+    priority: high
+    category: backend
+    description: Spring Framework, Spring Boot, Spring Security, Spring Data, and Spring Cloud diagnostics.
+    used_for:
+      - Validate Spring Boot auto-configuration, profiles, properties, and actuator behavior.
+      - Diagnose Spring Security, JWT resource server, CORS, and filter-chain issues.
+      - Check Spring Data JPA, datasource, transaction, and repository behavior.
+      - Keep Spring Cloud Gateway and backend Spring dependency versions aligned.
+
+  - id: java-platform
+    enabled: true
+    priority: high
+    category: backend
+    description: Java language, JVM, toolchain, bytecode, and compatibility diagnostics up to Java 25.
+    used_for:
+      - Check Java 21 through Java 25 language/runtime compatibility before upgrades.
+      - Validate Maven compiler, toolchain, bytecode target, Docker runtime, and CI JDK alignment.
+      - Review virtual threads, records, pattern matching, sealed types, and newer JVM feature tradeoffs.
+      - Diagnose classfile version, module path, GC, memory, and container JVM behavior.
+
+  - id: lombok
+    enabled: true
+    priority: medium
+    category: backend
+    description: Lombok annotation processing, generated code, and maintainability review.
+    used_for:
+      - Validate Lombok dependency and annotation processor configuration.
+      - Review generated constructors, builders, equals/hashCode, logging, and nullability assumptions.
+      - Detect Lombok usage that hides domain behavior or persistence side effects.
+      - Keep Lombok use minimal, explicit, and compatible with Java/Spring tooling.
 
   - id: node-workspace
     enabled: true
@@ -190,6 +223,28 @@ mcps:
       - Detect frontend dependency drift across root and app-level packages.
       - Support reproducible installs for web and worker packages.
       - Reduce package-level surprises during CI and release bumps.
+
+  - id: react-web
+    enabled: true
+    priority: high
+    category: frontend
+    description: React, Vite, TypeScript, routing, state, and browser runtime diagnostics.
+    used_for:
+      - Validate React component behavior, hooks, forms, routing, and API integration.
+      - Check Vite/TypeScript build and browser runtime differences.
+      - Review modern React patterns, including avoiding unnecessary memoization unless the repo pattern requires it.
+      - Diagnose frontend state, auth bootstrap, CORS, and gateway request failures.
+
+  - id: react-native
+    enabled: true
+    priority: medium
+    category: mobile
+    description: React Native and Expo-style mobile surface planning and diagnostics.
+    used_for:
+      - Evaluate shared React/domain code boundaries before mobile work.
+      - Review navigation, native module, Metro, platform permission, and mobile auth assumptions.
+      - Keep React Native implementation separate from web-only Vite/browser assumptions.
+      - Plan API contracts and authentication flows that work for mobile clients.
 
   - id: diagram-architecture
     enabled: true

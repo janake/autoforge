@@ -141,7 +141,9 @@ skills:
       - security
     uses_mcps:
       - http-api
+      - spring-framework
       - maven-java-deps
+      - java-platform
       - ssh-remote-shell
       - docker-compose
       - keycloak-admin
@@ -152,6 +154,79 @@ skills:
       - Compare local-success / production-failure scenarios with real tokens.
       - Keep backend auth config aligned with Keycloak realm behavior.
 
+  - id: spring-boot-java-runtime
+    enabled: true
+    owners:
+      - backend
+      - infra
+    uses_mcps:
+      - spring-framework
+      - maven-java-deps
+      - java-platform
+      - lombok
+      - http-api
+      - docker-engine
+    description: Spring Boot, Java 21-25, Maven, datasource, actuator, and runtime compatibility diagnostics.
+    responsibilities:
+      - Validate Spring Boot profiles, configuration properties, auto-configuration, actuator, and datasource setup.
+      - Keep Spring Boot, Spring Cloud, Maven BOMs, Java toolchain, and container runtime JDK aligned.
+      - Check Java 21 through Java 25 compatibility before changing language level or runtime image.
+      - Review Lombok annotation processing and generated code impact in Spring/JPA components.
+
+  - id: react-web-engineering
+    enabled: true
+    owners:
+      - frontend
+      - product
+    uses_mcps:
+      - react-web
+      - node-workspace
+      - playwright
+      - http-api
+      - github-actions
+    description: React web engineering for Vite/TypeScript UI, auth bootstrap, forms, and browser runtime behavior.
+    responsibilities:
+      - Validate React component, hook, form, and routing behavior against the existing web patterns.
+      - Use browser evidence for UI/auth failures instead of code-only assumptions.
+      - Keep Vite, TypeScript, API base URL, CORS, and gateway interactions aligned.
+      - Avoid unnecessary React memoization and preserve the current design system unless explicitly changing it.
+
+  - id: react-native-mobile-readiness
+    enabled: true
+    owners:
+      - frontend
+      - mobile
+      - product
+    uses_mcps:
+      - react-native
+      - react-web
+      - node-workspace
+      - http-api
+      - keycloak-admin
+    description: React Native readiness and mobile-client planning for future Autoforge surfaces.
+    responsibilities:
+      - Separate web-only assumptions from reusable React/domain logic before mobile work.
+      - Review mobile auth, deep-link, API, storage, and platform permission requirements.
+      - Keep React Native dependency and Metro/native module decisions explicit.
+      - Avoid adding mobile scaffolding until a task explicitly requires it.
+
+  - id: lombok-java-hygiene
+    enabled: true
+    owners:
+      - backend
+      - developers
+    uses_mcps:
+      - lombok
+      - java-platform
+      - maven-java-deps
+      - spring-framework
+    description: Lombok usage review for Java/Spring maintainability, generated code clarity, and annotation processing reliability.
+    responsibilities:
+      - Confirm Lombok annotation processor configuration in Maven and CI.
+      - Prefer explicit Java code when Lombok hides behavior, persistence semantics, or important invariants.
+      - Review `@Data`, builders, equals/hashCode, constructors, and logging annotations before adding them.
+      - Keep Lombok compatible with the active Java version and Spring/JPA model behavior.
+
   - id: e2e-repro
     enabled: true
     owners:
@@ -159,6 +234,7 @@ skills:
       - frontend
     uses_mcps:
       - playwright
+      - react-web
       - http-api
       - github
     description: Deterministic reproduction of browser-visible regressions with request-level evidence.
@@ -275,6 +351,10 @@ skills:
     uses_mcps:
       - github
       - maven-java-deps
+      - java-platform
+      - lombok
+      - react-web
+      - spring-framework
     description: Code readability, minimalism, naming, and maintainability guidance for Autoforge changes.
     responsibilities:
       - Prefer the smallest correct change and avoid unnecessary abstraction.

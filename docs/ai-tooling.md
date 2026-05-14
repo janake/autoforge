@@ -163,6 +163,34 @@ Feladata:
 - dependency tree ellenorzes
 - BOM drift kimutatasa
 - Java runtime osztalykonyvtar hibak gyors diagnosztikaja
+- Java 21-25, Maven compiler/toolchain es Lombok annotation processor kompatibilitas ellenorzese
+
+### `spring-framework`
+
+Feladata:
+
+- Spring Framework, Spring Boot, Spring Security, Spring Data es Spring Cloud diagnosztika
+- auto-configuration, profile, property binding es actuator viselkedes ellenorzese
+- datasource, JPA, transaction es repository problemak szetvalasztasa
+- Spring Cloud Gateway es backend Spring verzioillesztes kovetese
+
+### `java-platform`
+
+Feladata:
+
+- Java 21-25 nyelvi/runtime kompatibilitas ellenorzese
+- Maven compiler, toolchain, bytecode target, CI JDK es Docker runtime JDK osszhang vizsgalata
+- virtual threads, records, pattern matching, sealed types es uj JVM feature tradeoffok review-ja
+- classfile version, module path, GC, memory es container JVM viselkedes diagnosztikaja
+
+### `lombok`
+
+Feladata:
+
+- Lombok annotation processing es generalt kod ellenorzese
+- constructor, builder, equals/hashCode, logging es nullability feltetelezesek review-ja
+- Spring/JPA modellekben a Lombok mellekhatasok kiszurese
+- minimalis, explicit es Java/Spring kompatibilis Lombok hasznalat tamogatasa
 
 ### `node-workspace`
 
@@ -172,6 +200,24 @@ Feladata:
 - lockfile drift csokkentese
 - frontend csomagok telepitett allapotanak ellenorzese
 - verziozasi es package szintu meglepetesek csokkentese
+
+### `react-web`
+
+Feladata:
+
+- React, Vite es TypeScript web UI viselkedes diagnosztikaja
+- komponens, hook, form, routing, auth bootstrap es API integracio ellenorzese
+- browser runtime, CORS es gateway request hibak szetvalasztasa
+- modern React mintak hasznalata felesleges memoization nelkul, repo mintak szerint
+
+### `react-native`
+
+Feladata:
+
+- React Native / mobile surface tervezesi es diagnosztikai dontesek tamogatasa
+- shared React/domain kod es web-only Vite/browser feltetelezesek szetvalasztasa
+- navigation, Metro, native module, platform permission es mobile auth feltetelek review-ja
+- mobil API contract es auth flow elokeszitese explicit feladat eseten
 
 ### `diagram-architecture`
 
@@ -301,6 +347,42 @@ Feladata:
 - issuer/JWKS/static key hibak szetvalasztasa
 - backend auth config es Keycloak realm viselkedes osszehangolasa
 
+### `spring-boot-java-runtime`
+
+Feladata:
+
+- Spring Boot profile, property, actuator, datasource es auto-config problemak vizsgalata
+- Spring Boot, Spring Cloud, Maven BOM, Java 21-25 es Docker runtime JDK osszhang ellenorzese
+- Java nyelvi/runtime verzio emeles hatasainak review-ja Java 25-ig
+- Lombok annotation processing es generalt kod hatasanak ellenorzese Spring/JPA komponensekben
+
+### `react-web-engineering`
+
+Feladata:
+
+- React web komponens, hook, form es routing viselkedes validalasa
+- Vite, TypeScript, API base URL, CORS es gateway integracio osszhangban tartasa
+- UI/auth hibaknal browser bizonyitek gyujtese kodolvasas helyett
+- repo design system es React mintak megorzese explicit valtoztatasi igenyig
+
+### `react-native-mobile-readiness`
+
+Feladata:
+
+- React Native bevezetes elotti web-only es reusable kodhatarok feltarasa
+- mobile auth, deep link, API, storage es platform permission feltetelek tisztazasa
+- Metro/native module es dependency dontesek explicit dokumentalasa
+- mobil scaffold hozzaadasanak elkerulese konkret task nelkul
+
+### `lombok-java-hygiene`
+
+Feladata:
+
+- Lombok Maven/CI annotation processor konfiguracio ellenorzese
+- `@Data`, builder, constructor, equals/hashCode es logging annotaciok hatasainak review-ja
+- explicit Java kod preferalasa, ha Lombok domain vagy persistence viselkedest takar el
+- Lombok kompatibilitas kovetese aktiv Java es Spring/JPA modellek mellett
+
 ### `e2e-repro`
 
 Feladata:
@@ -383,6 +465,7 @@ Feladata:
 - public UI, browser runtime es auth callback felulet kezelese
 - frontend oldali request-trigger logika kezelese
 - user oldali regressziok reprodukcioja
+- React web es kesobbi React Native/mobile surface dontesek kezelese
 
 ### `api-auth`
 
@@ -391,6 +474,7 @@ Feladata:
 - backend API, JWT, claim es Keycloak contract kezelese
 - `/api/v1/me` es kapcsolodo auth endpointok viselkedese
 - frontend/backend auth szerzodes tisztan tartasa
+- Spring Boot, Java platform es Lombok hatasok figyelembe vetele backend valtozasoknal
 
 ### `edge-routing`
 
@@ -438,6 +522,10 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 | **AI sandbox / microVM izoláció döntés** | `delivery-runtime` | `microvm-runtime-isolation` | `firecracker` $\rightarrow$ `docker-engine` $\rightarrow$ `ssh-remote-shell` |
 | **Jira backlog / story migráció** | `delivery-runtime` | `jira-management` | `jira` $\rightarrow$ `github` $\rightarrow$ `node-workspace` |
 | **JWT validációs hiba (Backend)** | `api-auth` | `backend-auth-runtime` | `http-api` $\rightarrow$ `maven-java-deps` $\rightarrow$ `keycloak-admin` |
+| **Spring Boot / Java runtime hiba** | `api-auth` | `spring-boot-java-runtime` | `spring-framework` $\rightarrow$ `maven-java-deps` $\rightarrow$ `java-platform` |
+| **React web UI hiba** | `app-surface` | `react-web-engineering` | `react-web` $\rightarrow$ `playwright` $\rightarrow$ `http-api` |
+| **React Native / mobile tervezés** | `app-surface` | `react-native-mobile-readiness` | `react-native` $\rightarrow$ `react-web` $\rightarrow$ `http-api` |
+| **Lombok / annotation processing hiba** | `api-auth` | `lombok-java-hygiene` | `lombok` $\rightarrow$ `maven-java-deps` $\rightarrow$ `java-platform` |
 | **Biztonsági audit / Sebezhetőség** | `security-compliance` | `security-audit` | `sast-scanner` $\rightarrow$ `dependency-audit` $\rightarrow$ `secret-scanner` |
 | **Prompt minőség / prompt injection** | `knowledge-governance` | `prompt-engineering` | `prompt-library` $\rightarrow$ `context7` $\rightarrow$ `secret-scanner` |
 | **Dokumentáció és realidadegyezetlen** | `knowledge-governance` | `docs-sync` | `oci` $\rightarrow$ `github` $\rightarrow$ `diagram-architecture` |
@@ -455,6 +543,8 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 - `docker-engine`
 - `docker-compose`
 - `http-api`
+- `react-web`
+- `spring-framework`
 
 ### Masodik kor
 
@@ -464,6 +554,9 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 - `vault-secrets`
 - `cloudflare`
 - `firecracker`
+- `java-platform`
+- `lombok`
+- `react-native`
 
 ### Harmadik kor
 
