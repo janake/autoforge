@@ -8,9 +8,11 @@ cd "$APP_DIR"
 ENV_FILE="$APP_DIR/.env"
 BACKEND_IMAGE_ARCHIVE="$APP_DIR/autoforge-backend-image.tar.gz"
 OPENCODE_IMAGE_ARCHIVE="$APP_DIR/autoforge-opencode-image.tar.gz"
+OCI_CLI_IMAGE_ARCHIVE="$APP_DIR/autoforge-oci-cli-image.tar.gz"
 PRIVATE_IMAGES_PRELOADED="${PRIVATE_IMAGES_PRELOADED:-false}"
 WALLET_DIR="$APP_DIR/wallet"
-OCI_CLI_VENV_DIR="$APP_DIR/.oci-cli"
+OCI_CLI_IMAGE="${OCI_CLI_IMAGE:-ghcr.io/oracle/oci-cli:latest}"
+OCI_CMD=(oci)
 
 if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
@@ -56,35 +58,27 @@ get_env_value() {
   return 1
 }
 
-ensure_oci_cli() {
+ensure_oci_command() {
   if command -v oci >/dev/null 2>&1; then
+    OCI_CMD=(oci)
     return 0
   fi
 
-  if [ -x "$OCI_CLI_VENV_DIR/bin/oci" ]; then
-    PATH="$OCI_CLI_VENV_DIR/bin:$PATH"
-    export PATH
-    return 0
-  fi
-
-  if ! command -v python3 >/dev/null 2>&1; then
-    echo "python3 is required to bootstrap OCI CLI on the private host." >&2
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "Docker is required to run the OCI CLI container on the private host." >&2
     return 1
   fi
 
-  python3 -m venv "$OCI_CLI_VENV_DIR"
-  "$OCI_CLI_VENV_DIR/bin/python" -m pip install --upgrade pip >/dev/null
-  "$OCI_CLI_VENV_DIR/bin/python" -m pip install oci-cli >/dev/null
-
-  PATH="$OCI_CLI_VENV_DIR/bin:$PATH"
-  export PATH
-  command -v oci >/dev/null 2>&1
+  if ! docker image inspect "$OCI_CLI_IMAGE" >/dev/null 2>&1; then
+    docker pull "$OCI_CLI_IMAGE" >/dev/null
+  fi
+  OCI_CMD=(docker run --rm --network host "$OCI_CLI_IMAGE")
 }
 
 get_vault_secret() {
   local secret_ocid="$1"
 
-  oci secrets secret-bundle get \
+  "${OCI_CMD[@]}" secrets secret-bundle get \
     --auth instance_principal \
     --secret-id "$secret_ocid" \
     --query 'data."secret-bundle-content".content' \
@@ -99,7 +93,7 @@ find_vault_secret_id_by_name() {
     return 1
   fi
 
-  oci search resource free-text-search \
+  "${OCI_CMD[@]}" search resource free-text-search \
     --auth instance_principal \
     --text "$name" \
     --query "data.items[?\"resource-type\"=='VaultSecret' && \"display-name\"=='$name' && \"lifecycle-state\"=='ACTIVE'] | [0].identifier" \
@@ -221,6 +215,11 @@ printf '\n' >> "$RUNTIME_ENV"
 
 COMPOSE_ARGS=(--env-file "$RUNTIME_ENV" -f docker-compose.private.yml)
 
+if [ -f "$OCI_CLI_IMAGE_ARCHIVE" ]; then
+  docker load --input "$OCI_CLI_IMAGE_ARCHIVE"
+  rm -f "$OCI_CLI_IMAGE_ARCHIVE"
+fi
+
 : "${DB_URL_SECRET_NAME:=autoforge-db-url}"
 : "${DB_WALLET_URL_SECRET_NAME:=autoforge-db-wallet-url}"
 : "${DB_WALLET_PASSWORD_SECRET_NAME:=db-wallet-pwd}"
@@ -245,8 +244,8 @@ elif [ -n "$DB_WALLET_URL" ] && [ -z "$DB_WALLET_PASSWORD_SECRET_OCID" ]; then
 fi
 
 if [ "$NEEDS_OCI" = "true" ]; then
-  if ! ensure_oci_cli; then
-    echo "OCI CLI is required on the private host to read configured secrets from OCI Vault, and automatic bootstrap failed." >&2
+  if ! ensure_oci_command; then
+    echo "OCI CLI access is required on the private host to read configured secrets from OCI Vault." >&2
     exit 1
   fi
 fi

@@ -53,6 +53,8 @@ jobs:
             sleep 15
           done
           docker save "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG" | gzip -1 > /tmp/autoforge-backend-image.tar.gz
+          docker pull ghcr.io/oracle/oci-cli:latest
+          docker save ghcr.io/oracle/oci-cli:latest | gzip -1 > /tmp/autoforge-oci-cli-image.tar.gz
           if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ] && [ -n "${OPENAI_API_KEY_SECRET_OCID:-}" ]; then
             docker pull ghcr.io/anomalyco/opencode:latest
             docker save ghcr.io/anomalyco/opencode:latest | gzip -1 > /tmp/autoforge-opencode-image.tar.gz
@@ -110,6 +112,7 @@ jobs:
       - name: Upload private images
         run: |
           scp -F ~/.ssh/config /tmp/autoforge-backend-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-backend-image.tar.gz"
+          scp -F ~/.ssh/config /tmp/autoforge-oci-cli-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-oci-cli-image.tar.gz"
           if [ -f /tmp/autoforge-opencode-image.tar.gz ]; then
             scp -F ~/.ssh/config /tmp/autoforge-opencode-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-opencode-image.tar.gz"
           fi
