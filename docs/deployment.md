@@ -272,6 +272,7 @@ Celhalozat:
 - Public subnet: `subnet-prodet-new-public`, `10.42.0.0/24`, `0.0.0.0/0 -> Internet Gateway`
 - NAT host: `prodet-new-e2-public-01`, private IP `10.42.0.241`, public IP `144.24.176.5`
 - Private subnet: `subnet-autoforge-private`, `10.42.1.0/24`, public IP tiltva
+- Private host: `prodet-new-e2-private-03`, private IP `10.42.1.144`, public IP nelkul
 - Private subnet route table: `0.0.0.0/0 -> 10.42.0.241` private IP route target
 - Private security list: inbound csak `10.42.0.0/24` es `10.42.1.0/24`, outbound `0.0.0.0/0`
 
@@ -283,11 +284,18 @@ Public NAT host kovetelmenyek:
 - iptables MASQUERADE a private subnetre: `10.42.1.0/24 -> ens3`
 - iptables FORWARD szabalyok a private subnet kimenore es established/related visszaforgalomra
 
-Aktualis atmeneti allapot:
+Aktualis allapot:
 
 - A private subnet, private security list es private route table letrejott.
 - A public host NAT service (`autoforge-nat.service`) beallitja az IP forwardingot es iptables NAT szabalyokat.
-- A jelenlegi `prodet-new-e2-private-02` meg a regi `10.42.0.0/24` subnetben fut, mert a `VM.Standard.E2.1.Micro` shape csak egy VNIC-et enged, es uj Always Free instance inditasat a boot volume quota blokkolja.
+- A regi `prodet-new-e2-private-02` instance terminálva lett, mert a `VM.Standard.E2.1.Micro` shape csak egy VNIC-et enged.
+- Az uj `prodet-new-e2-private-03` instance kozvetlenul a `10.42.1.0/24` private subnetben fut.
+- A 100 GB-os `autoforge-private-workspace-100gb` block volume az uj private hoston `/mnt/autoforge-workspace` alatt mountolva van.
+- A private deploy GitHub secretjei az uj private IP-re mutatnak: `OCI_PRIVATE_HOST`, `OCI_PRIVATE_SSH_HOST`, `OCI_BACKEND_UPSTREAM`.
+- Az ADB ACL engedi a NAT public IP-t: `144.24.176.5/32`.
+- Az `ociprodet-backend-dg` dynamic group compartment-alapu, igy uj private instance rebuild utan is lefedi a `prodet-new` compartment compute instance-eit.
+- Az `autoforge-backend-vault-read` policy engedi a dynamic groupnak a Vault secret bundle olvasast.
+- A DB jelszo Vault secretben van: `autoforge-db-password`; GitHubban csak a secret OCID es a nem erzekeny JDBC URL deploy input szerepel.
 - A regi public subnet route table-t nem szabad `0.0.0.0/0 -> NAT instance` iranyba atallitani, mert ugyanazon a subneten van a public host is, es ez elvagna a public host sajat outbound forgalmat.
 
 Terraform reprodukciohoz rogzitendo eroforrasok:
@@ -300,6 +308,10 @@ Terraform reprodukciohoz rogzitendo eroforrasok:
 - public compute VNIC `skip_source_dest_check = true`
 - cloud-init vagy remote provisioner a NAT hoston az `autoforge-nat.service` letrehozasara
 - private compute instance kozvetlenul a private subnetben, public IP nelkul
+- dynamic group rule: `instance.compartment.id = <prodet-new compartment OCID>`
+- IAM policy: dynamic group olvashat `secret-bundles` eroforrast a `prodet-new` compartmentben
+- ADB ACL rule a NAT public IP-re
+- Vault secret a DB jelszora, es deploy secret/variable a DB URL-re es password secret OCID-ra
 
 ## Kezi frissitesi parancsok
 
