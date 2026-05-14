@@ -65,6 +65,46 @@ get_vault_secret() {
     --raw-output | base64 --decode
 }
 
+find_vault_secret_id_by_name() {
+  local name="$1"
+
+  if [[ "$name" == *"'"* ]]; then
+    echo "Vault secret names with single quotes are not supported: $name" >&2
+    return 1
+  fi
+
+  oci search resource free-text-search \
+    --auth instance_principal \
+    --text "$name" \
+    --query "data.items[?\"resource-type\"=='VaultSecret' && \"display-name\"=='$name' && \"lifecycle-state\"=='ACTIVE'] | [0].identifier" \
+    --raw-output
+}
+
+get_vault_secret_by_name() {
+  local name="$1"
+  local secret_ocid
+
+  secret_ocid="$(find_vault_secret_id_by_name "$name")"
+  if [ -z "$secret_ocid" ] || [ "$secret_ocid" = "null" ]; then
+    echo "Expected one ACTIVE OCI Vault secret named $name, found none." >&2
+    return 1
+  fi
+
+  get_vault_secret "$secret_ocid"
+}
+
+get_optional_vault_secret_by_name() {
+  local name="$1"
+  local secret_ocid
+
+  secret_ocid="$(find_vault_secret_id_by_name "$name")"
+  if [ -z "$secret_ocid" ] || [ "$secret_ocid" = "null" ]; then
+    return 1
+  fi
+
+  get_vault_secret "$secret_ocid"
+}
+
 ensure_metadata_block() {
   local metadata_ip="169.254.169.254"
   local iptables_cmd=(iptables)
@@ -134,12 +174,18 @@ OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_S
 OPENAI_API_KEY_SECRET_OCID="$(get_env_value OPENAI_API_KEY_SECRET_OCID || true)"
 GEMINI_API_KEY_SECRET_OCID="$(get_env_value GEMINI_API_KEY_SECRET_OCID || true)"
 DB_URL="$(get_env_value AUTOFORGE_DB_URL || true)"
+DB_URL_SECRET_NAME="$(get_env_value AUTOFORGE_DB_URL_SECRET_NAME || true)"
 DB_WALLET_URL="$(get_env_value AUTOFORGE_DB_WALLET_URL || true)"
+DB_WALLET_URL_SECRET_NAME="$(get_env_value AUTOFORGE_DB_WALLET_URL_SECRET_NAME || true)"
 DB_WALLET_PASSWORD_SECRET_OCID="$(get_env_value AUTOFORGE_DB_WALLET_PASSWORD_SECRET_OCID || true)"
+DB_WALLET_PASSWORD_SECRET_NAME="$(get_env_value AUTOFORGE_DB_WALLET_PASSWORD_SECRET_NAME || true)"
 DB_PASSWORD_SECRET_OCID="$(get_env_value AUTOFORGE_DB_PASSWORD_SECRET_OCID || true)"
+DB_PASSWORD_SECRET_NAME="$(get_env_value AUTOFORGE_DB_PASSWORD_SECRET_NAME || true)"
 DB_PASSWORD="$(get_env_value AUTOFORGE_DB_PASSWORD || true)"
 DB_USERNAME="$(get_env_value AUTOFORGE_DB_USERNAME || true)"
+DB_USERNAME_SECRET_NAME="$(get_env_value AUTOFORGE_DB_USERNAME_SECRET_NAME || true)"
 DB_SERVICE_ALIAS="$(get_env_value AUTOFORGE_DB_SERVICE_ALIAS || true)"
+DB_SERVICE_ALIAS_SECRET_NAME="$(get_env_value AUTOFORGE_DB_SERVICE_ALIAS_SECRET_NAME || true)"
 
 RUNTIME_ENV="$(mktemp "$APP_DIR/.runtime.env.XXXXXX")"
 trap 'rm -f "$APP_DIR/.deploy.env" "${RUNTIME_ENV:-}"' EXIT
@@ -149,11 +195,30 @@ printf '\n' >> "$RUNTIME_ENV"
 
 COMPOSE_ARGS=(--env-file "$RUNTIME_ENV" -f docker-compose.private.yml)
 
+: "${DB_URL_SECRET_NAME:=autoforge-db-url}"
+: "${DB_WALLET_URL_SECRET_NAME:=autoforge-db-wallet-url}"
+: "${DB_WALLET_PASSWORD_SECRET_NAME:=db-wallet-pwd}"
+: "${DB_PASSWORD_SECRET_NAME:=autoforge-db-password}"
+: "${DB_USERNAME_SECRET_NAME:=autoforge-db-username}"
+: "${DB_SERVICE_ALIAS_SECRET_NAME:=autoforge-db-service-alias}"
+
+NEEDS_OCI=false
+
 if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] \
   || [ -n "$OPENAI_API_KEY_SECRET_OCID" ] \
   || [ -n "$GEMINI_API_KEY_SECRET_OCID" ] \
   || [ -n "$DB_WALLET_PASSWORD_SECRET_OCID" ] \
   || [ -n "$DB_PASSWORD_SECRET_OCID" ]; then
+  NEEDS_OCI=true
+elif [ -z "$DB_URL" ] && [ -z "$DB_WALLET_URL" ]; then
+  NEEDS_OCI=true
+elif [ -n "$DB_URL" ] && [ -z "$DB_PASSWORD" ]; then
+  NEEDS_OCI=true
+elif [ -n "$DB_WALLET_URL" ] && [ -z "$DB_WALLET_PASSWORD_SECRET_OCID" ]; then
+  NEEDS_OCI=true
+fi
+
+if [ "$NEEDS_OCI" = "true" ]; then
   if ! command -v oci >/dev/null 2>&1; then
     echo "OCI CLI is required on the private host to read configured secrets from OCI Vault." >&2
     exit 1
@@ -178,23 +243,53 @@ if [ -n "$GEMINI_API_KEY_SECRET_OCID" ]; then
   append_secret_env "GEMINI_API_KEY" "$GEMINI_API_KEY_VALUE"
 fi
 
+if [ -z "$DB_URL" ] && [ -n "$DB_URL_SECRET_NAME" ]; then
+  DB_URL="$(get_optional_vault_secret_by_name "$DB_URL_SECRET_NAME" || true)"
+fi
+
+if [ -z "$DB_WALLET_URL" ] && [ -n "$DB_WALLET_URL_SECRET_NAME" ]; then
+  DB_WALLET_URL="$(get_optional_vault_secret_by_name "$DB_WALLET_URL_SECRET_NAME" || true)"
+fi
+
+if [ -z "$DB_USERNAME" ] && [ -n "$DB_USERNAME_SECRET_NAME" ]; then
+  DB_USERNAME="$(get_optional_vault_secret_by_name "$DB_USERNAME_SECRET_NAME" || true)"
+fi
+
+if [ -z "$DB_SERVICE_ALIAS" ] && [ -n "$DB_SERVICE_ALIAS_SECRET_NAME" ]; then
+  DB_SERVICE_ALIAS="$(get_optional_vault_secret_by_name "$DB_SERVICE_ALIAS_SECRET_NAME" || true)"
+fi
+
+if [ -z "$DB_PASSWORD" ] && [ -z "$DB_PASSWORD_SECRET_OCID" ] && [ -n "$DB_PASSWORD_SECRET_NAME" ]; then
+  DB_PASSWORD="$(get_optional_vault_secret_by_name "$DB_PASSWORD_SECRET_NAME" || true)"
+fi
+
 if [ -n "$DB_URL" ]; then
   : "${DB_USERNAME:=ADMIN}"
   if [ -z "$DB_PASSWORD" ] && [ -z "$DB_PASSWORD_SECRET_OCID" ]; then
     echo "AUTOFORGE_DB_PASSWORD or AUTOFORGE_DB_PASSWORD_SECRET_OCID is required when AUTOFORGE_DB_URL is set." >&2
     exit 1
   fi
+  append_secret_env "AUTOFORGE_DB_URL" "$DB_URL"
   append_secret_env "AUTOFORGE_DB_USERNAME" "$DB_USERNAME"
   if [ -n "$DB_PASSWORD_SECRET_OCID" ]; then
     DB_PASSWORD_VALUE="$(get_vault_secret "$DB_PASSWORD_SECRET_OCID")"
     append_secret_env "AUTOFORGE_DB_PASSWORD" "$DB_PASSWORD_VALUE"
+  elif [ -n "$DB_PASSWORD" ]; then
+    append_secret_env "AUTOFORGE_DB_PASSWORD" "$DB_PASSWORD"
   fi
 elif [ -n "$DB_WALLET_URL" ]; then
-  : "${DB_WALLET_PASSWORD_SECRET_OCID:?AUTOFORGE_DB_WALLET_PASSWORD_SECRET_OCID is required when AUTOFORGE_DB_WALLET_URL is set}"
+  if [ -z "$DB_WALLET_PASSWORD_SECRET_OCID" ] && [ -z "$DB_WALLET_PASSWORD_SECRET_NAME" ]; then
+    echo "AUTOFORGE_DB_WALLET_PASSWORD_SECRET_OCID or AUTOFORGE_DB_WALLET_PASSWORD_SECRET_NAME is required when AUTOFORGE_DB_WALLET_URL is set." >&2
+    exit 1
+  fi
   : "${DB_USERNAME:=ADMIN}"
   : "${DB_SERVICE_ALIAS:=autoforge_high}"
 
-  DB_WALLET_PASSWORD_VALUE="$(get_vault_secret "$DB_WALLET_PASSWORD_SECRET_OCID")"
+  if [ -n "$DB_WALLET_PASSWORD_SECRET_OCID" ]; then
+    DB_WALLET_PASSWORD_VALUE="$(get_vault_secret "$DB_WALLET_PASSWORD_SECRET_OCID")"
+  else
+    DB_WALLET_PASSWORD_VALUE="$(get_vault_secret_by_name "$DB_WALLET_PASSWORD_SECRET_NAME")"
+  fi
   ensure_wallet_dir
   download_wallet "$DB_WALLET_URL" "$DB_WALLET_PASSWORD_VALUE"
 
@@ -205,6 +300,8 @@ elif [ -n "$DB_WALLET_URL" ]; then
   if [ -n "$DB_PASSWORD_SECRET_OCID" ]; then
     DB_PASSWORD_VALUE="$(get_vault_secret "$DB_PASSWORD_SECRET_OCID")"
     append_secret_env "AUTOFORGE_DB_PASSWORD" "$DB_PASSWORD_VALUE"
+  elif [ -n "$DB_PASSWORD" ]; then
+    append_secret_env "AUTOFORGE_DB_PASSWORD" "$DB_PASSWORD"
   fi
 else
   echo "AUTOFORGE_DB_URL or AUTOFORGE_DB_WALLET_URL is required for private backend deploy." >&2
