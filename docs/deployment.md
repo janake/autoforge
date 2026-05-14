@@ -140,11 +140,17 @@ Vault secret azonosito GitHub secret-ek:
 - `OCI_OPENAI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-openai-api-key` secret OCID-ja
 - `OCI_GEMINI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-gemini-api-key` secret OCID-ja
 - `AUTOFORGE_DB_URL`: opcionális direkt JDBC URL, ha nem walletes ADB kapcsolatot hasznalunk
+- `AUTOFORGE_DB_URL_SECRET_NAME`: opcionális OCI Vault display name a direkt JDBC URL-hez, alapertelmezett: `autoforge-db-url`
 - `AUTOFORGE_DB_WALLET_URL`: a private ADB wallet zip object storage URL-je
+- `AUTOFORGE_DB_WALLET_URL_SECRET_NAME`: opcionális OCI Vault display name a wallet URL-hez, alapertelmezett: `autoforge-db-wallet-url`
 - `AUTOFORGE_DB_WALLET_PASSWORD_SECRET_OCID`: a wallet zip jelszavát tarolo OCI Vault secret OCID-ja
+- `AUTOFORGE_DB_WALLET_PASSWORD_SECRET_NAME`: opcionális OCI Vault display name a wallet zip jelszavahoz, alapertelmezett: `db-wallet-pwd`
+- `AUTOFORGE_DB_SERVICE_ALIAS_SECRET_NAME`: opcionális OCI Vault display name az ADB service aliashoz, alapertelmezett: `autoforge-db-service-alias`
 - `AUTOFORGE_DB_USERNAME`: az adatbazis felhasznalo, alapertelmezett: `ADMIN`
+- `AUTOFORGE_DB_USERNAME_SECRET_NAME`: opcionális OCI Vault display name az adatbazis felhasznalohoz, alapertelmezett: `autoforge-db-username`
 - `AUTOFORGE_DB_PASSWORD`: opcionális direkt adatbazis jelszo, ha nem Vault secret OCID-t hasznalunk
 - `AUTOFORGE_DB_PASSWORD_SECRET_OCID`: opcionális DB password secret OCID, ha a DB jelszó is Vaultban van
+- `AUTOFORGE_DB_PASSWORD_SECRET_NAME`: opcionális OCI Vault display name az adatbazis jelszohoz, alapertelmezett: `autoforge-db-password`
 
 GitHub PR broker konfiguráció:
 
@@ -184,6 +190,7 @@ Minimum elofeltetelek:
 
 - A private instance legyen benne egy OCI Dynamic Groupban.
 - Legyen policy, amely engedi a Dynamic Groupnak a secret bundle olvasast abban a compartmentben vagy vaultban, ahol a ket secret van.
+- Ha secret display name alapjan tortenik a feloldas, a Dynamic Groupnak resource search / secret metadata olvasasi jog is kell a secret OCID megtalalasahoz.
 - Vault secret hasznalata eseten a private hoston legyen telepitve az OCI CLI, es az SSH-n futtatott non-interactive shell PATH-jaban is latszodjon.
 
 Pelda policy minta:
