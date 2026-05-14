@@ -7,9 +7,14 @@ on:
       - main
     paths:
       - ".github/workflows/container-images.yml"
+      - ".github/workflows/deploy-private.yml"
+      - ".github/workflows/deploy-public.yml"
       - "apps/web/**"
       - "services/backend/**"
       - "infra/gateway/**"
+      - "infra/compose/**"
+      - "infra/deploy/private/**"
+      - "infra/deploy/public/**"
       - "package.json"
       - "package-lock.json"
 

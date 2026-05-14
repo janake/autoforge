@@ -33,13 +33,14 @@ jobs:
         run: |
           PROJECT_VERSION=$(node -p 'require("./package.json").version')
           echo "PROJECT_VERSION=$PROJECT_VERSION" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=sha-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
 
-      - name: Wait for versioned public images
+      - name: Wait for current public images
         env:
           GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
         run: |
-          IMAGE_TAG="${PROJECT_VERSION:?PROJECT_VERSION is required}"
+          IMAGE_TAG="${IMAGE_TAG:?IMAGE_TAG is required}"
           echo "$GHCR_DEPLOY_TOKEN" | docker login ghcr.io -u "$GHCR_DEPLOY_USERNAME" --password-stdin
           for image in "ghcr.io/${{ github.repository_owner }}/autoforge/web:$IMAGE_TAG" "ghcr.io/${{ github.repository_owner }}/autoforge/api-gateway:$IMAGE_TAG"; do
             for attempt in $(seq 1 20); do
@@ -47,7 +48,7 @@ jobs:
                 break
               fi
               if [ "$attempt" -eq 20 ]; then
-                echo "Versioned image is not available: $image" >&2
+                echo "Current image is not available: $image" >&2
                 exit 1
               fi
               sleep 15
@@ -92,7 +93,7 @@ jobs:
           KEYCLOAK_REALM: ${{ secrets.OCI_KEYCLOAK_REALM }}
           KEYCLOAK_CLIENT_ID: ${{ secrets.OCI_KEYCLOAK_CLIENT_ID }}
         run: |
-          IMAGE_TAG="${PROJECT_VERSION:?PROJECT_VERSION is required}"
+          IMAGE_TAG="${IMAGE_TAG:?IMAGE_TAG is required}"
           PUBLIC_SSH_HOST="${PUBLIC_SSH_HOST:-${PUBLIC_HOST:-}}"
           : "${PUBLIC_SSH_HOST:?OCI_PUBLIC_SSH_HOST or OCI_PUBLIC_HOST is required}"
           : "${PUBLIC_USER:?OCI_PUBLIC_USER is required}"
