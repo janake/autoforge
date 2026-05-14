@@ -139,8 +139,11 @@ Vault secret azonosito GitHub secret-ek:
 - `OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-opencode-server-password` secret OCID-ja
 - `OCI_OPENAI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-openai-api-key` secret OCID-ja
 - `OCI_GEMINI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-gemini-api-key` secret OCID-ja
+- `AUTOFORGE_DB_URL`: opcionális direkt JDBC URL, ha nem walletes ADB kapcsolatot hasznalunk
 - `AUTOFORGE_DB_WALLET_URL`: a private ADB wallet zip object storage URL-je
 - `AUTOFORGE_DB_WALLET_PASSWORD_SECRET_OCID`: a wallet zip jelszavát tarolo OCI Vault secret OCID-ja
+- `AUTOFORGE_DB_USERNAME`: az adatbazis felhasznalo, alapertelmezett: `ADMIN`
+- `AUTOFORGE_DB_PASSWORD`: opcionális direkt adatbazis jelszo, ha nem Vault secret OCID-t hasznalunk
 - `AUTOFORGE_DB_PASSWORD_SECRET_OCID`: opcionális DB password secret OCID, ha a DB jelszó is Vaultban van
 
 GitHub PR broker konfiguráció:

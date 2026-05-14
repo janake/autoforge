@@ -133,9 +133,11 @@ download_wallet() {
 OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_OCID || true)"
 OPENAI_API_KEY_SECRET_OCID="$(get_env_value OPENAI_API_KEY_SECRET_OCID || true)"
 GEMINI_API_KEY_SECRET_OCID="$(get_env_value GEMINI_API_KEY_SECRET_OCID || true)"
+DB_URL="$(get_env_value AUTOFORGE_DB_URL || true)"
 DB_WALLET_URL="$(get_env_value AUTOFORGE_DB_WALLET_URL || true)"
 DB_WALLET_PASSWORD_SECRET_OCID="$(get_env_value AUTOFORGE_DB_WALLET_PASSWORD_SECRET_OCID || true)"
 DB_PASSWORD_SECRET_OCID="$(get_env_value AUTOFORGE_DB_PASSWORD_SECRET_OCID || true)"
+DB_PASSWORD="$(get_env_value AUTOFORGE_DB_PASSWORD || true)"
 DB_USERNAME="$(get_env_value AUTOFORGE_DB_USERNAME || true)"
 DB_SERVICE_ALIAS="$(get_env_value AUTOFORGE_DB_SERVICE_ALIAS || true)"
 
@@ -162,6 +164,8 @@ if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ]; then
   OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret "$OPENCODE_SERVER_PASSWORD_SECRET_OCID")"
   append_secret_env "OPENCODE_SERVER_PASSWORD" "$OPENCODE_SERVER_PASSWORD_VALUE"
   COMPOSE_ARGS+=(--profile opencode)
+elif ! get_env_value OPENCODE_SERVER_PASSWORD >/dev/null 2>&1; then
+  append_secret_env "OPENCODE_SERVER_PASSWORD" "disabled-until-vault-secrets-are-configured"
 fi
 
 if [ -n "$OPENAI_API_KEY_SECRET_OCID" ]; then
@@ -174,7 +178,18 @@ if [ -n "$GEMINI_API_KEY_SECRET_OCID" ]; then
   append_secret_env "GEMINI_API_KEY" "$GEMINI_API_KEY_VALUE"
 fi
 
-if [ -n "$DB_WALLET_URL" ]; then
+if [ -n "$DB_URL" ]; then
+  : "${DB_USERNAME:=ADMIN}"
+  if [ -z "$DB_PASSWORD" ] && [ -z "$DB_PASSWORD_SECRET_OCID" ]; then
+    echo "AUTOFORGE_DB_PASSWORD or AUTOFORGE_DB_PASSWORD_SECRET_OCID is required when AUTOFORGE_DB_URL is set." >&2
+    exit 1
+  fi
+  append_secret_env "AUTOFORGE_DB_USERNAME" "$DB_USERNAME"
+  if [ -n "$DB_PASSWORD_SECRET_OCID" ]; then
+    DB_PASSWORD_VALUE="$(get_vault_secret "$DB_PASSWORD_SECRET_OCID")"
+    append_secret_env "AUTOFORGE_DB_PASSWORD" "$DB_PASSWORD_VALUE"
+  fi
+elif [ -n "$DB_WALLET_URL" ]; then
   : "${DB_WALLET_PASSWORD_SECRET_OCID:?AUTOFORGE_DB_WALLET_PASSWORD_SECRET_OCID is required when AUTOFORGE_DB_WALLET_URL is set}"
   : "${DB_USERNAME:=ADMIN}"
   : "${DB_SERVICE_ALIAS:=autoforge_high}"
@@ -191,6 +206,9 @@ if [ -n "$DB_WALLET_URL" ]; then
     DB_PASSWORD_VALUE="$(get_vault_secret "$DB_PASSWORD_SECRET_OCID")"
     append_secret_env "AUTOFORGE_DB_PASSWORD" "$DB_PASSWORD_VALUE"
   fi
+else
+  echo "AUTOFORGE_DB_URL or AUTOFORGE_DB_WALLET_URL is required for private backend deploy." >&2
+  exit 1
 fi
 
 ensure_metadata_block
