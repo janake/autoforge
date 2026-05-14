@@ -207,6 +207,7 @@ Mindket gepen kell:
 A private gepen plusz:
 
 - csatolt es mountolt workspace volume: `/mnt/autoforge-workspace`
+- olyan SSH user, amelyik jelszo nelkuli `sudo iptables` joggal tudja tiltani a kontener metadata endpoint hozzaferest
 
 Hasznos kezdo parancsok:
 
