@@ -56,6 +56,43 @@ skills:
       - Inspect host env drift, compose drift, and deploy path filters.
       - Trace OCI networking, DNS, and secret-related deployment issues.
 
+  - id: container-runtime-debug
+    enabled: true
+    owners:
+      - infra
+      - delivery
+      - security
+    uses_mcps:
+      - docker-engine
+      - docker-compose
+      - ssh-remote-shell
+      - github
+      - vault-secrets
+    description: Docker runtime diagnostics for images, compose stacks, one-shot utility containers, and metadata isolation.
+    responsibilities:
+      - Prefer ephemeral containers for short-lived tools when host package installation is unnecessary.
+      - Validate image preload, local cache, tags, networks, volumes, and container permissions.
+      - Check Docker metadata endpoint exposure and `DOCKER-USER` isolation rules.
+      - Separate Docker daemon, Compose, image, and host permission failures.
+
+  - id: microvm-runtime-isolation
+    enabled: true
+    owners:
+      - infra
+      - security
+      - ai
+    uses_mcps:
+      - firecracker
+      - docker-engine
+      - ssh-remote-shell
+      - oci
+    description: Firecracker-oriented runtime isolation review for high-risk AI/code-execution workloads.
+    responsibilities:
+      - Decide when containers are insufficient and microVM isolation should be considered.
+      - Review Firecracker jailer, network, rootfs, kernel, and metadata isolation tradeoffs.
+      - Keep AI worker and OpenCode sandboxing assumptions explicit before implementation.
+      - Document follow-up infrastructure work when microVM isolation is selected.
+
   - id: backend-auth-runtime
     enabled: true
     owners:

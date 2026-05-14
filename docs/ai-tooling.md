@@ -65,6 +65,24 @@ Feladata:
 - kontenerlogok es exec ellenorzesek
 - deploy eredmenyenek validalasa kontenerszinten
 
+### `docker-engine`
+
+Feladata:
+
+- Docker image, network, volume es daemon allapot ellenorzese
+- rovid eletu utility kontenerek futtatasi mintainak validalasa host telepites helyett
+- `DOCKER-USER` chain es metadata endpoint izolacio ellenorzese
+- Docker permission, image preload es local cache problemak szetvalasztasa
+
+### `firecracker`
+
+Feladata:
+
+- Firecracker microVM alapu izolacios dontesek elokeszitese
+- jailer, tap network, kernel/rootfs es metadata izolacio vizsgalata
+- kontener vs microVM trust boundary osszehasonlitasa AI/code execution munkaknal
+- kesobbi OpenCode vagy worker sandboxolas infrastrukturajanak tervezese
+
 ### `http-api`
 
 Feladata:
@@ -211,6 +229,24 @@ Feladata:
 - host env drift es compose drift ellenorzese
 - DNS, OCI, Vault es deploy script egyuttmozgasanak validalasa
 
+### `container-runtime-debug`
+
+Feladata:
+
+- Docker image, Compose stack, daemon es host permission hibak izolalasa
+- ephemeral utility kontener mintak hasznalata host csomagtelepites helyett
+- kontener metadata endpoint kitettség es `DOCKER-USER` chain ellenorzese
+- image preload, local cache es tag drift verifikalasa deploy hibaknal
+
+### `microvm-runtime-isolation`
+
+Feladata:
+
+- Firecracker microVM izolacio szuksegessegenek eldontese magas kockazatu AI/code execution munkaknal
+- konteneres es microVM-es sandboxolas tradeoffjainak dokumentalasa
+- jailer, halozat, rootfs/kernel es metadata eleres felteteleinek review-ja
+- follow-up infra feladatok kijelolese, ha microVM iranyt valasztunk
+
 ### `backend-auth-runtime`
 
 Feladata:
@@ -326,6 +362,7 @@ Feladata:
 - GitHub Actions, GHCR, OCI, Docker Compose es deploy pipeline felugyelete
 - public/private host runtime allapot validalasa
 - image tag drift, env drift es trigger drift kezelese
+- Docker Engine, ephemeral utility kontener es Firecracker/microVM izolacios dontesek kezelese
 
 ### `knowledge-governance`
 
@@ -349,6 +386,8 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 | **Login hiba / Redirect loop** | `app-surface` | `auth-debug` | `playwright` $\rightarrow$ `http-api` $\rightarrow$ `keycloak-admin` |
 | **502 Bad Gateway / 404 Route** | `edge-routing` | `gateway-debug` | `http-api` $\rightarrow$ `ssh-remote-shell` $\rightarrow$ `docker-compose` |
 | **Deploy nem történt / Rossz verzió** | `delivery-runtime` | `oci-deploy-debug` | `github` $\rightarrow$ `docker-compose` $\rightarrow$ `ssh-remote-shell` |
+| **Docker runtime / utility kontener hiba** | `delivery-runtime` | `container-runtime-debug` | `docker-engine` $\rightarrow$ `docker-compose` $\rightarrow$ `ssh-remote-shell` |
+| **AI sandbox / microVM izoláció döntés** | `delivery-runtime` | `microvm-runtime-isolation` | `firecracker` $\rightarrow$ `docker-engine` $\rightarrow$ `ssh-remote-shell` |
 | **Jira backlog / story migráció** | `delivery-runtime` | `jira-management` | `jira` $\rightarrow$ `github` $\rightarrow$ `node-workspace` |
 | **JWT validációs hiba (Backend)** | `api-auth` | `backend-auth-runtime` | `http-api` $\rightarrow$ `maven-java-deps` $\rightarrow$ `keycloak-admin` |
 | **Biztonsági audit / Sebezhetőség** | `security-compliance` | `security-audit` | `sast-scanner` $\rightarrow$ `dependency-audit` $\rightarrow$ `secret-scanner` |
@@ -363,6 +402,7 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 - `github`
 - `jira`
 - `ssh-remote-shell`
+- `docker-engine`
 - `docker-compose`
 - `http-api`
 
@@ -372,6 +412,7 @@ Az AI Tooling stack nem egy egyszerű eszközlista, hanem egy hierarchikus diagn
 - `oci`
 - `vault-secrets`
 - `cloudflare`
+- `firecracker`
 
 ### Harmadik kor
 

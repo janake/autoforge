@@ -42,12 +42,16 @@ groups:
       - github
       - jira
       - oci
+      - docker-engine
       - docker-compose
+      - firecracker
       - ssh-remote-shell
       - vault-secrets
       - cloudflare
     contains_skills:
       - oci-deploy-debug
+      - container-runtime-debug
+      - microvm-runtime-isolation
       - release-versioning
       - git-management
       - jira-management
@@ -73,5 +77,8 @@ groups:
       - sast-scanner
       - secret-scanner
       - dependency-audit
+      - docker-engine
+      - firecracker
     contains_skills:
       - security-audit
+      - microvm-runtime-isolation

@@ -59,6 +59,28 @@ mcps:
       - Exec into gateway or backend containers for targeted checks.
       - Validate that deploy scripts resulted in the expected runtime state.
 
+  - id: docker-engine
+    enabled: true
+    priority: critical
+    category: runtime
+    description: Docker Engine inspection for images, networks, volumes, iptables integration, and one-shot utility containers.
+    used_for:
+      - Validate image availability, tags, digests, and local image cache state.
+      - Inspect Docker networks, volumes, and container runtime metadata exposure.
+      - Run short-lived utility containers such as OCI CLI without host package installation.
+      - Diagnose Docker daemon, permissions, and `DOCKER-USER` chain behavior.
+
+  - id: firecracker
+    enabled: true
+    priority: high
+    category: runtime-isolation
+    description: Firecracker microVM planning and diagnostics for stronger workload isolation.
+    used_for:
+      - Evaluate whether risky AI/code-execution workloads should run in microVMs instead of plain containers.
+      - Review jailer, tap networking, kernel/rootfs, and metadata isolation assumptions.
+      - Compare container, microVM, and host-level trust boundaries before runtime changes.
+      - Plan future sandboxing for OpenCode or self-improving worker execution.
+
   - id: http-api
     enabled: true
     priority: critical
