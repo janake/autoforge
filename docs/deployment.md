@@ -262,6 +262,45 @@ Megjegyzes:
 
 - `iptables-restore` utan Docker chain-ek hianyozhatnak; ilyenkor `sudo systemctl restart docker`, majd compose `up -d --remove-orphans` kell.
 
+## Always Free NAT instance celallapot
+
+Az Always Free tierben nincs hasznalhato managed Service Gateway vagy NAT Gateway limit, ezert a private backend egress celallapota self-managed NAT instance a public hoston.
+
+Celhalozat:
+
+- VCN: `vcn-prodet-new`, `10.42.0.0/16`
+- Public subnet: `subnet-prodet-new-public`, `10.42.0.0/24`, `0.0.0.0/0 -> Internet Gateway`
+- NAT host: `prodet-new-e2-public-01`, private IP `10.42.0.241`, public IP `144.24.176.5`
+- Private subnet: `subnet-autoforge-private`, `10.42.1.0/24`, public IP tiltva
+- Private subnet route table: `0.0.0.0/0 -> 10.42.0.241` private IP route target
+- Private security list: inbound csak `10.42.0.0/24` es `10.42.1.0/24`, outbound `0.0.0.0/0`
+
+Public NAT host kovetelmenyek:
+
+- a public host VNIC-en `skip_source_dest_check = true`
+- Linux IP forwarding: `net.ipv4.ip_forward=1`
+- reverse path filter tiltva a NAT interface-en
+- iptables MASQUERADE a private subnetre: `10.42.1.0/24 -> ens3`
+- iptables FORWARD szabalyok a private subnet kimenore es established/related visszaforgalomra
+
+Aktualis atmeneti allapot:
+
+- A private subnet, private security list es private route table letrejott.
+- A public host NAT service (`autoforge-nat.service`) beallitja az IP forwardingot es iptables NAT szabalyokat.
+- A jelenlegi `prodet-new-e2-private-02` meg a regi `10.42.0.0/24` subnetben fut, mert a `VM.Standard.E2.1.Micro` shape csak egy VNIC-et enged, es uj Always Free instance inditasat a boot volume quota blokkolja.
+- A regi public subnet route table-t nem szabad `0.0.0.0/0 -> NAT instance` iranyba atallitani, mert ugyanazon a subneten van a public host is, es ez elvagna a public host sajat outbound forgalmat.
+
+Terraform reprodukciohoz rogzitendo eroforrasok:
+
+- `oci_core_vcn` a `10.42.0.0/16` VCN-hez
+- `oci_core_internet_gateway` es public route table `0.0.0.0/0 -> Internet Gateway`
+- `oci_core_route_table` a private subnethez `0.0.0.0/0 -> oci_core_private_ip.public_nat_primary.id`
+- `oci_core_subnet` public subnet `10.42.0.0/24`, public IP engedelyezve
+- `oci_core_subnet` private subnet `10.42.1.0/24`, `prohibit_public_ip_on_vnic = true`
+- public compute VNIC `skip_source_dest_check = true`
+- cloud-init vagy remote provisioner a NAT hoston az `autoforge-nat.service` letrehozasara
+- private compute instance kozvetlenul a private subnetben, public IP nelkul
+
 ## Kezi frissitesi parancsok
 
 Publikus host:
