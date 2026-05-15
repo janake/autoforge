@@ -3,7 +3,6 @@ import { getRuntimeConfig } from "./runtime-config";
 import { initializeKeycloak, loadAuthedJson, postAuthedJson, signIn, signOut } from "./auth/keycloak";
 import type {
   BackendMeResponse,
-  CreateJobRequest,
   CreateJobResponse,
   JobResponse,
   PromptDraftResponse,
@@ -257,9 +256,11 @@ function PromptDraftPanel({ onJobCreated }: { onJobCreated: (jobId: string) => v
   const [followUp, setFollowUp] = useState("");
   const [selectedIntent, setSelectedIntent] = useState<PromptIntent | "">("");
   const [implementationJobId, setImplementationJobId] = useState<string | null>(null);
+  const [submission, setSubmission] = useState<JobSubmissionState>({ status: "idle" });
   const [state, setState] = useState<PromptFlowState>({ status: "idle" });
 
   const draft = state.status === "ready" ? state.draft : null;
+  const latestAssistantMessage = draft?.messages.slice().reverse().find((message) => message.role === "ASSISTANT") ?? null;
 
   useEffect(() => {
     if (!draft) {
@@ -383,6 +384,33 @@ function PromptDraftPanel({ onJobCreated }: { onJobCreated: (jobId: string) => v
     }
   };
 
+  const copyLatestAssistantMessage = () => {
+    if (!latestAssistantMessage) {
+      return;
+    }
+
+    setFollowUp(latestAssistantMessage.content);
+  };
+
+  const createJobFromReply = async () => {
+    if (!followUp.trim()) {
+      return;
+    }
+
+    setSubmission({ status: "submitting" });
+
+    try {
+      const response = await postAuthedJson<CreateJobResponse>("/v1/jobs", { prompt: followUp });
+      setSubmission({ status: "success", jobId: response.jobId });
+      onJobCreated(response.jobId);
+    } catch (error) {
+      setSubmission({
+        status: "error",
+        message: error instanceof Error ? error.message : "Unable to create job.",
+      });
+    }
+  };
+
   const stage = promptFlowStage(draft, implementationJobId);
 
   return (
@@ -467,7 +495,16 @@ function PromptDraftPanel({ onJobCreated }: { onJobCreated: (jobId: string) => v
                   <button className="secondary-button" type="button" onClick={() => void addMessage()} disabled={state.status === "busy" || !followUp.trim()}>
                     Add reply
                   </button>
+                  <button className="secondary-button" type="button" onClick={copyLatestAssistantMessage} disabled={!latestAssistantMessage || state.status === "busy"}>
+                    Copy last assistant
+                  </button>
+                  <button className="primary-button" type="button" onClick={() => void createJobFromReply()} disabled={submission.status === "submitting" || !followUp.trim()}>
+                    {submission.status === "submitting" ? "Creating..." : "Create job"}
+                  </button>
                 </div>
+
+                {submission.status === "success" && <p className="success-title">Job created as {submission.jobId}.</p>}
+                {submission.status === "error" && <p className="error-title">{submission.message}</p>}
               </div>
             )}
           </section>
@@ -514,76 +551,6 @@ function PromptDraftPanel({ onJobCreated }: { onJobCreated: (jobId: string) => v
           )}
         </div>
       )}
-    </article>
-  );
-}
-
-function PromptSubmissionPanel({ onJobCreated }: { onJobCreated: (jobId: string) => void }) {
-  const [form, setForm] = useState<CreateJobRequest>({
-    prompt: "",
-  });
-  const [submission, setSubmission] = useState<JobSubmissionState>({ status: "idle" });
-
-  const updateField = <K extends keyof CreateJobRequest>(field: K, value: string) => {
-    setForm((current) => ({ ...current, [field]: value }));
-  };
-
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSubmission({ status: "submitting" });
-
-    try {
-      const response = await postAuthedJson<CreateJobResponse>("/v1/jobs", form);
-      setSubmission({ status: "success", jobId: response.jobId });
-      onJobCreated(response.jobId);
-    } catch (error) {
-      setSubmission({
-        status: "error",
-        message: error instanceof Error ? error.message : "Unable to submit prompt.",
-      });
-    }
-  };
-
-  return (
-    <article className="workspace-panel" id="prompt">
-      <div className="section-head">
-        <h2>Submit prompt</h2>
-        <span className="pill">Prompt</span>
-      </div>
-      <p className="muted">
-        Enter the prompt. The backend will create the queued job and use repository settings from configuration.
-      </p>
-
-      <form className="prompt-form" onSubmit={onSubmit}>
-        <label>
-          <span>Prompt</span>
-          <textarea
-            name="prompt"
-            value={form.prompt}
-            onChange={(event) => updateField("prompt", event.target.value)}
-            placeholder="Describe the task you want the agent to carry out"
-            rows={6}
-            required
-          />
-        </label>
-
-        <div className="prompt-actions">
-          <button className="primary-button" type="submit" disabled={submission.status === "submitting"}>
-            {submission.status === "submitting" ? "Submitting..." : "Create job"}
-          </button>
-          <span className="muted">
-            The request is authenticated with the current Keycloak session.
-          </span>
-        </div>
-      </form>
-
-      {submission.status === "success" && (
-        <p className="success-title">
-          Job created as {submission.jobId}.
-        </p>
-      )}
-
-      {submission.status === "error" && <p className="error-title">{submission.message}</p>}
     </article>
   );
 }
@@ -693,13 +660,6 @@ function PrivateWorkspace({
 
       <section className="workspace-grid" aria-label="User workspace">
         <PromptDraftPanel
-          onJobCreated={(createdJobId) => {
-            onJobCreated(createdJobId);
-            syncJobIdInUrl(createdJobId);
-          }}
-        />
-
-        <PromptSubmissionPanel
           onJobCreated={(createdJobId) => {
             onJobCreated(createdJobId);
             syncJobIdInUrl(createdJobId);
