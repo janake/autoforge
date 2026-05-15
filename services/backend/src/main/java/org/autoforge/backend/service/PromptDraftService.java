@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.autoforge.backend.domain.PromptDraft;
 import org.autoforge.backend.domain.PromptDraftMessage;
 import org.autoforge.backend.domain.PromptDraftMessageRole;
+import org.autoforge.backend.domain.PromptIntent;
 import org.autoforge.backend.domain.PromptDraftStatus;
 import org.autoforge.backend.dto.AddPromptDraftMessageRequest;
 import org.autoforge.backend.dto.CreatePromptDraftRequest;
@@ -33,6 +34,7 @@ public class PromptDraftService {
   @Transactional
   public PromptDraftResponse createDraft(CreatePromptDraftRequest request) {
     PromptDraft draft = promptDraftRepository.save(PromptDraft.create(request.prompt().trim()));
+    applyIntentClassification(draft, draft.getPrompt());
     promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.USER, draft.getPrompt()));
 
     List<String> questions = clarificationQuestions(draft.getPrompt());
@@ -62,7 +64,10 @@ public class PromptDraftService {
     }
     promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.USER, request.content().trim()));
 
-    List<String> questions = clarificationQuestions(combinedConversationText(draft.getPrompt(), draft.getId()));
+    String conversationText = combinedConversationText(draft.getPrompt(), draft.getId());
+    applyIntentClassification(draft, conversationText);
+
+    List<String> questions = clarificationQuestions(conversationText);
     if (questions.isEmpty()) {
       draft.setStatus(PromptDraftStatus.READY_FOR_APPROVAL);
       draft.setPendingQuestions(null);
@@ -126,6 +131,40 @@ public class PromptDraftService {
     return questions.stream().distinct().collect(Collectors.toList());
   }
 
+  private void applyIntentClassification(PromptDraft draft, String text) {
+    PromptIntentClassification classification = classifyIntent(text);
+    draft.setIntent(classification.intent());
+    draft.setIntentConfidence(classification.confidence());
+    draft.setIntentReason(classification.reason());
+    promptDraftRepository.save(draft);
+  }
+
+  private PromptIntentClassification classifyIntent(String text) {
+    String normalized = Objects.requireNonNullElse(text, "").toLowerCase(Locale.ROOT).replaceAll("\\s+", " ").trim();
+
+    if (normalized.isBlank()) {
+      return new PromptIntentClassification(PromptIntent.TASK, 0.25, "Empty prompt defaults to task");
+    }
+
+    if (normalized.contains("?") || normalized.matches(".*\\b(how|what|why|when|where|which|can you|could you|should i)\\b.*")) {
+      return new PromptIntentClassification(PromptIntent.QUESTION, 0.96, "Interrogative wording or question mark detected");
+    }
+
+    if (normalized.matches(".*\\b(bug|error|fail|failure|exception|broken|doesn't work|does not work|regression|fix)\\b.*")) {
+      return new PromptIntentClassification(PromptIntent.BUG, 0.88, "Bug/failure keywords detected");
+    }
+
+    if (normalized.matches(".*\\b(epic|large initiative|multi-step initiative|program of work)\\b.*")) {
+      return new PromptIntentClassification(PromptIntent.EPIC, 0.84, "Epic-sized scope keyword detected");
+    }
+
+    if (normalized.matches(".*\\b(feature|implement|add|build|create|support|enhance|introduce)\\b.*")) {
+      return new PromptIntentClassification(PromptIntent.FEATURE, 0.82, "Feature/implementation keywords detected");
+    }
+
+    return new PromptIntentClassification(PromptIntent.TASK, 0.61, "Defaulted to task after no stronger intent signal");
+  }
+
   private PromptDraftResponse toResponse(PromptDraft draft) {
     List<PromptDraftMessageResponse> messages = promptDraftMessageRepository.findByDraftIdOrderByCreatedAtAsc(draft.getId()).stream()
       .map(message -> new PromptDraftMessageResponse(message.getRole().name(), message.getContent(), message.getCreatedAt()))
@@ -139,6 +178,9 @@ public class PromptDraftService {
       draft.getId(),
       draft.getPrompt(),
       draft.getStatus().name(),
+      draft.getIntent() == null ? null : draft.getIntent().name(),
+      draft.getIntentConfidence(),
+      draft.getIntentReason(),
       draft.getStatus() == PromptDraftStatus.READY_FOR_APPROVAL,
       draft.getApprovedBy(),
       draft.getApprovedAt(),

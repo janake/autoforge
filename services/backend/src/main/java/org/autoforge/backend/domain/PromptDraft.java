@@ -30,6 +30,16 @@ public class PromptDraft {
   @Column(name = "pending_questions", length = 4000)
   private String pendingQuestions;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "intent", length = 32)
+  private PromptIntent intent;
+
+  @Column(name = "intent_confidence")
+  private Double intentConfidence;
+
+  @Column(name = "intent_reason", length = 1000)
+  private String intentReason;
+
   @Column(name = "approved_by", length = 128)
   private String approvedBy;
 
@@ -80,6 +90,18 @@ public class PromptDraft {
     return pendingQuestions;
   }
 
+  public PromptIntent getIntent() {
+    return intent;
+  }
+
+  public Double getIntentConfidence() {
+    return intentConfidence;
+  }
+
+  public String getIntentReason() {
+    return intentReason;
+  }
+
   public Instant getCreatedAt() {
     return createdAt;
   }
@@ -102,6 +124,18 @@ public class PromptDraft {
 
   public void setPendingQuestions(String pendingQuestions) {
     this.pendingQuestions = pendingQuestions;
+  }
+
+  public void setIntent(PromptIntent intent) {
+    this.intent = intent;
+  }
+
+  public void setIntentConfidence(Double intentConfidence) {
+    this.intentConfidence = intentConfidence;
+  }
+
+  public void setIntentReason(String intentReason) {
+    this.intentReason = intentReason;
   }
 
   public void approve(String approvedBy, Instant approvedAt) {

@@ -49,11 +49,12 @@ class PromptDraftControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
-            "prompt": "Add something useful"
+            "prompt": "Audit the workflow"
           }
           """))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.status").value("CLARIFYING"))
+      .andExpect(jsonPath("$.intent").value("TASK"))
       .andExpect(jsonPath("$.readyForApproval").value(false))
       .andExpect(jsonPath("$.pendingQuestions").isArray())
       .andExpect(jsonPath("$.messages[0].role").value("USER"))
@@ -113,6 +114,7 @@ class PromptDraftControllerTest {
           """))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.status").value("READY_FOR_APPROVAL"))
+      .andExpect(jsonPath("$.intent").value("FEATURE"))
       .andReturn();
 
     String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
@@ -121,6 +123,7 @@ class PromptDraftControllerTest {
         .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("APPROVED"))
+      .andExpect(jsonPath("$.intent").value("FEATURE"))
       .andExpect(jsonPath("$.approvedBy").value("janake"))
       .andExpect(jsonPath("$.approvedAt").isNotEmpty())
       .andExpect(jsonPath("$.readyForApproval").value(false));
