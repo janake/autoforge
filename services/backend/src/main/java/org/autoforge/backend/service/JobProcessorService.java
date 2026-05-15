@@ -1,6 +1,7 @@
 package org.autoforge.backend.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import org.autoforge.backend.domain.Job;
 import org.autoforge.backend.domain.JobStatus;
 import org.autoforge.backend.dto.GeneratedPatchResponse;
@@ -32,7 +33,7 @@ public class JobProcessorService {
 
   @Scheduled(fixedDelayString = "${autoforge.mvp.job-processor.poll-interval-ms:5000}")
   public void pollQueuedJobs() {
-    List<Job> queuedJobs = jobRepository.findByStatusOrderByCreatedAtAsc(JobStatus.QUEUED);
+    List<Job> queuedJobs = eligibleJobs(jobRepository.findByStatusOrderByCreatedAtAsc(JobStatus.QUEUED));
 
     for (Job job : queuedJobs) {
       processJob(job);
@@ -70,6 +71,12 @@ public class JobProcessorService {
       job.getPrompt(),
       generatedPatch.patch()
     );
+  }
+
+  List<Job> eligibleJobs(List<Job> queuedJobs) {
+    return queuedJobs.stream()
+      .filter(job -> job.getJiraIssueKey() != null && !job.getJiraIssueKey().isBlank())
+      .collect(Collectors.toList());
   }
 
   private String toRepositoryUrl(String targetRepository) {

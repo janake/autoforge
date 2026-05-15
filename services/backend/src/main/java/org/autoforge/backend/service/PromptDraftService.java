@@ -86,7 +86,7 @@ public class PromptDraftService {
   }
 
   @Transactional
-  public PromptDraftResponse approveDraft(String draftId, String approvedBy) {
+  public PromptDraftResponse approveDraft(String draftId, String approvedBy, PromptIntent selectedIntent) {
     PromptDraft draft = loadDraft(draftId);
 
     if (draft.getStatus() != PromptDraftStatus.READY_FOR_APPROVAL) {
@@ -94,7 +94,8 @@ public class PromptDraftService {
     }
 
     String approver = approvedBy == null || approvedBy.isBlank() ? "unknown" : approvedBy.trim();
-    draft.approve(approver, Instant.now());
+    PromptIntent finalSelectedIntent = requireSelectedIntent(draftId, selectedIntent);
+    draft.approve(approver, Instant.now(), finalSelectedIntent);
     promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, "Approved by %s.".formatted(approver)));
 
     return toResponse(promptDraftRepository.save(draft));
@@ -214,6 +215,7 @@ public class PromptDraftService {
       draft.getIntent() == null ? null : draft.getIntent().name(),
       draft.getIntentConfidence(),
       draft.getIntentReason(),
+      draft.getSelectedIntent() == null ? null : draft.getSelectedIntent().name(),
       draft.getStatus() == PromptDraftStatus.READY_FOR_APPROVAL,
       draft.getApprovedBy(),
       draft.getApprovedAt(),
@@ -271,5 +273,17 @@ public class PromptDraftService {
       return "unknown";
     }
     return value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
+  }
+
+  private PromptIntent requireSelectedIntent(String draftId, PromptIntent selectedIntent) {
+    if (selectedIntent == null) {
+      throw new PromptDraftApprovalException("Prompt draft approval requires a selected intent: " + draftId);
+    }
+
+    if (selectedIntent == PromptIntent.QUESTION) {
+      throw new PromptDraftApprovalException("Prompt draft approval cannot select QUESTION: " + draftId);
+    }
+
+    return selectedIntent;
   }
 }

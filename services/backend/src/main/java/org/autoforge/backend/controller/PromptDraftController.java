@@ -1,6 +1,7 @@
 package org.autoforge.backend.controller;
 
 import jakarta.validation.Valid;
+import org.autoforge.backend.dto.ApprovePromptDraftRequest;
 import org.autoforge.backend.dto.AddPromptDraftMessageRequest;
 import org.autoforge.backend.dto.CreatePromptDraftRequest;
 import org.autoforge.backend.dto.PromptDraftResponse;
@@ -47,6 +48,7 @@ public class PromptDraftController {
   @PostMapping("/{draftId}/approve")
   public PromptDraftResponse approveDraft(
     @PathVariable String draftId,
+    @Valid @RequestBody ApprovePromptDraftRequest request,
     Authentication authentication
   ) {
     if (!(authentication instanceof JwtAuthenticationToken token)) {
@@ -55,7 +57,7 @@ public class PromptDraftController {
 
     Jwt jwt = token.getToken();
     String approvedBy = jwt.getClaimAsString("preferred_username");
-    return promptDraftService.approveDraft(draftId, approvedBy);
+    return promptDraftService.approveDraft(draftId, approvedBy, request.selectedIntent());
   }
 
   @PostMapping("/{draftId}/jira-ticket")

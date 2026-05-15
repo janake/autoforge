@@ -68,6 +68,7 @@ class JobProcessorServiceTest {
       );
 
       Job job = jobRepository.saveAndFlush(Job.createQueued(
+        "AUTO-281",
         "Process queued job",
         sourceRepository.toUri().toString(),
         "main"
@@ -91,7 +92,7 @@ class JobProcessorServiceTest {
       assertThat(updated.getPrUrl()).isEqualTo("https://github.com/org/repo/pull/123");
       ArgumentCaptor<CreatePullRequestRequest> requestCaptor = ArgumentCaptor.forClass(CreatePullRequestRequest.class);
       verify(gitPublishService).pushBranchAndOpenPr(any(), requestCaptor.capture(), any());
-      assertThat(requestCaptor.getValue().branchName()).startsWith("task/JOB-");
+      assertThat(requestCaptor.getValue().branchName()).startsWith("task/AUTO-281-");
     } finally {
       GitPaths.deleteRecursively(sourceRepository);
     }
@@ -113,5 +114,21 @@ class JobProcessorServiceTest {
     Job updated = jobRepository.findById(job.getId()).orElseThrow();
     assertThat(updated.getStatus()).isEqualTo(JobStatus.FAILED);
     assertThat(updated.getErrorMessage()).contains("patch generator unavailable");
+  }
+
+  @Test
+  void ignoresQueuedJobsWithoutJiraIssueKey() {
+    Job job = jobRepository.saveAndFlush(Job.createQueued(
+      "Process queued job",
+      "janake/autoforge",
+      "main"
+    ));
+
+    jobProcessorService.pollQueuedJobs();
+
+    Job updated = jobRepository.findById(job.getId()).orElseThrow();
+    assertThat(updated.getStatus()).isEqualTo(JobStatus.QUEUED);
+    assertThat(updated.getPrUrl()).isNull();
+    assertThat(updated.getErrorMessage()).isNull();
   }
 }

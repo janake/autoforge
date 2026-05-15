@@ -45,7 +45,7 @@ public class JobService {
       job.getTargetRepository(),
       job.getBaseBranch(),
       job.getStatus().name(),
-      job.getPrUrl(),
+      job.getPrUrl() == null ? "" : job.getPrUrl(),
       job.getErrorMessage(),
       job.getCreatedAt(),
       job.getUpdatedAt()

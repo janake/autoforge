@@ -10,6 +10,7 @@ public record PromptDraftResponse(
   String intent,
   Double intentConfidence,
   String intentReason,
+  String selectedIntent,
   boolean readyForApproval,
   String approvedBy,
   Instant approvedAt,
