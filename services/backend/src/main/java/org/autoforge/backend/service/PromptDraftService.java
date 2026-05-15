@@ -16,6 +16,9 @@ import org.autoforge.backend.dto.AddPromptDraftMessageRequest;
 import org.autoforge.backend.dto.CreatePromptDraftRequest;
 import org.autoforge.backend.dto.PromptDraftMessageResponse;
 import org.autoforge.backend.dto.PromptDraftResponse;
+import org.autoforge.backend.jira.CreateJiraIssueRequest;
+import org.autoforge.backend.jira.CreateJiraIssueResponse;
+import org.autoforge.backend.jira.JiraIssueClient;
 import org.autoforge.backend.repository.PromptDraftMessageRepository;
 import org.autoforge.backend.repository.PromptDraftRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,7 @@ public class PromptDraftService {
 
   private final PromptDraftRepository promptDraftRepository;
   private final PromptDraftMessageRepository promptDraftMessageRepository;
+  private final JiraIssueClient jiraIssueClient;
 
   @Transactional
   public PromptDraftResponse createDraft(CreatePromptDraftRequest request) {
@@ -93,6 +97,35 @@ public class PromptDraftService {
     draft.approve(approver, Instant.now());
     promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, "Approved by %s.".formatted(approver)));
 
+    return toResponse(promptDraftRepository.save(draft));
+  }
+
+  @Transactional
+  public PromptDraftResponse createJiraTicket(String draftId, String createdBy) {
+    PromptDraft draft = loadDraft(draftId);
+
+    if (draft.getJiraIssueKey() != null && !draft.getJiraIssueKey().isBlank()) {
+      return toResponse(draft);
+    }
+
+    if (draft.getStatus() != PromptDraftStatus.APPROVED) {
+      throw new PromptDraftTicketException("Prompt draft is not approved: " + draftId);
+    }
+
+    if (draft.getIntent() == PromptIntent.QUESTION) {
+      throw new PromptDraftTicketException("Question drafts do not create Jira tickets: " + draftId);
+    }
+
+    CreateJiraIssueResponse ticket = jiraIssueClient.createIssue(new CreateJiraIssueRequest(
+      "AUTO",
+      toJiraIssueType(draft.getIntent()),
+      summaryForJiraIssue(draft.getPrompt()),
+      descriptionForJiraIssue(draft),
+      List.of("prompt-draft", "prompt-flow", "approved-by-" + safeLabel(createdBy))
+    ));
+
+    draft.markTicketCreated(ticket.issueKey(), ticket.issueUrl());
+    promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, "Jira ticket created: %s".formatted(ticket.issueKey())));
     return toResponse(promptDraftRepository.save(draft));
   }
 
@@ -184,10 +217,59 @@ public class PromptDraftService {
       draft.getStatus() == PromptDraftStatus.READY_FOR_APPROVAL,
       draft.getApprovedBy(),
       draft.getApprovedAt(),
+      draft.getJiraIssueKey(),
+      draft.getJiraIssueUrl(),
       pendingQuestions,
       messages,
       draft.getCreatedAt(),
       draft.getUpdatedAt()
     );
+  }
+
+  private String toJiraIssueType(PromptIntent intent) {
+    if (intent == null) {
+      return "Task";
+    }
+
+    return switch (intent) {
+      case BUG -> "Bug";
+      case FEATURE -> "Story";
+      case EPIC -> "Epic";
+      case TASK -> "Task";
+      case QUESTION -> "Task";
+    };
+  }
+
+  private String summaryForJiraIssue(String prompt) {
+    String cleaned = prompt == null ? "" : prompt.replaceAll("\\s+", " ").trim();
+    if (cleaned.length() <= 120) {
+      return cleaned;
+    }
+    return cleaned.substring(0, 117) + "...";
+  }
+
+  private String descriptionForJiraIssue(PromptDraft draft) {
+    StringBuilder builder = new StringBuilder();
+    builder.append("Source prompt:\n").append(draft.getPrompt()).append("\n\n");
+    if (draft.getApprovedBy() != null) {
+      builder.append("Approved by: ").append(draft.getApprovedBy()).append("\n");
+    }
+    if (draft.getIntent() != null) {
+      builder.append("Intent: ").append(draft.getIntent().name()).append("\n");
+    }
+    if (draft.getIntentReason() != null) {
+      builder.append("Intent reason: ").append(draft.getIntentReason()).append("\n");
+    }
+    if (draft.getPendingQuestions() != null && !draft.getPendingQuestions().isBlank()) {
+      builder.append("Pending questions:\n").append(draft.getPendingQuestions()).append("\n");
+    }
+    return builder.toString().trim();
+  }
+
+  private String safeLabel(String value) {
+    if (value == null || value.isBlank()) {
+      return "unknown";
+    }
+    return value.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
   }
 }

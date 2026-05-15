@@ -57,4 +57,18 @@ public class PromptDraftController {
     String approvedBy = jwt.getClaimAsString("preferred_username");
     return promptDraftService.approveDraft(draftId, approvedBy);
   }
+
+  @PostMapping("/{draftId}/jira-ticket")
+  public PromptDraftResponse createJiraTicket(
+    @PathVariable String draftId,
+    Authentication authentication
+  ) {
+    if (!(authentication instanceof JwtAuthenticationToken token)) {
+      throw new IllegalStateException("Expected JWT authentication");
+    }
+
+    Jwt jwt = token.getToken();
+    String createdBy = jwt.getClaimAsString("preferred_username");
+    return promptDraftService.createJiraTicket(draftId, createdBy);
+  }
 }
