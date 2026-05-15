@@ -121,7 +121,8 @@ class JobControllerTest {
       .andExpect(jsonPath("$.prompt").value("Check job status"))
       .andExpect(jsonPath("$.status").value("QUEUED"))
       .andExpect(jsonPath("$.targetRepository").value("janake/autoforge"))
-      .andExpect(jsonPath("$.baseBranch").value("main"));
+      .andExpect(jsonPath("$.baseBranch").value("main"))
+      .andExpect(jsonPath("$.prUrl").value(""));
   }
 
   @Test

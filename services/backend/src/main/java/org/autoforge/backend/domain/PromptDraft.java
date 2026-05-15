@@ -40,6 +40,10 @@ public class PromptDraft {
   @Column(name = "intent_reason", length = 1000)
   private String intentReason;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "selected_intent", length = 32)
+  private PromptIntent selectedIntent;
+
   @Column(name = "approved_by", length = 128)
   private String approvedBy;
 
@@ -108,6 +112,10 @@ public class PromptDraft {
     return intentReason;
   }
 
+  public PromptIntent getSelectedIntent() {
+    return selectedIntent;
+  }
+
   public Instant getCreatedAt() {
     return createdAt;
   }
@@ -152,10 +160,18 @@ public class PromptDraft {
     this.intentReason = intentReason;
   }
 
-  public void approve(String approvedBy, Instant approvedAt) {
+  public void setSelectedIntent(PromptIntent selectedIntent) {
+    this.selectedIntent = selectedIntent;
+  }
+
+  public void approve(String approvedBy, Instant approvedAt, PromptIntent selectedIntent) {
     this.status = PromptDraftStatus.APPROVED;
     this.approvedBy = approvedBy;
     this.approvedAt = approvedAt;
+    this.selectedIntent = selectedIntent;
+    this.intent = selectedIntent;
+    this.intentConfidence = 1.0;
+    this.intentReason = "Explicitly selected during approval";
   }
 
   public void markTicketCreated(String jiraIssueKey, String jiraIssueUrl) {

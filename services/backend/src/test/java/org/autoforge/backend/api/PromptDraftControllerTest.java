@@ -130,10 +130,17 @@ class PromptDraftControllerTest {
     String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "selectedIntent": "FEATURE"
+          }
+          """)
         .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("APPROVED"))
       .andExpect(jsonPath("$.intent").value("FEATURE"))
+      .andExpect(jsonPath("$.selectedIntent").value("FEATURE"))
       .andExpect(jsonPath("$.approvedBy").value("janake"))
       .andExpect(jsonPath("$.approvedAt").isNotEmpty())
       .andExpect(jsonPath("$.readyForApproval").value(false));
@@ -157,6 +164,12 @@ class PromptDraftControllerTest {
     String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "selectedIntent": "FEATURE"
+          }
+          """)
         .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.status").value(409))
@@ -179,6 +192,12 @@ class PromptDraftControllerTest {
     String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "selectedIntent": "FEATURE"
+          }
+          """)
         .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk());
 
@@ -212,6 +231,12 @@ class PromptDraftControllerTest {
     String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "selectedIntent": "FEATURE"
+          }
+          """)
         .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk());
 
@@ -250,5 +275,28 @@ class PromptDraftControllerTest {
         .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.message").value("Prompt draft is not approved: " + draftId));
+  }
+
+  @Test
+  void rejectsApprovalWithoutSelectedIntent() throws Exception {
+    var created = mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Implement prompt draft approval flow for janake/autoforge with explicit acceptance criteria and no automatic implementation before approval"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andReturn();
+
+    String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("{}")
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isConflict())
+      .andExpect(jsonPath("$.message").value("Prompt draft approval requires a selected intent: " + draftId));
   }
 }

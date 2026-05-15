@@ -25,7 +25,7 @@ export type JobResponse = {
   targetRepository: string;
   baseBranch: string;
   status: string;
-  prUrl: string | null;
+  prUrl: string;
   errorMessage: string | null;
   createdAt: string;
   updatedAt: string;
