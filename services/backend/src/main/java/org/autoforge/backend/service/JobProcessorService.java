@@ -24,6 +24,7 @@ public class JobProcessorService {
 
   private final JobRepository jobRepository;
   private final JobService jobService;
+  private final BranchNamingService branchNamingService;
   private final AIPatchGenerator aiPatchGenerator;
   private final GitRepositoryPreparationService gitRepositoryPreparationService;
   private final GitPatchApplicationService gitPatchApplicationService;
@@ -57,8 +58,8 @@ public class JobProcessorService {
   }
 
   private CreatePullRequestRequest createPullRequestRequest(Job job, GeneratedPatchResponse generatedPatch) {
-    String reference = jobReference(job);
-    String branchName = "autoforge/%s-job".formatted(reference);
+    String branchName = branchNamingService.branchNameFor(job);
+    String reference = branchNamingService.referenceFor(job.getJiraIssueKey(), job.getId());
 
     return new CreatePullRequestRequest(
       toRepositoryUrl(job.getTargetRepository()),
@@ -69,14 +70,6 @@ public class JobProcessorService {
       job.getPrompt(),
       generatedPatch.patch()
     );
-  }
-
-  private String jobReference(Job job) {
-    if (job.getJiraIssueKey() != null && !job.getJiraIssueKey().isBlank()) {
-      return job.getJiraIssueKey();
-    }
-
-    return "JOB-%s".formatted(job.getId().substring(0, 8));
   }
 
   private String toRepositoryUrl(String targetRepository) {

@@ -91,7 +91,7 @@ class JobProcessorServiceTest {
       assertThat(updated.getPrUrl()).isEqualTo("https://github.com/org/repo/pull/123");
       ArgumentCaptor<CreatePullRequestRequest> requestCaptor = ArgumentCaptor.forClass(CreatePullRequestRequest.class);
       verify(gitPublishService).pushBranchAndOpenPr(any(), requestCaptor.capture(), any());
-      assertThat(requestCaptor.getValue().branchName()).startsWith("autoforge/JOB-");
+      assertThat(requestCaptor.getValue().branchName()).startsWith("task/JOB-");
     } finally {
       GitPaths.deleteRecursively(sourceRepository);
     }
