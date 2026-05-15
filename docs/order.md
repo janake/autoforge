@@ -31,4 +31,6 @@ SPRINT-006 - Branch naming szabaly: `feature/JIRA-123-...`, `bug/JIRA-123-...`, 
 SPRINT-007 - Job processor csak Jira ticket es jovahagyott feladat utan induljon - planned
 SPRINT-008 - UI allapotok: draft conversation, ready for ticket, ticket created, implementation running - planned
 SPRINT-009 - Jira MCP kepessegek felmerese backlog, sprint, task es subtask kezelesre - planned
-SPRINT-010 - Dontes: sprint/backlog vezetes maradjon `order.md`-ben vagy menjen at Jira-ba - planned
+SPRINT-010 - Dontes: sprint/backlog vezetes maradjon `order.md`-ben vagy menjen at Jira-ba - done
+
+Kovetkeztetes: a high-level roadmap maradjon `order.md`-ben, a Jira pedig a vegrehajtasi source of truth es a task statusz követese legyen.

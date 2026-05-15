@@ -23,6 +23,7 @@ Autoforge is an AI-assisted application platform that is building a self-improvi
 ## Current operating model
 
 - Work is tracked in Jira and mirrored in repo docs only when needed.
+- `docs/order.md` stays the high-level roadmap; Jira stays the execution source of truth.
 - Architecture and workflow changes must be documented alongside the change.
 - Confluence holds published diagrams when the repo should not duplicate them.
 
