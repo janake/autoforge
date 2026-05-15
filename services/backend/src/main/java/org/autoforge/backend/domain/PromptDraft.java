@@ -46,6 +46,12 @@ public class PromptDraft {
   @Column(name = "approved_at")
   private Instant approvedAt;
 
+  @Column(name = "jira_issue_key", length = 32)
+  private String jiraIssueKey;
+
+  @Column(name = "jira_issue_url", length = 1024)
+  private String jiraIssueUrl;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;
@@ -118,6 +124,14 @@ public class PromptDraft {
     return approvedAt;
   }
 
+  public String getJiraIssueKey() {
+    return jiraIssueKey;
+  }
+
+  public String getJiraIssueUrl() {
+    return jiraIssueUrl;
+  }
+
   public void setStatus(PromptDraftStatus status) {
     this.status = status;
   }
@@ -142,5 +156,11 @@ public class PromptDraft {
     this.status = PromptDraftStatus.APPROVED;
     this.approvedBy = approvedBy;
     this.approvedAt = approvedAt;
+  }
+
+  public void markTicketCreated(String jiraIssueKey, String jiraIssueUrl) {
+    this.status = PromptDraftStatus.TICKET_CREATED;
+    this.jiraIssueKey = jiraIssueKey;
+    this.jiraIssueUrl = jiraIssueUrl;
   }
 }

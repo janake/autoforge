@@ -1,6 +1,11 @@
 package org.autoforge.backend.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,6 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.autoforge.backend.repository.JobRepository;
 import org.autoforge.backend.repository.PromptDraftMessageRepository;
 import org.autoforge.backend.repository.PromptDraftRepository;
+import org.autoforge.backend.jira.CreateJiraIssueResponse;
+import org.autoforge.backend.jira.JiraIssueClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +41,9 @@ class PromptDraftControllerTest {
 
   @Autowired
   private PromptDraftMessageRepository promptDraftMessageRepository;
+
+  @org.springframework.boot.test.mock.mockito.MockBean
+  private JiraIssueClient jiraIssueClient;
 
   @BeforeEach
   void cleanState() {
@@ -182,5 +192,63 @@ class PromptDraftControllerTest {
           """))
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.message").value("Approved prompt draft cannot be edited: " + draftId));
+  }
+
+  @Test
+  void createsJiraTicketOnlyFromApprovedDraftAndIsIdempotent() throws Exception {
+    when(jiraIssueClient.createIssue(any())).thenReturn(new CreateJiraIssueResponse("AUTO-999", "https://autoforge.atlassian.net/browse/AUTO-999"));
+
+    var created = mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Implement prompt draft approval flow for janake/autoforge with explicit acceptance criteria and no automatic implementation before approval"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andReturn();
+
+    String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isOk());
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/jira-ticket", draftId)
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("TICKET_CREATED"))
+      .andExpect(jsonPath("$.jiraIssueKey").value("AUTO-999"))
+      .andExpect(jsonPath("$.jiraIssueUrl").value("https://autoforge.atlassian.net/browse/AUTO-999"));
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/jira-ticket", draftId)
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.jiraIssueKey").value("AUTO-999"));
+
+    verify(jiraIssueClient, times(1)).createIssue(any());
+    verifyNoMoreInteractions(jiraIssueClient);
+  }
+
+  @Test
+  void rejectsJiraTicketCreationWhenDraftIsNotApproved() throws Exception {
+    var created = mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Audit the workflow"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andReturn();
+
+    String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/jira-ticket", draftId)
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isConflict())
+      .andExpect(jsonPath("$.message").value("Prompt draft is not approved: " + draftId));
   }
 }

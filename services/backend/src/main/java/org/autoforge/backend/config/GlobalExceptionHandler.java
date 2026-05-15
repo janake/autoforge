@@ -6,6 +6,7 @@ import org.autoforge.backend.dto.ApiErrorResponse;
 import org.autoforge.backend.service.JobNotFoundException;
 import org.autoforge.backend.service.PromptDraftApprovalException;
 import org.autoforge.backend.service.PromptDraftNotFoundException;
+import org.autoforge.backend.service.PromptDraftTicketException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -47,6 +48,11 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(PromptDraftApprovalException.class)
   public ResponseEntity<ApiErrorResponse> handleDraftApproval(PromptDraftApprovalException ex, HttpServletRequest request) {
+    return build(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(PromptDraftTicketException.class)
+  public ResponseEntity<ApiErrorResponse> handleDraftTicket(PromptDraftTicketException ex, HttpServletRequest request) {
     return build(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
   }
 

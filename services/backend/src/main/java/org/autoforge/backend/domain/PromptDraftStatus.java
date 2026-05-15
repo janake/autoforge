@@ -4,5 +4,6 @@ public enum PromptDraftStatus {
   DRAFT,
   CLARIFYING,
   READY_FOR_APPROVAL,
-  APPROVED
+  APPROVED,
+  TICKET_CREATED
 }

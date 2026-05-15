@@ -13,6 +13,8 @@ public record PromptDraftResponse(
   boolean readyForApproval,
   String approvedBy,
   Instant approvedAt,
+  String jiraIssueKey,
+  String jiraIssueUrl,
   List<String> pendingQuestions,
   List<PromptDraftMessageResponse> messages,
   Instant createdAt,
