@@ -33,7 +33,7 @@ management:
 autoforge:
   mvp:
     job-processor:
-      enabled: ${AUTOFORGE_JOB_PROCESSOR_ENABLED:true}
+      enabled: ${AUTOFORGE_JOB_PROCESSOR_ENABLED:false}
       poll-interval-ms: ${AUTOFORGE_JOB_PROCESSOR_POLL_INTERVAL_MS:5000}
     github:
       token: ${AUTOFORGE_GITHUB_TOKEN:}
