@@ -51,10 +51,13 @@ mcps:
     enabled: true
     priority: critical
     category: delivery
-    description: Jira issue, epic, story, backlog, status, and release tracking integration.
+    description: Jira issue, epic, story, sprint, backlog, export, status, and release tracking integration.
     local_launch: ops/mcp/jira-local.sh
     used_for:
       - Create, read, update, and transition Jira epics, stories, bugs, tasks, and spikes.
+      - Create, update, start, close, and inspect sprints on Agile boards.
+      - Add issues to sprints, move issues to backlog, and rank backlog or sprint issues.
+      - Export Jira project planning state including boards, sprints, issues, subtasks, comments, links, labels, parent relationships, and custom fields.
       - Run JQL searches for backlog grooming, migration checks, and status synchronization.
       - Link Jira issues with branches, commits, pull requests, releases, and verification notes.
       - Support Jira-first source-of-truth workflows after the Markdown task migration.

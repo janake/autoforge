@@ -106,3 +106,56 @@ Fontos:
 - A token értéke nem kerül kiírásra.
 - Ha egy Jira issue type nem létezik, a create retry alapértelmezetten `Task` típussal történik.
 - Első éles futás előtt mindig nézd meg a `build/jira-import-plan.json` tartalmát.
+
+## Jira MCP sprintkezeles es export
+
+Az `ops/mcp/jira-server.mjs` stdio MCP szerver kozvetlen Jira Agile REST toolokat ad az agenteknek.
+
+Futtatas helyi MCP launcherrel:
+
+```bash
+ops/mcp/jira-local.sh
+```
+
+Credential feloldas sorrendje:
+
+- kozvetlen env valtozo: `JIRA_BASE_URL`, `JIRA_PROJECT_KEY`, `JIRA_EMAIL`, `JIRA_API_TOKEN`
+- explicit OCI Vault OCID env: `OCI_<SECRET_NAME>_SECRET_OCID`
+- OCI Vault display name lookup azonos secret nevekkel
+
+Sprint/backlog toolok:
+
+- `jira_list_boards`
+- `jira_list_sprints`
+- `jira_create_sprint`
+- `jira_update_sprint` state valtashoz is, peldaul `active` vagy `closed`
+- `jira_get_sprint_issues`
+- `jira_add_issues_to_sprint`
+- `jira_move_issues_to_backlog`
+- `jira_rank_issues`
+
+Issue management toolok:
+
+- `jira_create_issue`
+- `jira_search`
+- `jira_get_issue`
+- `jira_update_issue`
+- `jira_list_transitions`
+- `jira_transition_issue`
+- `jira_add_comment`
+
+Export toolok:
+
+- `jira_export_issues`: JQL vagy projekt szerinti issue export epicekre, standard issue-kra es subtaskokra bontva.
+- `jira_export_project`: teljes projekt planning export boardokkal, sprintekkel, issue-kkal, kommentekkel, linkekkel, parent kapcsolatokkal, labelekkel es custom fieldekkel.
+
+Pelda teljes projekt export MCP tool argumentumra:
+
+```json
+{
+  "projectKey": "AUTO",
+  "includeClosedSprints": true,
+  "includeComments": true,
+  "pageSize": 100
+}
+```
