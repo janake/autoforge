@@ -23,7 +23,7 @@ AUTO-270 - Jira-first docs cleanup - done
 Kovetkezo sprint celja: promptbol tervezett feladat, nem azonnali PR
 
 SPRINT-001 - Prompt submit csak jobot hozzon letre, automatikus clone/branch/PR nelkul - in progress
-SPRINT-002 - Beszelgetos pontosito flow: a rendszer kerdezzen vissza, amig a feladat nem eleg konkret - planned
+SPRINT-002 - Beszelgetos pontosito flow: a rendszer kerdezzen vissza, amig a feladat nem eleg konkret - done
 SPRINT-003 - Explicit dontesi pont: csak akkor legyen Jira ticket, ha kimondjuk, hogy legyen belole task/bug/feature/epic - planned
 SPRINT-004 - Feladattipus besorolas: question, task, bug, feature, epic - planned
 SPRINT-005 - Jira ticket letrehozas csak jovahagyott feladatbol - planned
@@ -32,3 +32,5 @@ SPRINT-007 - Job processor csak Jira ticket es jovahagyott feladat utan induljon
 SPRINT-008 - UI allapotok: draft conversation, ready for ticket, ticket created, implementation running - planned
 SPRINT-009 - Jira MCP kepessegek felmerese backlog, sprint, task es subtask kezelesre - planned
 SPRINT-010 - Dontes: sprint/backlog vezetes maradjon `order.md`-ben vagy menjen at Jira-ba - planned
+
+Megjegyzes: a pontosito flow mar a prompt draft create/add message lepeseiben megvan, es a pending question/ready for approval allapotokkal mukodik.
