@@ -8,6 +8,8 @@ public record PromptDraftResponse(
   String prompt,
   String status,
   boolean readyForApproval,
+  String approvedBy,
+  Instant approvedAt,
   List<String> pendingQuestions,
   List<PromptDraftMessageResponse> messages,
   Instant createdAt,
