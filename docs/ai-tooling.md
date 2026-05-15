@@ -61,6 +61,8 @@ Feladata:
 
 - Jira epic, story, bug, task es spike olvasasa, letrehozasa es frissitese
 - backlog grooming, statuszvaltas es JQL alapu kereses tamogatasa
+- teljes Agile sprintkezeles: board es sprint listazas, sprint letrehozas, start/close/update, issue sprintbe mozgatas, backlogba mozgatas es rankeles
+- teljes projekt export determinisztikus JSON-ba: projekt metadata, boardok, sprintek, epicek, standard issue-k, subtaskok, kommentek, linkek, parent kapcsolatok, labelek es custom fieldek
 - Jira issue-k osszekotese branch, commit, PR, release es verifikacios adatokkal
 - Jira-first source-of-truth mukodes tamogatasa a Markdown task migracio utan
 - Helyi futtatasnal az `ops/ai/mcps.yaml` a `ops/mcp/jira-local.sh` gitignored launchert hasznalja.
