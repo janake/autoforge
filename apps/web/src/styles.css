@@ -391,6 +391,10 @@ code {
   border-left: 3px solid #8ecae6;
 }
 
+.prompt-reply-form {
+  margin-top: 14px;
+}
+
 .intent-chooser {
   display: flex;
   flex-wrap: wrap;
