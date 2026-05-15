@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -98,5 +99,85 @@ class PromptDraftControllerTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("READY_FOR_APPROVAL"))
       .andExpect(jsonPath("$.readyForApproval").value(true));
+  }
+
+  @Test
+  void approvesReadyDraftAndRecordsApprover() throws Exception {
+    var created = mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Implement prompt draft approval flow for janake/autoforge with explicit acceptance criteria and no automatic implementation before approval"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("READY_FOR_APPROVAL"))
+      .andReturn();
+
+    String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("APPROVED"))
+      .andExpect(jsonPath("$.approvedBy").value("janake"))
+      .andExpect(jsonPath("$.approvedAt").isNotEmpty())
+      .andExpect(jsonPath("$.readyForApproval").value(false));
+
+    assertThat(jobRepository.count()).isZero();
+  }
+
+  @Test
+  void rejectsApprovalWhenDraftIsNotReady() throws Exception {
+    var created = mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Add something useful"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andReturn();
+
+    String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isConflict())
+      .andExpect(jsonPath("$.status").value(409))
+      .andExpect(jsonPath("$.message").value("Prompt draft is not ready for approval: " + draftId));
+  }
+
+  @Test
+  void rejectsEditingApprovedDraft() throws Exception {
+    var created = mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Implement prompt draft approval flow for janake/autoforge with explicit acceptance criteria and no automatic implementation before approval"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andReturn();
+
+    String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isOk());
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/messages", draftId)
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "content": "Can we change the scope?"
+          }
+          """))
+      .andExpect(status().isConflict())
+      .andExpect(jsonPath("$.message").value("Approved prompt draft cannot be edited: " + draftId));
   }
 }

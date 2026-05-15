@@ -7,6 +7,9 @@ import org.autoforge.backend.dto.PromptDraftResponse;
 import org.autoforge.backend.service.PromptDraftService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,5 +42,19 @@ public class PromptDraftController {
     @Valid @RequestBody AddPromptDraftMessageRequest request
   ) {
     return promptDraftService.addMessage(draftId, request);
+  }
+
+  @PostMapping("/{draftId}/approve")
+  public PromptDraftResponse approveDraft(
+    @PathVariable String draftId,
+    Authentication authentication
+  ) {
+    if (!(authentication instanceof JwtAuthenticationToken token)) {
+      throw new IllegalStateException("Expected JWT authentication");
+    }
+
+    Jwt jwt = token.getToken();
+    String approvedBy = jwt.getClaimAsString("preferred_username");
+    return promptDraftService.approveDraft(draftId, approvedBy);
   }
 }

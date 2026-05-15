@@ -4,6 +4,7 @@ import java.time.Instant;
 import jakarta.servlet.http.HttpServletRequest;
 import org.autoforge.backend.dto.ApiErrorResponse;
 import org.autoforge.backend.service.JobNotFoundException;
+import org.autoforge.backend.service.PromptDraftApprovalException;
 import org.autoforge.backend.service.PromptDraftNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,11 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(PromptDraftNotFoundException.class)
   public ResponseEntity<ApiErrorResponse> handleDraftNotFound(PromptDraftNotFoundException ex, HttpServletRequest request) {
     return build(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(PromptDraftApprovalException.class)
+  public ResponseEntity<ApiErrorResponse> handleDraftApproval(PromptDraftApprovalException ex, HttpServletRequest request) {
+    return build(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
   }
 
   private ResponseEntity<ApiErrorResponse> build(HttpStatus status, String message, String path) {

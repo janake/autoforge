@@ -30,6 +30,12 @@ public class PromptDraft {
   @Column(name = "pending_questions", length = 4000)
   private String pendingQuestions;
 
+  @Column(name = "approved_by", length = 128)
+  private String approvedBy;
+
+  @Column(name = "approved_at")
+  private Instant approvedAt;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;
@@ -82,11 +88,25 @@ public class PromptDraft {
     return updatedAt;
   }
 
+  public String getApprovedBy() {
+    return approvedBy;
+  }
+
+  public Instant getApprovedAt() {
+    return approvedAt;
+  }
+
   public void setStatus(PromptDraftStatus status) {
     this.status = status;
   }
 
   public void setPendingQuestions(String pendingQuestions) {
     this.pendingQuestions = pendingQuestions;
+  }
+
+  public void approve(String approvedBy, Instant approvedAt) {
+    this.status = PromptDraftStatus.APPROVED;
+    this.approvedBy = approvedBy;
+    this.approvedAt = approvedAt;
   }
 }

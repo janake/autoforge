@@ -1,6 +1,7 @@
 package org.autoforge.backend.service;
 
 import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -56,6 +57,9 @@ public class PromptDraftService {
   @Transactional
   public PromptDraftResponse addMessage(String draftId, AddPromptDraftMessageRequest request) {
     PromptDraft draft = loadDraft(draftId);
+    if (draft.getStatus() == PromptDraftStatus.APPROVED) {
+      throw new PromptDraftApprovalException("Approved prompt draft cannot be edited: " + draftId);
+    }
     promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.USER, request.content().trim()));
 
     List<String> questions = clarificationQuestions(combinedConversationText(draft.getPrompt(), draft.getId()));
@@ -68,6 +72,21 @@ public class PromptDraftService {
       draft.setPendingQuestions(String.join("\n", questions));
       promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, String.join("\n", questions)));
     }
+
+    return toResponse(promptDraftRepository.save(draft));
+  }
+
+  @Transactional
+  public PromptDraftResponse approveDraft(String draftId, String approvedBy) {
+    PromptDraft draft = loadDraft(draftId);
+
+    if (draft.getStatus() != PromptDraftStatus.READY_FOR_APPROVAL) {
+      throw new PromptDraftApprovalException("Prompt draft is not ready for approval: " + draftId);
+    }
+
+    String approver = approvedBy == null || approvedBy.isBlank() ? "unknown" : approvedBy.trim();
+    draft.approve(approver, Instant.now());
+    promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, "Approved by %s.".formatted(approver)));
 
     return toResponse(promptDraftRepository.save(draft));
   }
@@ -121,6 +140,8 @@ public class PromptDraftService {
       draft.getPrompt(),
       draft.getStatus().name(),
       draft.getStatus() == PromptDraftStatus.READY_FOR_APPROVAL,
+      draft.getApprovedBy(),
+      draft.getApprovedAt(),
       pendingQuestions,
       messages,
       draft.getCreatedAt(),
