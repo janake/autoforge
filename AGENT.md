@@ -63,6 +63,8 @@ For any non-trivial code, infra, workflow, or documentation task, do the followi
 ## Branch And PR Hygiene
 
 - Before making changes, verify that the checked-out branch matches the active Jira task.
+- For new Jira-task branches, use `git worktree` under `/home/janake/IdeaProjects/autoforge-worktrees/<TASK-ID>-<slug>` instead of switching the main workspace branch.
+- Keep `/home/janake/IdeaProjects/autoforge` on the user's current branch so IntelliJ IDEA does not get forced onto task branches.
 - Do not create a `BUG-*` branch for a user-requested feature or UI cleanup.
 - Do not reuse an unrelated branch just because it is currently checked out.
 - If the current branch belongs to a different Jira task, stop and create a dedicated branch for the new task before editing files.
