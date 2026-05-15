@@ -440,48 +440,37 @@ function PromptDraftPanel({ onJobCreated }: { onJobCreated: (jobId: string) => v
             </div>
           </dl>
 
-          <div className="prompt-flow-grid">
-            <section className="prompt-flow-card">
-              <h3>Prompt</h3>
-              <p>{draft.prompt}</p>
-              <p className="footnote">
-                Intent: {draft.intent ?? "unknown"}
-                {draft.selectedIntent ? `, selected: ${draft.selectedIntent}` : ""}
-              </p>
-            </section>
-
-            <section className="prompt-flow-card">
-              <h3>Conversation</h3>
-              <div className="prompt-message-list">
-                {draft.messages.map((message, index) => (
-                  <div key={`${message.role}-${message.createdAt}-${index}`} className={`prompt-message ${message.role.toLowerCase()}`}>
-                    <span>{message.role}</span>
-                    <p>{message.content}</p>
-                  </div>
-                ))}
-              </div>
-
-              {draft.status === "CLARIFYING" && (
-                <div className="prompt-form prompt-reply-form">
-                  <label>
-                    <span>Reply</span>
-                    <textarea
-                      value={followUp}
-                      onChange={(event) => setFollowUp(event.target.value)}
-                      placeholder="Add more context, acceptance criteria, or repository details"
-                      rows={4}
-                    />
-                  </label>
-
-                  <div className="prompt-actions">
-                    <button className="secondary-button" type="button" onClick={() => void addMessage()} disabled={state.status === "busy" || !followUp.trim()}>
-                      Add reply
-                    </button>
-                  </div>
+          <section className="prompt-flow-card">
+            <h3>Conversation</h3>
+            <div className="prompt-message-list">
+              {draft.messages.map((message, index) => (
+                <div key={`${message.role}-${message.createdAt}-${index}`} className={`prompt-message ${message.role.toLowerCase()}`}>
+                  <span>{message.role}</span>
+                  <p>{message.content}</p>
                 </div>
-              )}
-            </section>
-          </div>
+              ))}
+            </div>
+
+            {draft.status === "CLARIFYING" && (
+              <div className="prompt-form prompt-reply-form">
+                <label>
+                  <span>Reply</span>
+                  <textarea
+                    value={followUp}
+                    onChange={(event) => setFollowUp(event.target.value)}
+                    placeholder="Add more context, acceptance criteria, or repository details"
+                    rows={4}
+                  />
+                </label>
+
+                <div className="prompt-actions">
+                  <button className="secondary-button" type="button" onClick={() => void addMessage()} disabled={state.status === "busy" || !followUp.trim()}>
+                    Add reply
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
 
           {draft.pendingQuestions.length > 0 && (
             <section className="prompt-flow-card">
