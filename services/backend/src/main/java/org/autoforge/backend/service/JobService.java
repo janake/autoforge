@@ -3,6 +3,7 @@ package org.autoforge.backend.service;
 import org.autoforge.backend.config.BackendMvpProperties;
 import org.autoforge.backend.domain.Job;
 import org.autoforge.backend.domain.JobStatus;
+import org.autoforge.backend.domain.PromptDraft;
 import org.autoforge.backend.dto.CreateJobRequest;
 import org.autoforge.backend.dto.CreateJobResponse;
 import org.autoforge.backend.dto.JobResponse;
@@ -21,17 +22,35 @@ public class JobService {
 
   @Transactional
   public CreateJobResponse createJob(CreateJobRequest request) {
-    Job saved = jobRepository.save(Job.createQueued(
-      request.prompt(),
-      configuredTargetRepository(),
-      configuredBaseBranch()
-    ));
+    Job saved = createQueuedJob(null, request.prompt());
 
     auditService.logJobCreated(saved, "system", request.prompt(), saved.getTargetRepository(), saved.getBaseBranch());
 
     return new CreateJobResponse(
       saved.getId(),
       saved.getStatus().name()
+    );
+  }
+
+  @Transactional
+  public JobResponse createJobFromPromptDraft(PromptDraft draft) {
+    if (draft.getJiraIssueKey() == null || draft.getJiraIssueKey().isBlank()) {
+      throw new IllegalStateException("Prompt draft does not have a Jira issue key: " + draft.getId());
+    }
+
+    Job saved = createQueuedJob(draft.getJiraIssueKey(), draft.getPrompt());
+    auditService.logJobCreated(saved, "system", draft.getPrompt(), saved.getTargetRepository(), saved.getBaseBranch());
+
+    return new JobResponse(
+      saved.getId(),
+      saved.getPrompt(),
+      saved.getTargetRepository(),
+      saved.getBaseBranch(),
+      saved.getStatus().name(),
+      saved.getPrUrl() == null ? "" : saved.getPrUrl(),
+      saved.getErrorMessage(),
+      saved.getCreatedAt(),
+      saved.getUpdatedAt()
     );
   }
 
@@ -67,6 +86,15 @@ public class JobService {
   private String configuredBaseBranch() {
     String baseBranch = properties.github() == null ? null : properties.github().baseBranch();
     return (baseBranch == null || baseBranch.isBlank()) ? "main" : baseBranch;
+  }
+
+  private Job createQueuedJob(String jiraIssueKey, String prompt) {
+    return jobRepository.save(Job.createQueued(
+      jiraIssueKey,
+      prompt,
+      configuredTargetRepository(),
+      configuredBaseBranch()
+    ));
   }
 
   @Transactional

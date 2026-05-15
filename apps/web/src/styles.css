@@ -209,6 +209,10 @@ code {
   grid-column: 1 / -1;
 }
 
+.workspace-panel#prompt-flow {
+  grid-column: 1 / -1;
+}
+
 .card,
 .workspace-panel {
   padding: 22px;
@@ -328,6 +332,79 @@ code {
   gap: 14px;
 }
 
+.prompt-flow-body {
+  display: grid;
+  gap: 18px;
+}
+
+.prompt-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.prompt-flow-card {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(12, 16, 24, 0.42);
+}
+
+.prompt-flow-card h3 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+
+.prompt-flow-card p {
+  margin: 0;
+}
+
+.prompt-message-list {
+  display: grid;
+  gap: 10px;
+}
+
+.prompt-message {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.prompt-message span {
+  color: rgba(245, 239, 227, 0.6);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.prompt-message p {
+  margin: 0;
+}
+
+.prompt-message.user {
+  border-left: 3px solid #ffb885;
+}
+
+.prompt-message.assistant {
+  border-left: 3px solid #8ecae6;
+}
+
+.intent-chooser {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0 16px;
+}
+
+.prompt-question-list {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+}
+
 .prompt-form label {
   display: grid;
   gap: 8px;
@@ -394,7 +471,8 @@ code {
   .dashboard-shell-header,
   .hero,
   .status-grid,
-  .workspace-grid {
+  .workspace-grid,
+  .prompt-flow-grid {
     grid-template-columns: 1fr;
   }
 
