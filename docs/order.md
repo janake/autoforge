@@ -22,7 +22,7 @@ AUTO-270 - Jira-first docs cleanup - done
 
 Kovetkezo sprint celja: promptbol tervezett feladat, nem azonnali PR
 
-SPRINT-001 - Prompt submit csak jobot hozzon letre, automatikus clone/branch/PR nelkul - in progress
+SPRINT-001 - Prompt submit csak jobot hozzon letre, automatikus clone/branch/PR nelkul - done
 SPRINT-002 - Beszelgetos pontosito flow: a rendszer kerdezzen vissza, amig a feladat nem eleg konkret - planned
 SPRINT-003 - Explicit dontesi pont: csak akkor legyen Jira ticket, ha kimondjuk, hogy legyen belole task/bug/feature/epic - planned
 SPRINT-004 - Feladattipus besorolas: question, task, bug, feature, epic - planned
