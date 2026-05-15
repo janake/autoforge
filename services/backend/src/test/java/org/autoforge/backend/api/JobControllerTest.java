@@ -9,11 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.autoforge.backend.repository.AuditLogRepository;
 import org.autoforge.backend.repository.JobRepository;
+import org.autoforge.backend.service.JobProcessorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -29,6 +31,9 @@ class JobControllerTest {
 
   @Autowired
   private AuditLogRepository auditLogRepository;
+
+  @Autowired
+  private ApplicationContext applicationContext;
 
   @BeforeEach
   void cleanJobs() {
@@ -60,6 +65,11 @@ class JobControllerTest {
     var auditLogs = auditLogRepository.findByJobIdOrderByTimestampAsc(job.getId());
     assertThat(auditLogs).hasSize(1);
     assertThat(auditLogs.get(0).getEventType().name()).isEqualTo("JOB_CREATED");
+  }
+
+  @Test
+  void disablesJobProcessorByDefault() {
+    assertThat(applicationContext.getBeansOfType(JobProcessorService.class)).isEmpty();
   }
 
   @Test
