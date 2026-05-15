@@ -18,6 +18,7 @@ import org.autoforge.backend.repository.PromptDraftMessageRepository;
 import org.autoforge.backend.repository.PromptDraftRepository;
 import org.autoforge.backend.jira.CreateJiraIssueResponse;
 import org.autoforge.backend.jira.JiraIssueClient;
+import org.autoforge.backend.domain.JobStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -257,6 +258,49 @@ class PromptDraftControllerTest {
   }
 
   @Test
+  void createsImplementationJobOnlyAfterTicketCreation() throws Exception {
+    when(jiraIssueClient.createIssue(any())).thenReturn(new CreateJiraIssueResponse("AUTO-999", "https://autoforge.atlassian.net/browse/AUTO-999"));
+
+    var created = mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Implement prompt draft approval flow for janake/autoforge with explicit acceptance criteria and no automatic implementation before approval"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andReturn();
+
+    String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "selectedIntent": "FEATURE"
+          }
+          """)
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isOk());
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/jira-ticket", draftId)
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isOk());
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/job", draftId)
+        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("QUEUED"))
+      .andExpect(jsonPath("$.prUrl").value(""));
+
+    assertThat(jobRepository.count()).isEqualTo(1);
+    var job = jobRepository.findAll().getFirst();
+    assertThat(job.getStatus()).isEqualTo(JobStatus.QUEUED);
+    assertThat(job.getJiraIssueKey()).isEqualTo("AUTO-999");
+  }
+
+  @Test
   void rejectsJiraTicketCreationWhenDraftIsNotApproved() throws Exception {
     var created = mockMvc.perform(post("/api/v1/prompt-drafts")
         .with(jwt())
@@ -275,6 +319,27 @@ class PromptDraftControllerTest {
         .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.message").value("Prompt draft is not approved: " + draftId));
+  }
+
+  @Test
+  void rejectsImplementationJobCreationBeforeTicketCreation() throws Exception {
+    var created = mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Audit the workflow"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andReturn();
+
+    String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
+
+    mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/job", draftId)
+        .with(jwt()))
+      .andExpect(status().isConflict())
+      .andExpect(jsonPath("$.message").value("Prompt draft does not have a Jira ticket yet: " + draftId));
   }
 
   @Test

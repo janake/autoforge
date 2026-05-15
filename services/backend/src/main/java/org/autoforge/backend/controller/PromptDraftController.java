@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.autoforge.backend.dto.ApprovePromptDraftRequest;
 import org.autoforge.backend.dto.AddPromptDraftMessageRequest;
 import org.autoforge.backend.dto.CreatePromptDraftRequest;
+import org.autoforge.backend.dto.JobResponse;
 import org.autoforge.backend.dto.PromptDraftResponse;
 import org.autoforge.backend.service.PromptDraftService;
 import lombok.RequiredArgsConstructor;
@@ -72,5 +73,10 @@ public class PromptDraftController {
     Jwt jwt = token.getToken();
     String createdBy = jwt.getClaimAsString("preferred_username");
     return promptDraftService.createJiraTicket(draftId, createdBy);
+  }
+
+  @PostMapping("/{draftId}/job")
+  public JobResponse createImplementationJob(@PathVariable String draftId) {
+    return promptDraftService.createImplementationJob(draftId);
   }
 }

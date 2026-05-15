@@ -14,6 +14,7 @@ import org.autoforge.backend.domain.PromptIntent;
 import org.autoforge.backend.domain.PromptDraftStatus;
 import org.autoforge.backend.dto.AddPromptDraftMessageRequest;
 import org.autoforge.backend.dto.CreatePromptDraftRequest;
+import org.autoforge.backend.dto.JobResponse;
 import org.autoforge.backend.dto.PromptDraftMessageResponse;
 import org.autoforge.backend.dto.PromptDraftResponse;
 import org.autoforge.backend.jira.CreateJiraIssueRequest;
@@ -34,6 +35,7 @@ public class PromptDraftService {
   private final PromptDraftRepository promptDraftRepository;
   private final PromptDraftMessageRepository promptDraftMessageRepository;
   private final JiraIssueClient jiraIssueClient;
+  private final JobService jobService;
 
   @Transactional
   public PromptDraftResponse createDraft(CreatePromptDraftRequest request) {
@@ -128,6 +130,21 @@ public class PromptDraftService {
     draft.markTicketCreated(ticket.issueKey(), ticket.issueUrl());
     promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, "Jira ticket created: %s".formatted(ticket.issueKey())));
     return toResponse(promptDraftRepository.save(draft));
+  }
+
+  @Transactional
+  public JobResponse createImplementationJob(String draftId) {
+    PromptDraft draft = loadDraft(draftId);
+
+    if (draft.getStatus() != PromptDraftStatus.TICKET_CREATED) {
+      throw new PromptDraftTicketException("Prompt draft does not have a Jira ticket yet: " + draftId);
+    }
+
+    if (draft.getJiraIssueKey() == null || draft.getJiraIssueKey().isBlank()) {
+      throw new PromptDraftTicketException("Prompt draft does not have a Jira issue key: " + draftId);
+    }
+
+    return jobService.createJobFromPromptDraft(draft);
   }
 
   private PromptDraft loadDraft(String draftId) {

@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { getRuntimeConfig } from "./runtime-config";
 import { initializeKeycloak, loadAuthedJson, postAuthedJson, signIn, signOut } from "./auth/keycloak";
-import type { BackendMeResponse, CreateJobRequest, CreateJobResponse, JobResponse } from "./types";
+import type {
+  BackendMeResponse,
+  CreateJobRequest,
+  CreateJobResponse,
+  JobResponse,
+  PromptDraftResponse,
+  PromptIntent,
+} from "./types";
 
 type SessionState =
   | { status: "loading" }
@@ -217,6 +224,311 @@ function JobStatusPanel({ jobId }: { jobId: string }) {
   );
 }
 
+type PromptFlowState =
+  | { status: "idle" }
+  | { status: "busy"; action: string }
+  | { status: "error"; message: string }
+  | { status: "ready"; draft: PromptDraftResponse; implementationJobId: string | null };
+
+const intentOptions: PromptIntent[] = ["TASK", "BUG", "FEATURE", "EPIC"];
+
+function promptFlowStage(draft?: PromptDraftResponse | null, implementationJobId?: string | null): string {
+  if (!draft) {
+    return "draft conversation";
+  }
+
+  if (implementationJobId) {
+    return "implementation running";
+  }
+
+  if (draft.status === "TICKET_CREATED") {
+    return "ticket created";
+  }
+
+  if (draft.status === "APPROVED" || draft.status === "READY_FOR_APPROVAL") {
+    return "ready for ticket";
+  }
+
+  return "draft conversation";
+}
+
+function PromptDraftPanel({ onJobCreated }: { onJobCreated: (jobId: string) => void }) {
+  const [prompt, setPrompt] = useState("");
+  const [followUp, setFollowUp] = useState("");
+  const [selectedIntent, setSelectedIntent] = useState<PromptIntent | "">("");
+  const [implementationJobId, setImplementationJobId] = useState<string | null>(null);
+  const [state, setState] = useState<PromptFlowState>({ status: "idle" });
+
+  const draft = state.status === "ready" ? state.draft : null;
+
+  useEffect(() => {
+    if (!draft) {
+      return;
+    }
+
+    if (draft.selectedIntent) {
+      setSelectedIntent(draft.selectedIntent);
+      return;
+    }
+
+    if (draft.intent && draft.intent !== "QUESTION") {
+      setSelectedIntent(draft.intent);
+      return;
+    }
+
+    setSelectedIntent("TASK");
+  }, [draft?.draftId, draft?.selectedIntent, draft?.intent]);
+
+  const setReady = (nextDraft: PromptDraftResponse) => {
+    setState({
+      status: "ready",
+      draft: nextDraft,
+      implementationJobId: implementationJobId,
+    });
+  };
+
+  const createDraft = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setState({ status: "busy", action: "Creating draft..." });
+
+    try {
+      const response = await postAuthedJson<PromptDraftResponse>("/v1/prompt-drafts", { prompt });
+      setPrompt("");
+      setImplementationJobId(null);
+      setState({ status: "ready", draft: response, implementationJobId: null });
+    } catch (error) {
+      setState({
+        status: "error",
+        message: error instanceof Error ? error.message : "Unable to create prompt draft.",
+      });
+    }
+  };
+
+  const addMessage = async () => {
+    if (!draft || !followUp.trim()) {
+      return;
+    }
+
+    setState({ status: "busy", action: "Updating draft..." });
+
+    try {
+      const response = await postAuthedJson<PromptDraftResponse>(`/v1/prompt-drafts/${draft.draftId}/messages`, {
+        content: followUp,
+      });
+      setFollowUp("");
+      setReady(response);
+    } catch (error) {
+      setState({
+        status: "error",
+        message: error instanceof Error ? error.message : "Unable to update the prompt draft.",
+      });
+    }
+  };
+
+  const approveDraft = async () => {
+    if (!draft || !selectedIntent) {
+      return;
+    }
+
+    setState({ status: "busy", action: "Approving draft..." });
+
+    try {
+      const response = await postAuthedJson<PromptDraftResponse>(`/v1/prompt-drafts/${draft.draftId}/approve`, {
+        selectedIntent,
+      });
+      setReady(response);
+    } catch (error) {
+      setState({
+        status: "error",
+        message: error instanceof Error ? error.message : "Unable to approve the prompt draft.",
+      });
+    }
+  };
+
+  const createTicket = async () => {
+    if (!draft) {
+      return;
+    }
+
+    setState({ status: "busy", action: "Creating Jira ticket..." });
+
+    try {
+      const response = await postAuthedJson<PromptDraftResponse>(`/v1/prompt-drafts/${draft.draftId}/jira-ticket`, {});
+      setReady(response);
+    } catch (error) {
+      setState({
+        status: "error",
+        message: error instanceof Error ? error.message : "Unable to create the Jira ticket.",
+      });
+    }
+  };
+
+  const startImplementation = async () => {
+    if (!draft) {
+      return;
+    }
+
+    setState({ status: "busy", action: "Starting implementation..." });
+
+    try {
+      const response = await postAuthedJson<JobResponse>(`/v1/prompt-drafts/${draft.draftId}/job`, {});
+      setImplementationJobId(response.jobId);
+      onJobCreated(response.jobId);
+      setState({ status: "ready", draft, implementationJobId: response.jobId });
+    } catch (error) {
+      setState({
+        status: "error",
+        message: error instanceof Error ? error.message : "Unable to start implementation.",
+      });
+    }
+  };
+
+  const stage = promptFlowStage(draft, implementationJobId);
+
+  return (
+    <article className="workspace-panel" id="prompt-flow">
+      <div className="section-head">
+        <h2>Prompt flow</h2>
+        <span className="pill">{stage}</span>
+      </div>
+      <p className="muted">
+        Draft, clarify, approve, create the Jira ticket, and then launch implementation from the approved ticket.
+      </p>
+
+      {state.status === "error" && <p className="error-title">{state.message}</p>}
+      {state.status === "busy" && <p className="muted">{state.action}</p>}
+
+      {!draft ? (
+        <form className="prompt-form" onSubmit={createDraft}>
+          <label>
+            <span>Prompt draft</span>
+            <textarea
+              name="prompt-draft"
+              value={prompt}
+              onChange={(event) => setPrompt(event.target.value)}
+              placeholder="Describe the change in enough detail for the system to ask follow-up questions"
+              rows={6}
+              required
+            />
+          </label>
+
+          <div className="prompt-actions">
+            <button className="primary-button" type="submit" disabled={state.status === "busy"}>
+              {state.status === "busy" ? "Creating..." : "Start draft"}
+            </button>
+            <span className="muted">The backend will classify intent and ask for more detail when needed.</span>
+          </div>
+        </form>
+      ) : (
+        <div className="prompt-flow-body">
+          <dl className="profile-list compact">
+            <div>
+              <dt>Conversation</dt>
+              <dd>{draft.status === "CLARIFYING" ? "draft conversation" : "complete"}</dd>
+            </div>
+            <div>
+              <dt>Ready for ticket</dt>
+              <dd>{draft.status === "READY_FOR_APPROVAL" || draft.status === "APPROVED" || draft.status === "TICKET_CREATED" ? "yes" : "no"}</dd>
+            </div>
+            <div>
+              <dt>Ticket</dt>
+              <dd>{draft.jiraIssueKey ? `${draft.jiraIssueKey} (${draft.jiraIssueUrl ?? ""})` : "not created yet"}</dd>
+            </div>
+            <div>
+              <dt>Implementation</dt>
+              <dd>{implementationJobId ? `running as ${implementationJobId}` : "waiting"}</dd>
+            </div>
+          </dl>
+
+          <div className="prompt-flow-grid">
+            <section className="prompt-flow-card">
+              <h3>Prompt</h3>
+              <p>{draft.prompt}</p>
+              <p className="footnote">
+                Intent: {draft.intent ?? "unknown"}
+                {draft.selectedIntent ? `, selected: ${draft.selectedIntent}` : ""}
+              </p>
+            </section>
+
+            <section className="prompt-flow-card">
+              <h3>Conversation</h3>
+              <div className="prompt-message-list">
+                {draft.messages.map((message, index) => (
+                  <div key={`${message.role}-${message.createdAt}-${index}`} className={`prompt-message ${message.role.toLowerCase()}`}>
+                    <span>{message.role}</span>
+                    <p>{message.content}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          {draft.pendingQuestions.length > 0 && (
+            <section className="prompt-flow-card">
+              <h3>Questions</h3>
+              <ul className="prompt-question-list">
+                {draft.pendingQuestions.map((question) => (
+                  <li key={question}>{question}</li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {draft.status === "CLARIFYING" && (
+            <div className="prompt-form">
+              <label>
+                <span>Reply</span>
+                <textarea
+                  value={followUp}
+                  onChange={(event) => setFollowUp(event.target.value)}
+                  placeholder="Add more context, acceptance criteria, or repository details"
+                  rows={4}
+                />
+              </label>
+
+              <div className="prompt-actions">
+                <button className="secondary-button" type="button" onClick={() => void addMessage()} disabled={state.status === "busy" || !followUp.trim()}>
+                  Add reply
+                </button>
+              </div>
+            </div>
+          )}
+
+          {(draft.status === "READY_FOR_APPROVAL" || draft.status === "APPROVED" || draft.status === "TICKET_CREATED") && (
+            <section className="prompt-flow-card">
+              <h3>Decision</h3>
+              <div className="intent-chooser">
+                {intentOptions.map((intent) => (
+                  <button
+                    key={intent}
+                    type="button"
+                    className={selectedIntent === intent ? "primary-button" : "secondary-button"}
+                    onClick={() => setSelectedIntent(intent)}
+                  >
+                    {intent}
+                  </button>
+                ))}
+              </div>
+
+              <div className="prompt-actions">
+                <button className="secondary-button" type="button" onClick={() => void approveDraft()} disabled={state.status === "busy" || !selectedIntent || draft.status !== "READY_FOR_APPROVAL"}>
+                  Approve draft
+                </button>
+                <button className="secondary-button" type="button" onClick={() => void createTicket()} disabled={state.status === "busy" || draft.status !== "APPROVED" && draft.status !== "TICKET_CREATED"}>
+                  Create Jira ticket
+                </button>
+                <button className="primary-button" type="button" onClick={() => void startImplementation()} disabled={state.status === "busy" || draft.status !== "TICKET_CREATED"}>
+                  Start implementation
+                </button>
+              </div>
+            </section>
+          )}
+        </div>
+      )}
+    </article>
+  );
+}
+
 function PromptSubmissionPanel({ onJobCreated }: { onJobCreated: (jobId: string) => void }) {
   const [form, setForm] = useState<CreateJobRequest>({
     prompt: "",
@@ -391,6 +703,13 @@ function PrivateWorkspace({
       </section>
 
       <section className="workspace-grid" aria-label="User workspace">
+        <PromptDraftPanel
+          onJobCreated={(createdJobId) => {
+            onJobCreated(createdJobId);
+            syncJobIdInUrl(createdJobId);
+          }}
+        />
+
         <PromptSubmissionPanel
           onJobCreated={(createdJobId) => {
             onJobCreated(createdJobId);
