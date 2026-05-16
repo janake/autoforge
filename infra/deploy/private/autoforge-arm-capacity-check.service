@@ -3,4 +3,5 @@ Description=Autoforge OCI ARM capacity check
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/env oci-a1-capacity
+EnvironmentFile=/opt/autoforge/private/.env
+ExecStart=/usr/bin/env python3 /opt/autoforge/private/autoforge-arm-capacity.py check

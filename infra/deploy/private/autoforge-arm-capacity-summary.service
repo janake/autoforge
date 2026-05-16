@@ -1,0 +1,7 @@
+[Unit]
+Description=Autoforge OCI ARM capacity daily summary
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/autoforge/private/.env
+ExecStart=/usr/bin/env python3 /opt/autoforge/private/autoforge-arm-capacity.py summary

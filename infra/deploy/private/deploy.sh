@@ -206,17 +206,22 @@ download_wallet() {
 install_arm_capacity_timer() {
   local service_src="$APP_DIR/autoforge-arm-capacity-check.service"
   local timer_src="$APP_DIR/autoforge-arm-capacity-check.timer"
+  local summary_service_src="$APP_DIR/autoforge-arm-capacity-summary.service"
+  local summary_timer_src="$APP_DIR/autoforge-arm-capacity-summary.timer"
   local systemd_dir="/etc/systemd/system"
 
-  if [ ! -f "$service_src" ] || [ ! -f "$timer_src" ]; then
+  if [ ! -f "$service_src" ] || [ ! -f "$timer_src" ] || [ ! -f "$summary_service_src" ] || [ ! -f "$summary_timer_src" ] || [ ! -f "$APP_DIR/autoforge-arm-capacity.py" ]; then
     echo "ARM capacity timer unit files are missing from $APP_DIR." >&2
     exit 1
   fi
 
   "${INSTALL_CMD[@]}" -m 644 "$service_src" "$systemd_dir/autoforge-arm-capacity-check.service"
   "${INSTALL_CMD[@]}" -m 644 "$timer_src" "$systemd_dir/autoforge-arm-capacity-check.timer"
+  "${INSTALL_CMD[@]}" -m 644 "$summary_service_src" "$systemd_dir/autoforge-arm-capacity-summary.service"
+  "${INSTALL_CMD[@]}" -m 644 "$summary_timer_src" "$systemd_dir/autoforge-arm-capacity-summary.timer"
   "${SYSTEMCTL_CMD[@]}" daemon-reload
   "${SYSTEMCTL_CMD[@]}" enable --now autoforge-arm-capacity-check.timer
+  "${SYSTEMCTL_CMD[@]}" enable --now autoforge-arm-capacity-summary.timer
 }
 
 OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_OCID || true)"
