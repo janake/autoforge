@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Autoforge OCI ARM capacity checks every 3 minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=3min
+Persistent=true
+Unit=autoforge-arm-capacity-check.service
+
+[Install]
+WantedBy=timers.target

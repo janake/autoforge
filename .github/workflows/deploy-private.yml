@@ -120,6 +120,11 @@ jobs:
           ssh -F ~/.ssh/config autoforge-private "mkdir -p '$DEPLOY_PATH'"
           scp -F ~/.ssh/config infra/compose/docker-compose.private.yml autoforge-private:"$DEPLOY_PATH/docker-compose.private.yml"
           scp -F ~/.ssh/config infra/compose/opencode.json autoforge-private:"$DEPLOY_PATH/opencode.json"
+          scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity-check.service autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity-check.service"
+          scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity-check.timer autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity-check.timer"
+          scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity-summary.service autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity-summary.service"
+          scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity-summary.timer autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity-summary.timer"
+          scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity.py autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity.py"
           scp -F ~/.ssh/config infra/deploy/private/opencode-smoke.sh autoforge-private:"$DEPLOY_PATH/opencode-smoke.sh"
           scp -F ~/.ssh/config infra/deploy/private/deploy.sh autoforge-private:"$DEPLOY_PATH/deploy.sh"
           ssh -F ~/.ssh/config autoforge-private "chmod +x '$DEPLOY_PATH/deploy.sh' '$DEPLOY_PATH/opencode-smoke.sh'"
@@ -158,6 +163,13 @@ jobs:
           AUTOFORGE_DB_PASSWORD: ${{ secrets.AUTOFORGE_DB_PASSWORD }}
           AUTOFORGE_DB_PASSWORD_SECRET_OCID: ${{ secrets.AUTOFORGE_DB_PASSWORD_SECRET_OCID }}
           AUTOFORGE_DB_PASSWORD_SECRET_NAME: ${{ vars.AUTOFORGE_DB_PASSWORD_SECRET_NAME }}
+          AUTOFORGE_ARM_CAPACITY_SMTP_HOST: ${{ secrets.AUTOFORGE_ARM_CAPACITY_SMTP_HOST }}
+          AUTOFORGE_ARM_CAPACITY_SMTP_PORT: ${{ vars.AUTOFORGE_ARM_CAPACITY_SMTP_PORT }}
+          AUTOFORGE_ARM_CAPACITY_SMTP_USERNAME: ${{ secrets.AUTOFORGE_ARM_CAPACITY_SMTP_USERNAME }}
+          AUTOFORGE_ARM_CAPACITY_SMTP_PASSWORD: ${{ secrets.AUTOFORGE_ARM_CAPACITY_SMTP_PASSWORD }}
+          AUTOFORGE_ARM_CAPACITY_SMTP_FROM: ${{ secrets.AUTOFORGE_ARM_CAPACITY_SMTP_FROM }}
+          AUTOFORGE_ARM_CAPACITY_EMAIL_TO: ${{ secrets.AUTOFORGE_ARM_CAPACITY_EMAIL_TO }}
+          AUTOFORGE_ARM_CAPACITY_SMTP_STARTTLS: ${{ vars.AUTOFORGE_ARM_CAPACITY_SMTP_STARTTLS }}
           KEYCLOAK_URL: ${{ secrets.OCI_KEYCLOAK_URL }}
           KEYCLOAK_REALM: ${{ secrets.OCI_KEYCLOAK_REALM }}
         run: |
@@ -231,6 +243,27 @@ jobs:
             fi
             if [ -n "${AUTOFORGE_DB_PASSWORD_SECRET_NAME:-}" ]; then
               echo "AUTOFORGE_DB_PASSWORD_SECRET_NAME=$AUTOFORGE_DB_PASSWORD_SECRET_NAME"
+            fi
+            if [ -n "${AUTOFORGE_ARM_CAPACITY_SMTP_HOST:-}" ]; then
+              echo "AUTOFORGE_ARM_CAPACITY_SMTP_HOST=$AUTOFORGE_ARM_CAPACITY_SMTP_HOST"
+            fi
+            if [ -n "${AUTOFORGE_ARM_CAPACITY_SMTP_PORT:-}" ]; then
+              echo "AUTOFORGE_ARM_CAPACITY_SMTP_PORT=$AUTOFORGE_ARM_CAPACITY_SMTP_PORT"
+            fi
+            if [ -n "${AUTOFORGE_ARM_CAPACITY_SMTP_USERNAME:-}" ]; then
+              echo "AUTOFORGE_ARM_CAPACITY_SMTP_USERNAME=$AUTOFORGE_ARM_CAPACITY_SMTP_USERNAME"
+            fi
+            if [ -n "${AUTOFORGE_ARM_CAPACITY_SMTP_PASSWORD:-}" ]; then
+              echo "AUTOFORGE_ARM_CAPACITY_SMTP_PASSWORD=$AUTOFORGE_ARM_CAPACITY_SMTP_PASSWORD"
+            fi
+            if [ -n "${AUTOFORGE_ARM_CAPACITY_SMTP_FROM:-}" ]; then
+              echo "AUTOFORGE_ARM_CAPACITY_SMTP_FROM=$AUTOFORGE_ARM_CAPACITY_SMTP_FROM"
+            fi
+            if [ -n "${AUTOFORGE_ARM_CAPACITY_EMAIL_TO:-}" ]; then
+              echo "AUTOFORGE_ARM_CAPACITY_EMAIL_TO=$AUTOFORGE_ARM_CAPACITY_EMAIL_TO"
+            fi
+            if [ -n "${AUTOFORGE_ARM_CAPACITY_SMTP_STARTTLS:-}" ]; then
+              echo "AUTOFORGE_ARM_CAPACITY_SMTP_STARTTLS=$AUTOFORGE_ARM_CAPACITY_SMTP_STARTTLS"
             fi
             echo "KEYCLOAK_ISSUER_URI=$KEYCLOAK_URL/realms/$KEYCLOAK_REALM"
           } > /tmp/autoforge-private.env

@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Autoforge OCI ARM capacity summary daily at 7am
+
+[Timer]
+OnCalendar=*-*-* 07:00:00
+Persistent=true
+Unit=autoforge-arm-capacity-summary.service
+
+[Install]
+WantedBy=timers.target
