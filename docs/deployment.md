@@ -105,6 +105,7 @@ A tipikus tartalom:
 - `Deploy Private Host`: private stack frissitese merge utan vagy manual dispatch-csel, beleertve a backendet es az opencode REST AI service-et
 - a private hoston a deploy a `autoforge-arm-capacity-check.timer` systemd timert is telepiti, amely 3 percenkent futtatja az `oci-a1-capacity` ellenorzest a Frankfurt tenancy ARM kapacitasara
 - a private hoston a deploy a `autoforge-arm-capacity-summary.timer` systemd timert is telepiti, amely minden nap 07:00-kor kuldi az elozo 24 ora osszegzeset
+- a private hoston a deploy OCI Notifications topicot hoz letre vagy ujrahasznal, majd ehhez email subscriptiont regisztral `janak.endre@gmail.com` cimre
 - a private deploy a sikeres `opencode` inditas utan egy REST smoke tesztet is futtat, amely ellenorzi a health endpointot, a session letrehozasat es egy smoke prompt completiont
 - ugyanazok a workflow-k `main`-re merge-elt, relevans fájlokat erinto pushokra is lefutnak, hogy a deploy automatikusan meginduljon
 
@@ -154,13 +155,7 @@ Vault secret azonosito GitHub secret-ek:
 - `AUTOFORGE_DB_PASSWORD`: opcionális direkt adatbazis jelszo, ha nem Vault secret OCID-t hasznalunk
 - `AUTOFORGE_DB_PASSWORD_SECRET_OCID`: opcionális DB password secret OCID, ha a DB jelszó is Vaultban van
 - `AUTOFORGE_DB_PASSWORD_SECRET_NAME`: opcionális OCI Vault display name az adatbazis jelszohoz, alapertelmezett: `autoforge-db-password`
-- `AUTOFORGE_ARM_CAPACITY_SMTP_HOST`: opcionális SMTP relay host a kapacitas emailok kuldeshez
-- `AUTOFORGE_ARM_CAPACITY_SMTP_PORT`: opcionális SMTP port, alapertelmezett: `587`
-- `AUTOFORGE_ARM_CAPACITY_SMTP_USERNAME`: opcionális SMTP felhasznalonev
-- `AUTOFORGE_ARM_CAPACITY_SMTP_PASSWORD`: opcionális SMTP jelszo
-- `AUTOFORGE_ARM_CAPACITY_SMTP_FROM`: opcionális felado cim
-- `AUTOFORGE_ARM_CAPACITY_EMAIL_TO`: opcionális cimzett cim
-- `AUTOFORGE_ARM_CAPACITY_SMTP_STARTTLS`: opcionális `false` ertekkel kikapcsolhato a STARTTLS
+- `AUTOFORGE_ARM_CAPACITY_NOTIFICATION_COMPARTMENT_OCID`: opcionális OCI compartment OCID, ha a private instance metadata nem elerheto a topic letrehozasahoz
 
 GitHub PR broker konfiguráció:
 
@@ -174,7 +169,7 @@ Fontos:
 - A GitHub secret-ekben csak a Vault secret OCID-k szerepelnek, nem az OpenCode jelszo vagy provider API kulcs ertekei.
 - A deploy workflow ezeket az OCID-ket masolja a private host `.env` fajljaba.
 - A private host `deploy.sh` scriptje olvassa ki a konkret secret ertekeket OCI Vaultbol, `--auth instance_principal` hasznalataval.
-- A kapacitasfigyelo emailok SMTP env valtozokbol dolgoznak; ha ezek hianyoznak, a timer fut, csak emailt nem kuld.
+- A kapacitasjelzes OCI Notifications topicra megy; a deploy script ezt a topicot kezeli, az email subscription pedig `janak.endre@gmail.com` cimre mutat.
 - A provider API kulcsot az OpenRouter proxy kapja meg runtime env-kent; az `opencode` kontener csak a belso proxy URL-t es nem titkos placeholder authot lat.
 - Az ADB wallet zipet a private host `deploy.sh` letolti object storage-bol, kicsomagolja az `APP_DIR/wallet` mappaba, majd a backend kontenernek `TNS_ADMIN`-nel atadja.
 - A backend nem olvas Vaultot runtime alatt; csak runtime env valtozokat kap.
@@ -195,7 +190,7 @@ Megjegyzes:
 
 ## Szükséges OCI jogosultság
 
-A private compute instance-nek instance principalon keresztul kell tudnia olvasni a Vault secret bundle-ok tartalmat.
+A private compute instance-nek instance principalon keresztul kell tudnia olvasni a Vault secret bundle-ok tartalmat es kezelni az OCI Notifications topic/subscription eroforrasokat.
 
 Minimum elofeltetelek:
 
@@ -204,6 +199,7 @@ Minimum elofeltetelek:
 - Ha secret display name alapjan tortenik a feloldas, a Dynamic Groupnak resource search / secret metadata olvasasi jog is kell a secret OCID megtalalasahoz.
 - Vault secret hasznalata eseten a private hoston legyen telepitve az OCI CLI, es az SSH-n futtatott non-interactive shell PATH-jaban is latszodjon.
 - Ha az OCI CLI nincs telepitve, a private deploy script ideiglenes OCI CLI kontenert futtat (`ghcr.io/oracle/oci-cli:latest`) `docker run --rm --network host` modon, instance principal auth-tal.
+- A Notifications topic es email subscription letrehozasahoz a Dynamic Groupnak `manage ons-topics` es `manage ons-subscriptions` jog kell abban a compartmentben, ahol a topic el.
 
 Pelda policy minta:
 
