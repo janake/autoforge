@@ -142,7 +142,9 @@ Megjegyzések:
 Vault secret azonosito GitHub secret-ek:
 
 - `OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-opencode-server-password` secret OCID-ja
+- `OCI_OPENCODE_SERVER_PASSWORD_SECRET_NAME`: opcionális OCI Vault display name az OpenCode REST jelszóhoz, ha OCID helyett név alapján oldjuk fel
 - `OCI_OPENROUTER_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt OpenRouter API key secret OCID-ja; ezt csak az OpenRouter proxy kapja meg, az OpenCode kontener nem
+- `OCI_OPENROUTER_API_KEY_SECRET_NAME`: opcionális OCI Vault display name az OpenRouter API keyhez, ha OCID helyett név alapján oldjuk fel
 - `AUTOFORGE_DB_URL`: opcionális direkt JDBC URL, ha nem walletes ADB kapcsolatot hasznalunk
 - `AUTOFORGE_DB_URL_SECRET_NAME`: opcionális OCI Vault display name a direkt JDBC URL-hez, alapertelmezett: `autoforge-db-url`
 - `AUTOFORGE_DB_WALLET_URL`: a private ADB wallet zip object storage URL-je
@@ -167,7 +169,8 @@ GitHub PR broker konfiguráció:
 Fontos:
 
 - A GitHub secret-ekben csak a Vault secret OCID-k szerepelnek, nem az OpenCode jelszo vagy provider API kulcs ertekei.
-- A deploy workflow ezeket az OCID-ket masolja a private host `.env` fajljaba.
+- A GitHub variable-okban opcionálisan Vault display name-ek is szerepelhetnek; konkrét OpenCode/OpenRouter secret érték nem kerülhet GitHubba vagy gitelt fájlba.
+- A deploy workflow ezeket az OCID/name referenciákat masolja a private host `.env` fajljaba.
 - A private host `deploy.sh` scriptje olvassa ki a konkret secret ertekeket OCI Vaultbol, `--auth instance_principal` hasznalataval.
 - A kapacitasjelzes OCI Notifications topicra megy; a deploy script ezt a topicot kezeli, az email subscription pedig `janak.endre@gmail.com` cimre mutat.
 - A provider API kulcsot az OpenRouter proxy kapja meg runtime env-kent; az `opencode` kontener csak a belso proxy URL-t es nem titkos placeholder authot lat.
