@@ -381,6 +381,9 @@ if [ -n "$OPENROUTER_API_KEY_SECRET_OCID" ]; then
     append_secret_env "OPENROUTER_API_KEY" "$OPENROUTER_API_KEY_VALUE"
   fi
 fi
+if [ -z "$OPENROUTER_API_KEY_VALUE" ]; then
+  append_secret_env "OPENROUTER_API_KEY" "disabled-until-vault-secrets-are-configured"
+fi
 
 if [ -n "$OPENCODE_SERVER_PASSWORD_VALUE" ] && [ -n "$OPENROUTER_API_KEY_VALUE" ]; then
   COMPOSE_ARGS+=(--profile opencode)
