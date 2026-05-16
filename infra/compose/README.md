@@ -3,9 +3,10 @@
 Itt vannak a ket OCI gephez tartozo Compose stackek.
 
 - `docker-compose.public.yml`: frontend + API gateway + Caddy a publikus gepre
-- `docker-compose.private.yml`: backend + opencode REST AI a privat gepre
+- `docker-compose.private.yml`: backend + opencode REST AI + OpenRouter proxy a privat gepre
 - `Caddyfile`: publikus gateway szabalyok
 - `opencode.json`: az opencode server alap konfiguracioja
+- `openrouter-proxy`: a private compose stackben futó provider proxy, amely az OpenRouter API kulcsot izolalja az OpenCode runtime-tol
 - `.env.public.example`: publikus stack valtozoi
 - `.env.private.example`: privat stack valtozoi es OCI Vault secret OCID placeholder-ek
 

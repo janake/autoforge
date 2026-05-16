@@ -5,6 +5,7 @@
   "description": "AI-assisted self-evolving application platform",
   "workspaces": [
     "apps/*",
+    "services/provider-proxy",
     "services/worker"
   ],
   "scripts": {
@@ -14,6 +15,7 @@
     "dev:backend": "mvn -f services/backend/pom.xml spring-boot:run",
     "test:backend": "mvn -q -f services/backend/pom.xml test",
     "build:backend": "mvn -q -f services/backend/pom.xml package",
+    "test:provider-proxy": "npm run test --workspace @autoforge/provider-proxy",
     "dev:worker": "npm run dev --workspace @autoforge/worker",
     "jira:dry-run": "node ops/jira/generate-import-plan.mjs",
     "jira:import:dry-run": "node ops/jira/import-plan.mjs",

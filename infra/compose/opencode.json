@@ -1,6 +1,21 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "openai/gpt-4.1",
+  "model": "{env:OPENCODE_MODEL}",
+  "provider": {
+    "autoforge-openrouter": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Autoforge OpenRouter Proxy",
+      "options": {
+        "baseURL": "http://openrouter-proxy:8080/v1",
+        "apiKey": "proxy-auth-placeholder"
+      },
+      "models": {
+        "deepseek/deepseek-chat": {
+          "name": "DeepSeek Chat via OpenRouter Proxy"
+        }
+      }
+    }
+  },
   "share": "disabled",
   "server": {
     "hostname": "0.0.0.0",
