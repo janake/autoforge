@@ -195,6 +195,7 @@ OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_S
 OPENROUTER_API_KEY_SECRET_OCID="$(get_env_value OPENROUTER_API_KEY_SECRET_OCID || true)"
 OPENCODE_SERVER_PASSWORD_CONFIGURED=false
 OPENROUTER_API_KEY_CONFIGURED=false
+OPENCODE_PROFILE_ENABLED=false
 if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] || get_env_value OPENCODE_SERVER_PASSWORD >/dev/null 2>&1; then
   OPENCODE_SERVER_PASSWORD_CONFIGURED=true
 fi
@@ -271,6 +272,7 @@ fi
 
 if [ "$OPENCODE_SERVER_PASSWORD_CONFIGURED" = "true" ] && [ "$OPENROUTER_API_KEY_CONFIGURED" = "true" ]; then
   COMPOSE_ARGS+=(--profile opencode)
+  OPENCODE_PROFILE_ENABLED=true
 fi
 
 if [ -z "$DB_URL" ] && [ -n "$DB_URL_SECRET_NAME" ]; then
@@ -363,4 +365,9 @@ if [ "$PRIVATE_IMAGES_PRELOADED" != "true" ]; then
 fi
 
 "${COMPOSE_CMD[@]}" "${COMPOSE_ARGS[@]}" up -d --remove-orphans
+
+if [ "$OPENCODE_PROFILE_ENABLED" = "true" ]; then
+  bash "$APP_DIR/opencode-smoke.sh"
+fi
+
 docker image prune -f

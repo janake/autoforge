@@ -120,8 +120,9 @@ jobs:
           ssh -F ~/.ssh/config autoforge-private "mkdir -p '$DEPLOY_PATH'"
           scp -F ~/.ssh/config infra/compose/docker-compose.private.yml autoforge-private:"$DEPLOY_PATH/docker-compose.private.yml"
           scp -F ~/.ssh/config infra/compose/opencode.json autoforge-private:"$DEPLOY_PATH/opencode.json"
+          scp -F ~/.ssh/config infra/deploy/private/opencode-smoke.sh autoforge-private:"$DEPLOY_PATH/opencode-smoke.sh"
           scp -F ~/.ssh/config infra/deploy/private/deploy.sh autoforge-private:"$DEPLOY_PATH/deploy.sh"
-          ssh -F ~/.ssh/config autoforge-private "chmod +x '$DEPLOY_PATH/deploy.sh'"
+          ssh -F ~/.ssh/config autoforge-private "chmod +x '$DEPLOY_PATH/deploy.sh' '$DEPLOY_PATH/opencode-smoke.sh'"
 
       - name: Upload private images
         run: |
