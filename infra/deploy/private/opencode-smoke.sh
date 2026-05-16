@@ -8,6 +8,9 @@ set -euo pipefail
 NETWORK_NAME="${OPENCODE_NETWORK_NAME:-autoforge-private}"
 OPENCODE_PORT="${OPENCODE_SERVER_PORT:-4096}"
 OPENCODE_BASE_URL="${OPENCODE_BASE_URL:-http://opencode:${OPENCODE_PORT}}"
+PROVIDER_PROXY_PORT="${PROVIDER_PROXY_PORT:-8080}"
+OPENROUTER_PROXY_BASE_URL="${OPENROUTER_PROXY_BASE_URL:-http://openrouter-proxy:${PROVIDER_PROXY_PORT}}"
+OPENROUTER_DEFAULT_MODEL="${OPENROUTER_DEFAULT_MODEL:-deepseek/deepseek-chat}"
 HTTP_CLIENT_IMAGE="${HTTP_CLIENT_IMAGE:-curlimages/curl:8.13.0}"
 
 docker_curl() {
@@ -15,6 +18,18 @@ docker_curl() {
 }
 
 basic_auth_args=(--user "$OPENCODE_SERVER_USERNAME:$OPENCODE_SERVER_PASSWORD")
+
+proxy_health_response="$(docker_curl -fsS "$OPENROUTER_PROXY_BASE_URL/health")"
+if [[ "$proxy_health_response" != *'"healthy":true'* ]] || [[ "$proxy_health_response" != *'"apiKeyConfigured":true'* ]]; then
+  echo "OpenRouter proxy health check did not report healthy configured state: $proxy_health_response" >&2
+  exit 1
+fi
+
+proxy_models_response="$(docker_curl -fsS "$OPENROUTER_PROXY_BASE_URL/v1/models")"
+if [[ "$proxy_models_response" != *"$OPENROUTER_DEFAULT_MODEL"* ]]; then
+  echo "OpenRouter proxy model list does not include $OPENROUTER_DEFAULT_MODEL: $proxy_models_response" >&2
+  exit 1
+fi
 
 health_response="$(docker_curl -fsS "${basic_auth_args[@]}" "$OPENCODE_BASE_URL/global/health")"
 if [[ "$health_response" != *'"healthy":true'* ]]; then
