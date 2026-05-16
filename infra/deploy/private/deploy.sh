@@ -247,7 +247,7 @@ metadata_compartment_id() {
 }
 
 oci_json() {
-  "${OCI_CMD[@]}" "$@" --output json
+  "${OCI_CMD[@]}" "$@" --auth instance_principal --output json
 }
 
 ensure_notification_topic() {
@@ -257,11 +257,11 @@ ensure_notification_topic() {
   topics_json="$(oci_json ons topic list --compartment-id "$compartment_id" --name "$ARM_CAPACITY_NOTIFICATION_TOPIC_NAME" --all)"
   topic_id="$(python3 -c 'import json,sys
 data=json.load(sys.stdin).get("data", [])
-print(data[0]["id"] if data else "")' <<<"$topics_json")"
+print(data[0]["topic-id"] if data else "")' <<<"$topics_json")"
 
   if [ -z "$topic_id" ]; then
-    topic_id="$(oci_json ons topic create --compartment-id "$compartment_id" --name "$ARM_CAPACITY_NOTIFICATION_TOPIC_NAME" --description "Autoforge ARM capacity notifications" --wait-for-state ACTIVE | python3 -c 'import json,sys
-print(json.load(sys.stdin)["data"]["id"])')"
+    topic_id="$(oci_json ons topic create --compartment-id "$compartment_id" --name "$ARM_CAPACITY_NOTIFICATION_TOPIC_NAME" --description "Autoforge ARM capacity notifications" | python3 -c 'import json,sys
+print(json.load(sys.stdin)["data"]["topic-id"])')"
   fi
 
   printf '%s' "$topic_id"

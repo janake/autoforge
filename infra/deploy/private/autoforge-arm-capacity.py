@@ -148,6 +148,8 @@ def publish_notification(title: str, body: str) -> bool:
         subprocess.run(
             oci_command()
             + [
+                "--auth",
+                "instance_principal",
                 "ons",
                 "message",
                 "publish",
