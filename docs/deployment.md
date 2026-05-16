@@ -103,6 +103,7 @@ A tipikus tartalom:
 - `Container Images`: web, backend, API gateway es OpenRouter proxy image build + push GHCR-be
 - `Deploy Public Host`: public stack frissitese merge utan vagy manual dispatch-csel
 - `Deploy Private Host`: private stack frissitese merge utan vagy manual dispatch-csel, beleertve a backendet es az opencode REST AI service-et
+- a private deploy a sikeres `opencode` inditas utan egy REST smoke tesztet is futtat, amely ellenorzi a health endpointot, a session letrehozasat es egy smoke prompt completiont
 - ugyanazok a workflow-k `main`-re merge-elt, relevans fájlokat erinto pushokra is lefutnak, hogy a deploy automatikusan meginduljon
 
 Fontos trigger-ek:
