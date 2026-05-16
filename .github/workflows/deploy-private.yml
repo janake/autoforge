@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "services/backend/**"
+      - "services/provider-proxy/**"
       - "infra/compose/**"
       - "infra/deploy/private/**"
       - ".github/workflows/deploy-private.yml"
@@ -39,7 +40,7 @@ jobs:
           GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
           OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
-          OPENAI_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENAI_API_KEY_SECRET_OCID }}
+          OPENROUTER_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENROUTER_API_KEY_SECRET_OCID }}
         run: |
           IMAGE_TAG="${IMAGE_TAG:?IMAGE_TAG is required}"
           echo "$GHCR_DEPLOY_TOKEN" | docker login ghcr.io -u "$GHCR_DEPLOY_USERNAME" --password-stdin
@@ -56,10 +57,22 @@ jobs:
           docker save "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG" | gzip -1 > /tmp/autoforge-backend-image.tar.gz
           docker pull ghcr.io/oracle/oci-cli:latest
           docker save ghcr.io/oracle/oci-cli:latest | gzip -1 > /tmp/autoforge-oci-cli-image.tar.gz
-          if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ] && [ -n "${OPENAI_API_KEY_SECRET_OCID:-}" ]; then
+          if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ] && [ -n "${OPENROUTER_API_KEY_SECRET_OCID:-}" ]; then
+            for attempt in $(seq 1 20); do
+              if docker pull "ghcr.io/${{ github.repository_owner }}/autoforge/openrouter-proxy:$IMAGE_TAG"; then
+                break
+              fi
+              if [ "$attempt" -eq 20 ]; then
+                echo "Current OpenRouter proxy image is not available: $IMAGE_TAG" >&2
+                exit 1
+              fi
+              sleep 15
+            done
+            docker save "ghcr.io/${{ github.repository_owner }}/autoforge/openrouter-proxy:$IMAGE_TAG" | gzip -1 > /tmp/autoforge-openrouter-proxy-image.tar.gz
             docker pull ghcr.io/anomalyco/opencode:latest
             docker save ghcr.io/anomalyco/opencode:latest | gzip -1 > /tmp/autoforge-opencode-image.tar.gz
           else
+            rm -f /tmp/autoforge-openrouter-proxy-image.tar.gz
             rm -f /tmp/autoforge-opencode-image.tar.gz
           fi
 
@@ -114,6 +127,9 @@ jobs:
         run: |
           scp -F ~/.ssh/config /tmp/autoforge-backend-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-backend-image.tar.gz"
           scp -F ~/.ssh/config /tmp/autoforge-oci-cli-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-oci-cli-image.tar.gz"
+          if [ -f /tmp/autoforge-openrouter-proxy-image.tar.gz ]; then
+            scp -F ~/.ssh/config /tmp/autoforge-openrouter-proxy-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-openrouter-proxy-image.tar.gz"
+          fi
           if [ -f /tmp/autoforge-opencode-image.tar.gz ]; then
             scp -F ~/.ssh/config /tmp/autoforge-opencode-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-opencode-image.tar.gz"
           fi
@@ -127,8 +143,7 @@ jobs:
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
           OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
-          OPENAI_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENAI_API_KEY_SECRET_OCID }}
-          GEMINI_API_KEY_SECRET_OCID: ${{ secrets.OCI_GEMINI_API_KEY_SECRET_OCID }}
+          OPENROUTER_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENROUTER_API_KEY_SECRET_OCID }}
           AUTOFORGE_DB_URL: ${{ secrets.AUTOFORGE_DB_URL }}
           AUTOFORGE_DB_URL_SECRET_NAME: ${{ vars.AUTOFORGE_DB_URL_SECRET_NAME }}
           AUTOFORGE_DB_WALLET_URL: ${{ secrets.AUTOFORGE_DB_WALLET_URL }}
@@ -164,14 +179,18 @@ jobs:
             echo "OPENCODE_SERVER_URL=http://opencode:4096"
             echo "OPENCODE_SERVER_USERNAME=opencode"
             echo "OPENCODE_SERVER_PORT=4096"
+            echo "OPENCODE_MODEL=autoforge-openrouter/deepseek/deepseek-chat"
+            echo "OPENROUTER_PROXY_IMAGE=ghcr.io/${{ github.repository_owner }}/autoforge/openrouter-proxy"
+            echo "OPENROUTER_PROXY_IMAGE_TAG=$IMAGE_TAG"
+            echo "OPENROUTER_DEFAULT_MODEL=deepseek/deepseek-chat"
+            echo "OPENROUTER_ALLOWED_MODELS=deepseek/deepseek-chat"
+            echo "OPENROUTER_SITE_URL=https://oci.prodet.org"
+            echo "OPENROUTER_APP_NAME=Autoforge"
             if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ]; then
               echo "OPENCODE_SERVER_PASSWORD_SECRET_OCID=$OPENCODE_SERVER_PASSWORD_SECRET_OCID"
             fi
-            if [ -n "${OPENAI_API_KEY_SECRET_OCID:-}" ]; then
-              echo "OPENAI_API_KEY_SECRET_OCID=$OPENAI_API_KEY_SECRET_OCID"
-            fi
-            if [ -n "${GEMINI_API_KEY_SECRET_OCID:-}" ]; then
-              echo "GEMINI_API_KEY_SECRET_OCID=$GEMINI_API_KEY_SECRET_OCID"
+            if [ -n "${OPENROUTER_API_KEY_SECRET_OCID:-}" ]; then
+              echo "OPENROUTER_API_KEY_SECRET_OCID=$OPENROUTER_API_KEY_SECRET_OCID"
             fi
             if [ -n "${AUTOFORGE_DB_URL:-}" ]; then
               echo "AUTOFORGE_DB_URL=$AUTOFORGE_DB_URL"

@@ -7,6 +7,7 @@ cd "$APP_DIR"
 
 ENV_FILE="$APP_DIR/.env"
 BACKEND_IMAGE_ARCHIVE="$APP_DIR/autoforge-backend-image.tar.gz"
+OPENROUTER_PROXY_IMAGE_ARCHIVE="$APP_DIR/autoforge-openrouter-proxy-image.tar.gz"
 OPENCODE_IMAGE_ARCHIVE="$APP_DIR/autoforge-opencode-image.tar.gz"
 OCI_CLI_IMAGE_ARCHIVE="$APP_DIR/autoforge-oci-cli-image.tar.gz"
 PRIVATE_IMAGES_PRELOADED="${PRIVATE_IMAGES_PRELOADED:-false}"
@@ -191,8 +192,15 @@ download_wallet() {
 }
 
 OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_OCID || true)"
-OPENAI_API_KEY_SECRET_OCID="$(get_env_value OPENAI_API_KEY_SECRET_OCID || true)"
-GEMINI_API_KEY_SECRET_OCID="$(get_env_value GEMINI_API_KEY_SECRET_OCID || true)"
+OPENROUTER_API_KEY_SECRET_OCID="$(get_env_value OPENROUTER_API_KEY_SECRET_OCID || true)"
+OPENCODE_SERVER_PASSWORD_CONFIGURED=false
+OPENROUTER_API_KEY_CONFIGURED=false
+if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] || get_env_value OPENCODE_SERVER_PASSWORD >/dev/null 2>&1; then
+  OPENCODE_SERVER_PASSWORD_CONFIGURED=true
+fi
+if [ -n "$OPENROUTER_API_KEY_SECRET_OCID" ] || get_env_value OPENROUTER_API_KEY >/dev/null 2>&1; then
+  OPENROUTER_API_KEY_CONFIGURED=true
+fi
 DB_URL="$(get_env_value AUTOFORGE_DB_URL || true)"
 DB_URL_SECRET_NAME="$(get_env_value AUTOFORGE_DB_URL_SECRET_NAME || true)"
 DB_WALLET_URL="$(get_env_value AUTOFORGE_DB_WALLET_URL || true)"
@@ -230,8 +238,7 @@ fi
 NEEDS_OCI=false
 
 if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] \
-  || [ -n "$OPENAI_API_KEY_SECRET_OCID" ] \
-  || [ -n "$GEMINI_API_KEY_SECRET_OCID" ] \
+  || [ -n "$OPENROUTER_API_KEY_SECRET_OCID" ] \
   || [ -n "$DB_WALLET_PASSWORD_SECRET_OCID" ] \
   || [ -n "$DB_PASSWORD_SECRET_OCID" ]; then
   NEEDS_OCI=true
@@ -253,19 +260,17 @@ fi
 if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ]; then
   OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret "$OPENCODE_SERVER_PASSWORD_SECRET_OCID")"
   append_secret_env "OPENCODE_SERVER_PASSWORD" "$OPENCODE_SERVER_PASSWORD_VALUE"
-  COMPOSE_ARGS+=(--profile opencode)
 elif ! get_env_value OPENCODE_SERVER_PASSWORD >/dev/null 2>&1; then
   append_secret_env "OPENCODE_SERVER_PASSWORD" "disabled-until-vault-secrets-are-configured"
 fi
 
-if [ -n "$OPENAI_API_KEY_SECRET_OCID" ]; then
-  OPENAI_API_KEY_VALUE="$(get_vault_secret "$OPENAI_API_KEY_SECRET_OCID")"
-  append_secret_env "OPENAI_API_KEY" "$OPENAI_API_KEY_VALUE"
+if [ -n "$OPENROUTER_API_KEY_SECRET_OCID" ]; then
+  OPENROUTER_API_KEY_VALUE="$(get_vault_secret "$OPENROUTER_API_KEY_SECRET_OCID")"
+  append_secret_env "OPENROUTER_API_KEY" "$OPENROUTER_API_KEY_VALUE"
 fi
 
-if [ -n "$GEMINI_API_KEY_SECRET_OCID" ]; then
-  GEMINI_API_KEY_VALUE="$(get_vault_secret "$GEMINI_API_KEY_SECRET_OCID")"
-  append_secret_env "GEMINI_API_KEY" "$GEMINI_API_KEY_VALUE"
+if [ "$OPENCODE_SERVER_PASSWORD_CONFIGURED" = "true" ] && [ "$OPENROUTER_API_KEY_CONFIGURED" = "true" ]; then
+  COMPOSE_ARGS+=(--profile opencode)
 fi
 
 if [ -z "$DB_URL" ] && [ -n "$DB_URL_SECRET_NAME" ]; then
@@ -338,6 +343,11 @@ ensure_metadata_block
 if [ -f "$BACKEND_IMAGE_ARCHIVE" ]; then
   docker load --input "$BACKEND_IMAGE_ARCHIVE"
   rm -f "$BACKEND_IMAGE_ARCHIVE"
+fi
+
+if [ -f "$OPENROUTER_PROXY_IMAGE_ARCHIVE" ]; then
+  docker load --input "$OPENROUTER_PROXY_IMAGE_ARCHIVE"
+  rm -f "$OPENROUTER_PROXY_IMAGE_ARCHIVE"
 fi
 
 if [ -f "$OPENCODE_IMAGE_ARCHIVE" ]; then

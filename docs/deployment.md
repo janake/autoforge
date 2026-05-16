@@ -44,11 +44,12 @@ Publikus host:
 Privat host:
 
 - fajl: `infra/compose/docker-compose.private.yml`
-- szolgaltatasok: `backend`, `opencode`
+- szolgaltatasok: `backend`, `opencode`, `openrouter-proxy`
 - host port: `8080`
 - plusz config: `infra/compose/opencode.json`
 - opencode server: belso REST endpoint a backendhez, auth-vedett
 - opencode image: `ghcr.io/anomalyco/opencode`
+- openrouter-proxy image: `ghcr.io/<registry-owner>/autoforge/openrouter-proxy`
 - opencode secret ertekek: OCI Vaultbol, instance principal-lal olvasva a private hoston
 - workspace storage: 100 GB OCI Block Volume, ext4, mount point: `/mnt/autoforge-workspace`
 - ha az OpenCode Vault secret OCID-k nincsenek beallitva, a deploy csak a backendet inditja, az `opencode` profile nelkul
@@ -99,7 +100,7 @@ A tipikus tartalom:
 
 - `Frontend Build`: PR es main build a React apphoz
 - `Backend Build`: PR es main test a Spring Boot apphoz
-- `Container Images`: web es backend image build + push GHCR-be
+- `Container Images`: web, backend, API gateway es OpenRouter proxy image build + push GHCR-be
 - `Deploy Public Host`: public stack frissitese merge utan vagy manual dispatch-csel
 - `Deploy Private Host`: private stack frissitese merge utan vagy manual dispatch-csel, beleertve a backendet es az opencode REST AI service-et
 - ugyanazok a workflow-k `main`-re merge-elt, relevans fájlokat erinto pushokra is lefutnak, hogy a deploy automatikusan meginduljon
@@ -107,7 +108,7 @@ A tipikus tartalom:
 Fontos trigger-ek:
 
 - public deploy lefut `apps/web/**`, `infra/gateway/**`, `infra/compose/**`, `infra/deploy/public/**`, `.github/workflows/deploy-public.yml`, `package.json`, `package-lock.json` valtozasra
-- private deploy lefut `services/backend/**`, `infra/compose/**`, `infra/deploy/private/**`, `.github/workflows/deploy-private.yml`, `package.json`, `package-lock.json` valtozasra
+- private deploy lefut `services/backend/**`, `services/provider-proxy/**`, `infra/compose/**`, `infra/deploy/private/**`, `.github/workflows/deploy-private.yml`, `package.json`, `package-lock.json` valtozasra
 
 ## Szukseges GitHub secret-ek
 
@@ -137,8 +138,7 @@ Megjegyzések:
 Vault secret azonosito GitHub secret-ek:
 
 - `OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-opencode-server-password` secret OCID-ja
-- `OCI_OPENAI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-openai-api-key` secret OCID-ja
-- `OCI_GEMINI_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-gemini-api-key` secret OCID-ja
+- `OCI_OPENROUTER_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt OpenRouter API key secret OCID-ja; ezt csak az OpenRouter proxy kapja meg, az OpenCode kontener nem
 - `AUTOFORGE_DB_URL`: opcionális direkt JDBC URL, ha nem walletes ADB kapcsolatot hasznalunk
 - `AUTOFORGE_DB_URL_SECRET_NAME`: opcionális OCI Vault display name a direkt JDBC URL-hez, alapertelmezett: `autoforge-db-url`
 - `AUTOFORGE_DB_WALLET_URL`: a private ADB wallet zip object storage URL-je
@@ -164,6 +164,7 @@ Fontos:
 - A GitHub secret-ekben csak a Vault secret OCID-k szerepelnek, nem az OpenCode jelszo vagy provider API kulcs ertekei.
 - A deploy workflow ezeket az OCID-ket masolja a private host `.env` fajljaba.
 - A private host `deploy.sh` scriptje olvassa ki a konkret secret ertekeket OCI Vaultbol, `--auth instance_principal` hasznalataval.
+- A provider API kulcsot az OpenRouter proxy kapja meg runtime env-kent; az `opencode` kontener csak a belso proxy URL-t es nem titkos placeholder authot lat.
 - Az ADB wallet zipet a private host `deploy.sh` letolti object storage-bol, kicsomagolja az `APP_DIR/wallet` mappaba, majd a backend kontenernek `TNS_ADMIN`-nel atadja.
 - A backend nem olvas Vaultot runtime alatt; csak runtime env valtozokat kap.
 - A webes hostname es az SSH-cel nem ugyanaz: a Cloudflare-kezelt publikus domain nem alkalmas SSH deploy celra, ehhez kulon SSH host kell.
@@ -173,8 +174,7 @@ Fontos:
 ## Szükséges OCI Vault secret-ek
 
 - `autoforge-opencode-server-password`: az OpenCode REST szerver HTTP basic auth jelszava. Legalabb 32 karakteres, veletlen, newline nelkuli ertek legyen.
-- `autoforge-openai-api-key`: az OpenAI API kulcs, amelyet az OpenCode provider hasznal. Newline nelkuli ertek legyen.
-- `autoforge-gemini-api-key`: a Google Gemini API kulcs, amelyet az OpenCode provider hasznal. Newline nelkuli ertek legyen.
+- `autoforge-openrouter-api-key`: az OpenRouter API kulcs, amelyet csak az OpenRouter proxy hasznal. Newline nelkuli ertek legyen.
 - `db-wallet-pwd`: az ADB wallet zip kicsomagolasi jelszava.
 
 Megjegyzes:
