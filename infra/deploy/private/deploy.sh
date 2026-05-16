@@ -16,6 +16,8 @@ OCI_CLI_IMAGE="${OCI_CLI_IMAGE:-ghcr.io/oracle/oci-cli:latest}"
 OCI_CMD=(oci)
 SYSTEMCTL_CMD=(systemctl)
 INSTALL_CMD=(install)
+ARM_CAPACITY_NOTIFICATION_TOPIC_NAME="${AUTOFORGE_ARM_CAPACITY_NOTIFICATION_TOPIC_NAME:-autoforge-arm-capacity}"
+ARM_CAPACITY_NOTIFICATION_EMAIL_TO="${AUTOFORGE_ARM_CAPACITY_NOTIFICATION_EMAIL_TO:-janak.endre@gmail.com}"
 
 if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
@@ -224,6 +226,83 @@ install_arm_capacity_timer() {
   "${SYSTEMCTL_CMD[@]}" enable --now autoforge-arm-capacity-summary.timer
 }
 
+metadata_instance_json() {
+  local metadata_url="http://169.254.169.254/opc/v2/instance/"
+
+  if ! command -v curl >/dev/null 2>&1; then
+    echo "curl is required to read OCI instance metadata for Notifications setup." >&2
+    return 1
+  fi
+
+  curl -fsSL -H 'Authorization: Bearer Oracle' "$metadata_url"
+}
+
+metadata_compartment_id() {
+  if [ -n "${AUTOFORGE_ARM_CAPACITY_NOTIFICATION_COMPARTMENT_OCID:-}" ]; then
+    printf '%s' "$AUTOFORGE_ARM_CAPACITY_NOTIFICATION_COMPARTMENT_OCID"
+    return 0
+  fi
+
+  metadata_instance_json | python3 -c 'import json,sys; print(json.load(sys.stdin)["compartmentId"])'
+}
+
+oci_json() {
+  "${OCI_CMD[@]}" "$@" --output json
+}
+
+ensure_notification_topic() {
+  local compartment_id="$1"
+  local topics_json topic_id
+
+  topics_json="$(oci_json ons topic list --compartment-id "$compartment_id" --name "$ARM_CAPACITY_NOTIFICATION_TOPIC_NAME" --all)"
+  topic_id="$(python3 -c 'import json,sys
+data=json.load(sys.stdin).get("data", [])
+print(data[0]["id"] if data else "")' <<<"$topics_json")"
+
+  if [ -z "$topic_id" ]; then
+    topic_id="$(oci_json ons topic create --compartment-id "$compartment_id" --name "$ARM_CAPACITY_NOTIFICATION_TOPIC_NAME" --description "Autoforge ARM capacity notifications" --wait-for-state ACTIVE | python3 -c 'import json,sys
+print(json.load(sys.stdin)["data"]["id"])')"
+  fi
+
+  printf '%s' "$topic_id"
+}
+
+ensure_notification_subscription() {
+  local compartment_id="$1"
+  local topic_id="$2"
+  local subscriptions_json already_present
+
+  subscriptions_json="$(oci_json ons subscription list --compartment-id "$compartment_id" --topic-id "$topic_id" --all)"
+  already_present="$(python3 -c 'import json,sys
+endpoint = sys.argv[1]
+data=json.load(sys.stdin).get("data", [])
+for item in data:
+    if item.get("endpoint") == endpoint:
+        print("true")
+        break
+else:
+    print("false")' "$ARM_CAPACITY_NOTIFICATION_EMAIL_TO" <<<"$subscriptions_json")"
+
+  if [ "$already_present" != "true" ]; then
+    oci_json ons subscription create \
+      --compartment-id "$compartment_id" \
+      --topic-id "$topic_id" \
+      --protocol EMAIL \
+      --subscription-endpoint "$ARM_CAPACITY_NOTIFICATION_EMAIL_TO" \
+      --wait-for-state PENDING >/dev/null
+  fi
+}
+
+ensure_arm_capacity_notifications() {
+  local compartment_id topic_id
+
+  compartment_id="$(metadata_compartment_id)"
+  topic_id="$(ensure_notification_topic "$compartment_id")"
+  ensure_notification_subscription "$compartment_id" "$topic_id"
+  append_secret_env "AUTOFORGE_ARM_CAPACITY_NOTIFICATION_TOPIC_OCID" "$topic_id"
+  printf '%s=%s\n' "AUTOFORGE_ARM_CAPACITY_NOTIFICATION_TOPIC_OCID" "$topic_id" >> "$ENV_FILE"
+}
+
 OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_OCID || true)"
 OPENROUTER_API_KEY_SECRET_OCID="$(get_env_value OPENROUTER_API_KEY_SECRET_OCID || true)"
 OPENCODE_SERVER_PASSWORD_CONFIGURED=false
@@ -269,7 +348,7 @@ fi
 : "${DB_USERNAME_SECRET_NAME:=autoforge-db-username}"
 : "${DB_SERVICE_ALIAS_SECRET_NAME:=autoforge-db-service-alias}"
 
-NEEDS_OCI=false
+NEEDS_OCI=true
 
 if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] \
   || [ -n "$OPENROUTER_API_KEY_SECRET_OCID" ] \
@@ -374,6 +453,7 @@ else
 fi
 
 ensure_metadata_block
+ensure_arm_capacity_notifications
 
 if [ -f "$BACKEND_IMAGE_ARCHIVE" ]; then
   docker load --input "$BACKEND_IMAGE_ARCHIVE"

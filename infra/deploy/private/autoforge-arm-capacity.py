@@ -9,19 +9,16 @@ import os
 import re
 import shlex
 import shutil
-import smtplib
 import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from email.message import EmailMessage
 from contextlib import contextmanager
 from pathlib import Path
 
 
 DEFAULT_STATE_DIR = Path("/opt/autoforge/private/arm-capacity")
 DEFAULT_COMMAND = ["oci-a1-capacity"]
-DEFAULT_SMTP_PORT = 587
 
 
 @dataclass(frozen=True)
@@ -72,41 +69,21 @@ def capacity_command() -> list[str]:
     return shlex.split(raw)
 
 
-def smtp_host() -> str | None:
-    value = os.getenv("AUTOFORGE_ARM_CAPACITY_SMTP_HOST", "").strip()
+def notification_topic_ocid() -> str | None:
+    value = os.getenv("AUTOFORGE_ARM_CAPACITY_NOTIFICATION_TOPIC_OCID", "").strip()
     return value or None
 
 
-def smtp_port() -> int:
-    value = os.getenv("AUTOFORGE_ARM_CAPACITY_SMTP_PORT", str(DEFAULT_SMTP_PORT)).strip()
-    try:
-        return int(value)
-    except ValueError:
-        return DEFAULT_SMTP_PORT
+def oci_command() -> list[str]:
+    resolved = shutil.which("oci")
+    if resolved:
+        return [resolved]
 
+    if not shutil.which("docker"):
+        raise FileNotFoundError("oci CLI is not installed and docker is unavailable")
 
-def smtp_user() -> str:
-    return os.getenv("AUTOFORGE_ARM_CAPACITY_SMTP_USERNAME", "").strip()
-
-
-def smtp_password() -> str:
-    return os.getenv("AUTOFORGE_ARM_CAPACITY_SMTP_PASSWORD", "")
-
-
-def mail_from() -> str:
-    value = os.getenv("AUTOFORGE_ARM_CAPACITY_SMTP_FROM", "").strip()
-    if value:
-        return value
-    hostname = os.uname().nodename.split(".", 1)[0]
-    return f"autoforge@{hostname}"
-
-
-def mail_to() -> str:
-    return os.getenv("AUTOFORGE_ARM_CAPACITY_EMAIL_TO", "").strip()
-
-
-def have_email_config() -> bool:
-    return smtp_host() is not None and bool(mail_to())
+    image = os.getenv("AUTOFORGE_ARM_CAPACITY_OCI_CLI_IMAGE", "ghcr.io/oracle/oci-cli:latest")
+    return ["docker", "run", "--rm", "--network", "host", image]
 
 
 def detect_available(output: str) -> bool:
@@ -162,26 +139,32 @@ def write_last_alert_state(value: str) -> None:
     status_file().write_text(value + "\n", encoding="utf-8")
 
 
-def send_email(subject: str, body: str) -> bool:
-    if not have_email_config():
+def publish_notification(title: str, body: str) -> bool:
+    topic_ocid = notification_topic_ocid()
+    if not topic_ocid:
         return False
 
-    message = EmailMessage()
-    message["From"] = mail_from()
-    message["To"] = mail_to()
-    message["Subject"] = subject
-    message.set_content(body)
-
-    with smtplib.SMTP(smtp_host(), smtp_port(), timeout=30) as client:
-        client.ehlo()
-        if os.getenv("AUTOFORGE_ARM_CAPACITY_SMTP_STARTTLS", "true").lower() != "false":
-            client.starttls()
-            client.ehlo()
-
-        if smtp_user():
-            client.login(smtp_user(), smtp_password())
-
-        client.send_message(message)
+    try:
+        subprocess.run(
+            oci_command()
+            + [
+                "ons",
+                "message",
+                "publish",
+                "--topic-id",
+                topic_ocid,
+                "--title",
+                title,
+                "--body",
+                body,
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError) as exc:
+        print(f"Failed to publish OCI notification: {exc}", file=sys.stderr)
+        return False
     return True
 
 
@@ -201,10 +184,10 @@ def check_mode() -> int:
                     f"Checked at: {result.checked_at}\n\n"
                     f"{result.output}\n"
                 )
-                if send_email(subject, body):
-                    print("Sent availability email notification.")
+                if publish_notification(subject, body):
+                    print("Published availability notification.")
                 else:
-                    print("Email notification skipped because SMTP is not configured.")
+                    print("Availability notification skipped because OCI Notifications is not configured.")
                 write_last_alert_state("available")
         else:
             write_last_alert_state("unavailable")
@@ -262,10 +245,10 @@ def summary_mode() -> int:
                 f"Latest output:\n{latest_output}\n"
             )
 
-        if send_email(subject, body):
-            print("Sent daily ARM capacity summary email.")
+        if publish_notification(subject, body):
+            print("Published daily ARM capacity summary notification.")
         else:
-            print("Daily summary email skipped because SMTP is not configured.")
+            print("Daily summary notification skipped because OCI Notifications is not configured.")
 
     return 0
 
