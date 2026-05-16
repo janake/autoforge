@@ -1,0 +1,6 @@
+[Unit]
+Description=Autoforge OCI ARM capacity check
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env oci-a1-capacity

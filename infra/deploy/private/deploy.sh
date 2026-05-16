@@ -14,12 +14,24 @@ PRIVATE_IMAGES_PRELOADED="${PRIVATE_IMAGES_PRELOADED:-false}"
 WALLET_DIR="$APP_DIR/wallet"
 OCI_CLI_IMAGE="${OCI_CLI_IMAGE:-ghcr.io/oracle/oci-cli:latest}"
 OCI_CMD=(oci)
+SYSTEMCTL_CMD=(systemctl)
+INSTALL_CMD=(install)
 
 if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
 fi
 
 export PATH
+
+if [ "$EUID" -ne 0 ]; then
+  if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+    SYSTEMCTL_CMD=(sudo -n systemctl)
+    INSTALL_CMD=(sudo -n install)
+  else
+    echo "Passwordless sudo is required to install the ARM capacity timer systemd units." >&2
+    exit 1
+  fi
+fi
 
 if [ -f .deploy.env ]; then
   set -a
@@ -189,6 +201,22 @@ download_wallet() {
   curl -fsSL "$wallet_url" -o "$APP_DIR/autoforge-adb-wallet.zip"
   unzip -o -P "$wallet_password" "$APP_DIR/autoforge-adb-wallet.zip" -d "$WALLET_DIR" >/dev/null
   rm -f "$APP_DIR/autoforge-adb-wallet.zip"
+}
+
+install_arm_capacity_timer() {
+  local service_src="$APP_DIR/autoforge-arm-capacity-check.service"
+  local timer_src="$APP_DIR/autoforge-arm-capacity-check.timer"
+  local systemd_dir="/etc/systemd/system"
+
+  if [ ! -f "$service_src" ] || [ ! -f "$timer_src" ]; then
+    echo "ARM capacity timer unit files are missing from $APP_DIR." >&2
+    exit 1
+  fi
+
+  "${INSTALL_CMD[@]}" -m 644 "$service_src" "$systemd_dir/autoforge-arm-capacity-check.service"
+  "${INSTALL_CMD[@]}" -m 644 "$timer_src" "$systemd_dir/autoforge-arm-capacity-check.timer"
+  "${SYSTEMCTL_CMD[@]}" daemon-reload
+  "${SYSTEMCTL_CMD[@]}" enable --now autoforge-arm-capacity-check.timer
 }
 
 OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_OCID || true)"
@@ -363,4 +391,5 @@ if [ "$PRIVATE_IMAGES_PRELOADED" != "true" ]; then
 fi
 
 "${COMPOSE_CMD[@]}" "${COMPOSE_ARGS[@]}" up -d --remove-orphans
+install_arm_capacity_timer
 docker image prune -f
