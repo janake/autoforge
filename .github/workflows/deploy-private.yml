@@ -125,8 +125,9 @@ jobs:
           scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity-summary.service autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity-summary.service"
           scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity-summary.timer autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity-summary.timer"
           scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity.py autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity.py"
+          scp -F ~/.ssh/config infra/deploy/private/opencode-smoke.sh autoforge-private:"$DEPLOY_PATH/opencode-smoke.sh"
           scp -F ~/.ssh/config infra/deploy/private/deploy.sh autoforge-private:"$DEPLOY_PATH/deploy.sh"
-          ssh -F ~/.ssh/config autoforge-private "chmod +x '$DEPLOY_PATH/deploy.sh'"
+          ssh -F ~/.ssh/config autoforge-private "chmod +x '$DEPLOY_PATH/deploy.sh' '$DEPLOY_PATH/opencode-smoke.sh'"
 
       - name: Upload private images
         run: |

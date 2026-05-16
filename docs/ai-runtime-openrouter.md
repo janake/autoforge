@@ -98,3 +98,4 @@ This is enough to proceed with `AUTO-322`, but that story must still smoke-test 
 - Any config checked into git must use non-secret placeholders only.
 - Provider model IDs should be allowlisted, with the first candidate being an OpenRouter-hosted low-cost coding model.
 - Logs must prove which model/provider path was used without recording the API key or full prompt payloads by default.
+- The private deploy should run an `opencode` REST smoke test after the stack comes up, using the documented health/session/message endpoints.

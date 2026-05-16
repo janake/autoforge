@@ -105,6 +105,7 @@ A tipikus tartalom:
 - `Deploy Private Host`: private stack frissitese merge utan vagy manual dispatch-csel, beleertve a backendet es az opencode REST AI service-et
 - a private hoston a deploy a `autoforge-arm-capacity-check.timer` systemd timert is telepiti, amely 3 percenkent futtatja az `oci-a1-capacity` ellenorzest a Frankfurt tenancy ARM kapacitasara
 - a private hoston a deploy a `autoforge-arm-capacity-summary.timer` systemd timert is telepiti, amely minden nap 07:00-kor kuldi az elozo 24 ora osszegzeset
+- a private deploy a sikeres `opencode` inditas utan egy REST smoke tesztet is futtat, amely ellenorzi a health endpointot, a session letrehozasat es egy smoke prompt completiont
 - ugyanazok a workflow-k `main`-re merge-elt, relevans fájlokat erinto pushokra is lefutnak, hogy a deploy automatikusan meginduljon
 
 Fontos trigger-ek:
