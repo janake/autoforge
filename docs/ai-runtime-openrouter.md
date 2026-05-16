@@ -97,5 +97,6 @@ This is enough to proceed with `AUTO-322`, but that story must still smoke-test 
 - No new direct provider API key should be added to the `opencode` service environment.
 - Any config checked into git must use non-secret placeholders only.
 - Provider model IDs should be allowlisted, with the first candidate being an OpenRouter-hosted low-cost coding model.
-- Logs must prove which model/provider path was used without recording the API key or full prompt payloads by default.
-- The private deploy should run an `opencode` REST smoke test after the stack comes up, using the documented health/session/message endpoints.
+- The provider proxy caps completion tokens and request body bytes with `OPENROUTER_MAX_COMPLETION_TOKENS` and `OPENROUTER_MAX_REQUEST_BYTES` so the OpenCode path has a predictable default cost envelope.
+- Logs must prove which model/provider path was used without recording the API key, bearer token, full prompt payload, or provider response body by default.
+- The private deploy should run proxy health/model checks and an `opencode` REST smoke test after the stack comes up, using the documented health/session/message endpoints.
