@@ -4,7 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "autoforge.mvp")
 public record BackendMvpProperties(
-  Github github
+  Github github,
+  Opencode opencode
 ) {
 
   public record Github(
@@ -12,6 +13,14 @@ public record BackendMvpProperties(
     String owner,
     String repo,
     String baseBranch
+  ) {
+  }
+
+  public record Opencode(
+    String serverUrl,
+    String username,
+    String password,
+    String model
   ) {
   }
 }

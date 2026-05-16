@@ -4,11 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import org.autoforge.backend.domain.Job;
 import org.autoforge.backend.dto.GeneratedPatchResponse;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Component;
 
-@Component
-@Primary
 public class MockAIPatchGenerator implements AIPatchGenerator {
 
   private static final String PATCH = """
