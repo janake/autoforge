@@ -10,7 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.autoforge.backend.domain.LearningChunk;
+import org.autoforge.backend.domain.LearningEmbedding;
+import org.autoforge.backend.domain.LearningIngestionJob;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.dto.LearningEmbeddingPayload;
 import org.autoforge.backend.repository.LearningChunkRepository;
@@ -82,9 +86,26 @@ class LearningIngestionControllerTest {
       .getContentAsString();
 
     assertThat(response).contains(material.getId());
-    assertThat(learningIngestionJobRepository.findByMaterialId(material.getId())).isPresent();
+    LearningIngestionJob job = learningIngestionJobRepository.findByMaterialId(material.getId()).orElseThrow();
     assertThat(learningChunkRepository.count()).isEqualTo(2);
     assertThat(learningEmbeddingRepository.count()).isEqualTo(2);
+
+    List<LearningChunk> chunks = learningChunkRepository.findByJobIdOrderByChunkIndexAsc(job.getId());
+    assertThat(chunks).hasSize(2);
+    assertThat(chunks.get(0).getOwnerSubject()).isEqualTo("teacher-1");
+    assertThat(chunks.get(0).getChunkIndex()).isEqualTo(0);
+    assertThat(chunks.get(0).getSourceStartOffset()).isEqualTo(0);
+    assertThat(chunks.get(0).getSourceEndOffset()).isGreaterThan(chunks.get(0).getSourceStartOffset());
+    assertThat(chunks.get(1).getSourceStartOffset()).isGreaterThan(chunks.get(0).getSourceStartOffset());
+
+    LearningEmbedding firstEmbedding = learningEmbeddingRepository.findAll().stream()
+      .filter(embedding -> embedding.getChunkId().equals(chunks.get(0).getId()))
+      .findFirst()
+      .orElseThrow();
+    assertThat(firstEmbedding.getOwnerSubject()).isEqualTo("teacher-1");
+    assertThat(firstEmbedding.getModel()).isEqualTo("mock-embed");
+    assertThat(firstEmbedding.getDimensions()).isEqualTo(4);
+    assertThat(firstEmbedding.getVectorJson()).contains("0.1");
 
     mockMvc.perform(get("/api/v1/learning/materials/{materialId}/ingestion", material.getId())
         .with(jwt().jwt(token -> token.subject("teacher-1"))))

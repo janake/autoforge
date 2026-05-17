@@ -98,7 +98,7 @@ public class LearningIngestionService {
   private LearningIngestionResponse processJob(LearningIngestionJob job, LearningMaterial material) {
     try {
       String text = extractText(material);
-      List<String> chunks = chunkText(text);
+      List<ChunkSlice> chunks = chunkText(text);
 
       if (chunks.isEmpty()) {
         throw new IllegalArgumentException("No chunkable content found");
@@ -106,11 +106,20 @@ public class LearningIngestionService {
 
       List<LearningChunk> persistedChunks = new ArrayList<>();
       for (int index = 0; index < chunks.size(); index++) {
-        String chunkContent = chunks.get(index);
-        LearningChunk chunk = LearningChunk.create(job.getId(), material.getId(), job.getOwnerSubject(), index, chunkContent, estimateTokens(chunkContent));
+        ChunkSlice chunkSlice = chunks.get(index);
+        LearningChunk chunk = LearningChunk.create(
+          job.getId(),
+          material.getId(),
+          job.getOwnerSubject(),
+          index,
+          chunkSlice.content(),
+          chunkSlice.sourceStartOffset(),
+          chunkSlice.sourceEndOffset(),
+          estimateTokens(chunkSlice.content())
+        );
         persistedChunks.add(learningChunkRepository.save(chunk));
 
-        LearningEmbeddingPayload payload = learningEmbeddingProvider.embed(chunkContent);
+        LearningEmbeddingPayload payload = learningEmbeddingProvider.embed(chunkSlice.content());
         learningEmbeddingRepository.save(LearningEmbedding.create(chunk.getId(), job.getOwnerSubject(), payload.model(), payload.dimensions(), payload.vectorJson()));
       }
 
@@ -179,32 +188,43 @@ public class LearningIngestionService {
     return material.getTitle() + "\n" + Objects.toString(material.getDescription(), "");
   }
 
-  private static List<String> chunkText(String text) {
+  private static List<ChunkSlice> chunkText(String text) {
     String normalized = text == null ? "" : text.trim();
     if (normalized.isBlank()) {
       return List.of();
     }
 
-    List<String> chunks = new ArrayList<>();
+    List<ChunkSlice> chunks = new ArrayList<>();
+    int cursor = 0;
     for (String paragraph : CHUNK_BOUNDARY.split(normalized)) {
       if (paragraph == null || paragraph.isBlank()) {
         continue;
       }
       String remaining = paragraph.trim();
+      int paragraphStart = normalized.indexOf(remaining, cursor);
+      if (paragraphStart < 0) {
+        paragraphStart = cursor;
+      }
+      cursor = paragraphStart + remaining.length();
       while (remaining.length() > CHUNK_SIZE) {
-        chunks.add(remaining.substring(0, CHUNK_SIZE));
+        String chunkContent = remaining.substring(0, CHUNK_SIZE);
+        chunks.add(new ChunkSlice(chunkContent, paragraphStart, paragraphStart + CHUNK_SIZE));
         remaining = remaining.substring(CHUNK_SIZE).trim();
+        paragraphStart += CHUNK_SIZE;
       }
       if (!remaining.isBlank()) {
-        chunks.add(remaining);
+        chunks.add(new ChunkSlice(remaining, paragraphStart, paragraphStart + remaining.length()));
       }
     }
 
     if (chunks.isEmpty()) {
-      chunks.add(normalized);
+      chunks.add(new ChunkSlice(normalized, 0, normalized.length()));
     }
 
     return chunks;
+  }
+
+  private record ChunkSlice(String content, int sourceStartOffset, int sourceEndOffset) {
   }
 
   private static int estimateTokens(String chunkContent) {

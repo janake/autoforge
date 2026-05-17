@@ -9,6 +9,8 @@ Use Oracle Autonomous Database as the first target for Learning RAG metadata and
 The first Learning RAG implementation should keep a portability boundary around vector storage:
 
 - Store learning document metadata, ownership, processing status, chunk metadata, and generated artifact metadata in relational tables.
+- Use `learning_materials`, `learning_chunks`, `learning_embeddings`, and `learning_ingestion_jobs` as the relational boundary.
+- Keep chunk source offsets in `learning_chunks` so retrieval can cite source spans later.
 - Store embeddings in an adapter-owned vector column/table only after the target ADB instance confirms `VECTOR` support.
 - Keep a fallback path where embeddings can be stored as serialized arrays or in an alternate vector store if the current Always Free ADB instance does not expose the required vector capability.
 
@@ -86,7 +88,7 @@ Jozsi and Bela must remain isolated by `owner_subject` at every query boundary. 
 
 ## Follow-Up Stories
 
-- AUTO-258 should define the storage/chunk model using this decision as the database capability baseline.
+- AUTO-258 defines the storage/chunk model using this decision as the database capability baseline.
 - AUTO-336 should implement the Learning-specific relational model with the native-vector adapter boundary.
 - AUTO-331 should add ingestion, chunking, and embedding pipeline controls.
 - AUTO-337 should define learner profile fields and retrieval context constraints.
