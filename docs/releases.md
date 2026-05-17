@@ -485,3 +485,14 @@ Taskok
 
 Megjegyzes
 - A repo eltávolítja a helyi task és epic markdownokat, és a manifestekre/Jira state-re támaszkodik.
+
+## 0.1.43
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-341`: Tananyag hozzárendelés diákokhoz és tanulócsoportokhoz
+
+Megjegyzes
+- Az első Learning implementációs slice a hozzáférés- és hozzárendelés-kezelést vezeti be a tananyagokhoz.
