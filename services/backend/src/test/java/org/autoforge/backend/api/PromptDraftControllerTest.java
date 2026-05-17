@@ -68,6 +68,7 @@ class PromptDraftControllerTest {
       .andExpect(jsonPath("$.intent").value("TASK"))
       .andExpect(jsonPath("$.readyForApproval").value(false))
       .andExpect(jsonPath("$.pendingQuestions").isArray())
+      .andExpect(jsonPath("$.messages[1].content").value(org.hamcrest.Matchers.containsString("Which repository should this apply to?")))
       .andExpect(jsonPath("$.messages[0].role").value("USER"))
       .andExpect(jsonPath("$.messages[1].role").value("ASSISTANT"));
 

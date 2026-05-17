@@ -22,3 +22,8 @@ autoforge:
       repo: autoforge
       api-base-url: https://api.github.com
       token: test-token
+    opencode:
+      server-url: http://opencode:4096
+      username: opencode
+      password: test-token
+      model: autoforge-openrouter/deepseek/deepseek-chat
