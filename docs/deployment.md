@@ -106,7 +106,7 @@ A tipikus tartalom:
 - a private hoston a deploy a `autoforge-arm-capacity-check.timer` systemd timert is telepiti, amely 3 percenkent futtatja az `oci-a1-capacity` ellenorzest a Frankfurt tenancy ARM kapacitasara
 - a private hoston a deploy a `autoforge-arm-capacity-summary.timer` systemd timert is telepiti, amely minden nap 07:00-kor kuldi az elozo 24 ora osszegzeset
 - a private hoston a deploy OCI Notifications topicot hoz letre vagy ujrahasznal, majd ehhez email subscriptiont regisztral `janak.endre@gmail.com` cimre
-- a private deploy a sikeres `opencode` inditas utan egy REST smoke tesztet is futtat, amely ellenorzi a health endpointot, a session letrehozasat es egy smoke prompt completiont
+- a private deploy a sikeres `opencode` inditas utan egy REST smoke tesztet is futtat, amely ellenorzi az OpenRouter proxy health/model endpointjait, az OpenCode health endpointot, a session letrehozasat es egy smoke prompt completiont
 - ugyanazok a workflow-k `main`-re merge-elt, relevans fájlokat erinto pushokra is lefutnak, hogy a deploy automatikusan meginduljon
 
 Fontos trigger-ek:
@@ -142,7 +142,9 @@ Megjegyzések:
 Vault secret azonosito GitHub secret-ek:
 
 - `OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-opencode-server-password` secret OCID-ja
+- `OCI_OPENCODE_SERVER_PASSWORD_SECRET_NAME`: opcionális OCI Vault display name az OpenCode REST jelszóhoz, ha OCID helyett név alapján oldjuk fel
 - `OCI_OPENROUTER_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt OpenRouter API key secret OCID-ja; ezt csak az OpenRouter proxy kapja meg, az OpenCode kontener nem
+- `OCI_OPENROUTER_API_KEY_SECRET_NAME`: opcionális OCI Vault display name az OpenRouter API keyhez, ha OCID helyett név alapján oldjuk fel
 - `AUTOFORGE_DB_URL`: opcionális direkt JDBC URL, ha nem walletes ADB kapcsolatot hasznalunk
 - `AUTOFORGE_DB_URL_SECRET_NAME`: opcionális OCI Vault display name a direkt JDBC URL-hez, alapertelmezett: `autoforge-db-url`
 - `AUTOFORGE_DB_WALLET_URL`: a private ADB wallet zip object storage URL-je
@@ -167,10 +169,13 @@ GitHub PR broker konfiguráció:
 Fontos:
 
 - A GitHub secret-ekben csak a Vault secret OCID-k szerepelnek, nem az OpenCode jelszo vagy provider API kulcs ertekei.
-- A deploy workflow ezeket az OCID-ket masolja a private host `.env` fajljaba.
+- A GitHub variable-okban opcionálisan Vault display name-ek is szerepelhetnek; konkrét OpenCode/OpenRouter secret érték nem kerülhet GitHubba vagy gitelt fájlba.
+- A deploy workflow ezeket az OCID/name referenciákat masolja a private host `.env` fajljaba.
 - A private host `deploy.sh` scriptje olvassa ki a konkret secret ertekeket OCI Vaultbol, `--auth instance_principal` hasznalataval.
 - A kapacitasjelzes OCI Notifications topicra megy; a deploy script ezt a topicot kezeli, az email subscription pedig `janak.endre@gmail.com` cimre mutat.
 - A provider API kulcsot az OpenRouter proxy kapja meg runtime env-kent; az `opencode` kontener csak a belso proxy URL-t es nem titkos placeholder authot lat.
+- Az OpenRouter proxy `OPENROUTER_ALLOWED_MODELS`, `OPENROUTER_MAX_COMPLETION_TOKENS` es `OPENROUTER_MAX_REQUEST_BYTES` guardrailekkel korlatozza az AI runtime koltseg- es payload-kockazatat.
+- A provider proxy logjai csak provider/model/status/duration metaadatot irhatnak; promptot, bearer tokent, API kulcsot vagy provider response bodyt nem.
 - Az ADB wallet zipet a private host `deploy.sh` letolti object storage-bol, kicsomagolja az `APP_DIR/wallet` mappaba, majd a backend kontenernek `TNS_ADMIN`-nel atadja.
 - A backend nem olvas Vaultot runtime alatt; csak runtime env valtozokat kap.
 - A webes hostname es az SSH-cel nem ugyanaz: a Cloudflare-kezelt publikus domain nem alkalmas SSH deploy celra, ehhez kulon SSH host kell.

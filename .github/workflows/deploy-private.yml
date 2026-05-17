@@ -41,6 +41,8 @@ jobs:
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
           OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
           OPENROUTER_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENROUTER_API_KEY_SECRET_OCID }}
+          OPENCODE_SERVER_PASSWORD_SECRET_NAME: ${{ vars.OCI_OPENCODE_SERVER_PASSWORD_SECRET_NAME }}
+          OPENROUTER_API_KEY_SECRET_NAME: ${{ vars.OCI_OPENROUTER_API_KEY_SECRET_NAME }}
         run: |
           IMAGE_TAG="${IMAGE_TAG:?IMAGE_TAG is required}"
           echo "$GHCR_DEPLOY_TOKEN" | docker login ghcr.io -u "$GHCR_DEPLOY_USERNAME" --password-stdin
@@ -57,7 +59,8 @@ jobs:
           docker save "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG" | gzip -1 > /tmp/autoforge-backend-image.tar.gz
           docker pull ghcr.io/oracle/oci-cli:latest
           docker save ghcr.io/oracle/oci-cli:latest | gzip -1 > /tmp/autoforge-oci-cli-image.tar.gz
-          if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ] && [ -n "${OPENROUTER_API_KEY_SECRET_OCID:-}" ]; then
+          if { [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ] || [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_NAME:-}" ]; } \
+            && { [ -n "${OPENROUTER_API_KEY_SECRET_OCID:-}" ] || [ -n "${OPENROUTER_API_KEY_SECRET_NAME:-}" ]; }; then
             for attempt in $(seq 1 20); do
               if docker pull "ghcr.io/${{ github.repository_owner }}/autoforge/openrouter-proxy:$IMAGE_TAG"; then
                 break
@@ -150,6 +153,10 @@ jobs:
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
           OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
           OPENROUTER_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENROUTER_API_KEY_SECRET_OCID }}
+          OPENCODE_SERVER_PASSWORD_SECRET_NAME: ${{ vars.OCI_OPENCODE_SERVER_PASSWORD_SECRET_NAME }}
+          OPENROUTER_API_KEY_SECRET_NAME: ${{ vars.OCI_OPENROUTER_API_KEY_SECRET_NAME }}
+          OPENROUTER_MAX_COMPLETION_TOKENS: ${{ vars.OPENROUTER_MAX_COMPLETION_TOKENS }}
+          OPENROUTER_MAX_REQUEST_BYTES: ${{ vars.OPENROUTER_MAX_REQUEST_BYTES }}
           AUTOFORGE_DB_URL: ${{ secrets.AUTOFORGE_DB_URL }}
           AUTOFORGE_DB_URL_SECRET_NAME: ${{ vars.AUTOFORGE_DB_URL_SECRET_NAME }}
           AUTOFORGE_DB_WALLET_URL: ${{ secrets.AUTOFORGE_DB_WALLET_URL }}
@@ -197,13 +204,21 @@ jobs:
             echo "OPENROUTER_PROXY_IMAGE_TAG=$IMAGE_TAG"
             echo "OPENROUTER_DEFAULT_MODEL=deepseek/deepseek-chat"
             echo "OPENROUTER_ALLOWED_MODELS=deepseek/deepseek-chat"
+            echo "OPENROUTER_MAX_COMPLETION_TOKENS=${OPENROUTER_MAX_COMPLETION_TOKENS:-2048}"
+            echo "OPENROUTER_MAX_REQUEST_BYTES=${OPENROUTER_MAX_REQUEST_BYTES:-262144}"
             echo "OPENROUTER_SITE_URL=https://oci.prodet.org"
             echo "OPENROUTER_APP_NAME=Autoforge"
             if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ]; then
               echo "OPENCODE_SERVER_PASSWORD_SECRET_OCID=$OPENCODE_SERVER_PASSWORD_SECRET_OCID"
             fi
+            if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_NAME:-}" ]; then
+              echo "OPENCODE_SERVER_PASSWORD_SECRET_NAME=$OPENCODE_SERVER_PASSWORD_SECRET_NAME"
+            fi
             if [ -n "${OPENROUTER_API_KEY_SECRET_OCID:-}" ]; then
               echo "OPENROUTER_API_KEY_SECRET_OCID=$OPENROUTER_API_KEY_SECRET_OCID"
+            fi
+            if [ -n "${OPENROUTER_API_KEY_SECRET_NAME:-}" ]; then
+              echo "OPENROUTER_API_KEY_SECRET_NAME=$OPENROUTER_API_KEY_SECRET_NAME"
             fi
             if [ -n "${AUTOFORGE_DB_URL:-}" ]; then
               echo "AUTOFORGE_DB_URL=$AUTOFORGE_DB_URL"

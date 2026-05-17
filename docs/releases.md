@@ -293,6 +293,8 @@ Taskok
 - `AUTO-167`: User session and profile surface
 - `AUTO-168`: Command runner and execution status view
 - `AUTO-169`: Prompt/history workspace view
+- `AUTO-325`: Vault-backed OpenRouter runtime secret references
+- `AUTO-326`: AI runtime cost and health guardrails
 
 Megjegyzes
 - A core application feature epic a user-facing termékfunkciókat csoportosítja külön a platform hardening epicektől.
