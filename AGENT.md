@@ -10,6 +10,7 @@ This file is mandatory for every AI agent working in this repository. Before sta
 - Never revert, overwrite, or remove user changes unless the user explicitly asks for it.
 - Do not commit secrets, private keys, tokens, local absolute paths, personal identifiers, cloud credentials, tenancy/user OCIDs, or machine-specific data.
 - Use placeholders or configured secrets for sensitive values, for example `${AUTOFORGE_SSH_KEY}`, `<registry-owner>`, `<repo-url>`.
+- Before starting any task, check whether a relevant skill exists; if one does, use it.
 
 ## Task Classification
 
@@ -63,7 +64,7 @@ For any non-trivial code, infra, workflow, or documentation task, do the followi
 ## Branch And PR Hygiene
 
 - Before making changes, verify that the checked-out branch matches the active Jira task.
-- For new Jira-task branches, use `git worktree` under `/home/janake/IdeaProjects/autoforge-worktrees/<TASK-ID>-<slug>` instead of switching the main workspace branch.
+- For every Jira task that changes tracked files, use `git worktree` under `/home/janake/IdeaProjects/autoforge-worktrees/<TASK-ID>-<slug>` instead of working in the main workspace branch.
 - Keep `/home/janake/IdeaProjects/autoforge` on the user's current branch so IntelliJ IDEA does not get forced onto task branches.
 - Do not create a `BUG-*` branch for a user-requested feature or UI cleanup.
 - Do not reuse an unrelated branch just because it is currently checked out.
@@ -71,6 +72,7 @@ For any non-trivial code, infra, workflow, or documentation task, do the followi
 - If a mistaken branch or PR was created, close it and create the correct one instead of continuing the mistake.
 - If the target code change is already on `main`, do not fabricate a duplicate code diff. Document the situation honestly in the task and PR.
 - If any tracked repository file is changed, the task must end with a commit, branch push, and open PR. Do not wait for the user to ask for the PR separately.
+- When a task is finished, always open or update the PR before handing it back.
 
 ## Verification
 
@@ -140,8 +142,10 @@ When finishing a task, report:
 
 ## Jira Status Rule
 
-Ha bármilyen Jira **story**-t kezdessz el dolgozni, akkor előtte (vagy a munka legelső lépésében) a Jira státuszt állítsd át **In Progress**-ra.
+- Mindig mozgasd a Jira ticketet a megfelelő státuszba a munka aktuális állapotának megfelelően.
+- Ha bármilyen Jira **story**-t kezdesz el dolgozni, akkor előtte (vagy a munka legelső lépésében) a Jira státuszt állítsd át **In Progress**-ra.
 - Ha a storyhoz PR nyílik, a Jira státuszt állítsd át **Under Test**-re, és tartsd ott a review/verification ideje alatt.
+- Ha a munka befejeződött és a PR merge-elve van, csak akkor állítsd **Done**-ra, ha az összes szükséges verifikáció is kész.
 
 ## Task Completion Rule
 
