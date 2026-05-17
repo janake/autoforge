@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.Base64;
@@ -43,6 +44,7 @@ public class SecurityConfig {
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info", "/api/v1/health").permitAll()
+        .requestMatchers("/api/v1/prompt-drafts/**", "/api/v1/jobs/**").hasRole("developer")
         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
         .anyRequest().authenticated())
       .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
@@ -100,6 +102,7 @@ public class SecurityConfig {
     public Collection<GrantedAuthority> convert(Jwt jwt) {
       Set<GrantedAuthority> authorities = new LinkedHashSet<>();
       authorities.addAll(scopeAuthorities(jwt));
+      authorities.addAll(groupAuthorities(jwt));
       authorities.addAll(realmRoleAuthorities(jwt));
       authorities.addAll(resourceRoleAuthorities(jwt));
       return authorities;
@@ -135,6 +138,21 @@ public class SecurityConfig {
         .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    private Collection<GrantedAuthority> groupAuthorities(Jwt jwt) {
+      Object groupsClaim = jwt.getClaims().get("groups");
+      if (!(groupsClaim instanceof Collection<?> groups)) {
+        return Set.of();
+      }
+
+      return groups.stream()
+        .filter(String.class::isInstance)
+        .map(String.class::cast)
+        .map(SecurityConfig::normalizeGroupName)
+        .filter(group -> !group.isBlank())
+        .map(group -> new SimpleGrantedAuthority("ROLE_" + group))
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
     private Collection<GrantedAuthority> resourceRoleAuthorities(Jwt jwt) {
       Object resourceAccess = jwt.getClaims().get("resource_access");
       if (!(resourceAccess instanceof Map<?, ?> access)) {
@@ -160,5 +178,20 @@ public class SecurityConfig {
       }
       return authorities;
     }
+  }
+
+  private static String normalizeGroupName(String group) {
+    if (group == null) {
+      return "";
+    }
+
+    String normalized = group.trim();
+    if (normalized.startsWith("/")) {
+      normalized = normalized.substring(1);
+    }
+    if (normalized.contains("/")) {
+      normalized = normalized.substring(normalized.lastIndexOf('/') + 1);
+    }
+    return normalized;
   }
 }

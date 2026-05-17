@@ -8,6 +8,7 @@ public record MeResponse(
   String username,
   String email,
   List<String> roles,
+  List<String> groups,
   Map<String, String> claims
 ) {
 }

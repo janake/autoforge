@@ -17,6 +17,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
+import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -41,10 +44,16 @@ class JobControllerTest {
     auditLogRepository.deleteAll();
   }
 
+  private static JwtRequestPostProcessor developerJwt() {
+    return jwt()
+      .jwt(token -> token.claim("groups", List.of("developer")))
+      .authorities(new SimpleGrantedAuthority("ROLE_developer"));
+  }
+
   @Test
   void createsQueuedJobFromValidRequestAndPersistsIt() throws Exception {
     mockMvc.perform(post("/api/v1/jobs")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -68,6 +77,19 @@ class JobControllerTest {
   }
 
   @Test
+  void rejectsJobCreationWithoutDeveloperGroup() throws Exception {
+    mockMvc.perform(post("/api/v1/jobs")
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Implement job creation API"
+          }
+          """))
+      .andExpect(status().isForbidden());
+  }
+
+  @Test
   void disablesJobProcessorByDefault() {
     assertThat(applicationContext.getBeansOfType(JobProcessorService.class)).isEmpty();
   }
@@ -75,7 +97,7 @@ class JobControllerTest {
   @Test
   void ignoresClientSuppliedJiraKeyAndRepositoryFields() throws Exception {
     mockMvc.perform(post("/api/v1/jobs")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -97,7 +119,7 @@ class JobControllerTest {
   @Test
   void rejectsBlankPrompt() throws Exception {
     mockMvc.perform(post("/api/v1/jobs")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -115,7 +137,7 @@ class JobControllerTest {
     );
 
     mockMvc.perform(get("/api/v1/jobs/{jobId}", saved.getId())
-        .with(jwt()))
+        .with(developerJwt()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.jobId").value(saved.getId()))
       .andExpect(jsonPath("$.prompt").value("Check job status"))
@@ -128,7 +150,7 @@ class JobControllerTest {
   @Test
   void returnsNotFoundForMissingJob() throws Exception {
     mockMvc.perform(get("/api/v1/jobs/{jobId}", "missing-job-id")
-        .with(jwt()))
+        .with(developerJwt()))
       .andExpect(status().isNotFound())
       .andExpect(jsonPath("$.status").value(404));
   }

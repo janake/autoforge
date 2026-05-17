@@ -559,11 +559,13 @@ function DashboardShell({
   mode,
   actionLabel,
   onAction,
+  navItems = dashboardNav,
   children,
 }: {
   mode: string;
   actionLabel: string;
   onAction: () => void;
+  navItems?: typeof dashboardNav;
   children: ReactNode;
 }) {
   return (
@@ -576,7 +578,7 @@ function DashboardShell({
         </div>
 
         <nav className="dashboard-nav" aria-label="Primary navigation">
-          {dashboardNav.map((item) => (
+          {navItems.map((item) => (
             <a key={item.href} href={item.href}>
               {item.label}
             </a>
@@ -608,6 +610,10 @@ function PrivateWorkspace({
   onJobCreated: (jobId: string) => void;
 }) {
   const config = useMemo(() => getRuntimeConfig(), []);
+  const isDeveloper = profile.groups.includes("developer");
+  const navItems = isDeveloper
+    ? [dashboardNav[0], { label: "AI", href: "#ai" }, ...dashboardNav.slice(1)]
+    : dashboardNav;
 
   const persona = profile.roles.includes("admin")
     ? "operator"
@@ -616,7 +622,7 @@ function PrivateWorkspace({
       : "member";
 
   return (
-    <DashboardShell mode="authenticated" actionLabel="Sign out" onAction={onSignOut}>
+    <DashboardShell mode="authenticated" actionLabel="Sign out" onAction={onSignOut} navItems={navItems}>
       <section className="hero">
         <div className="hero-copy">
           <h1>Signed-in workspace for building the platform itself.</h1>
@@ -659,15 +665,6 @@ function PrivateWorkspace({
       </section>
 
       <section className="workspace-grid" aria-label="User workspace">
-        <PromptDraftPanel
-          onJobCreated={(createdJobId) => {
-            onJobCreated(createdJobId);
-            syncJobIdInUrl(createdJobId);
-          }}
-        />
-
-        {jobId && <JobStatusPanel jobId={jobId} />}
-
         <article className="workspace-panel" id="jobs">
           <div className="section-head">
             <h2>Profile</h2>
@@ -690,11 +687,66 @@ function PrivateWorkspace({
               <dd>{profile.roles.length ? profile.roles.join(", ") : "none"}</dd>
             </div>
             <div>
+              <dt>Groups</dt>
+              <dd>{profile.groups.length ? profile.groups.join(", ") : "none"}</dd>
+            </div>
+            <div>
               <dt>Issuer</dt>
               <dd>{profile.claims.issuer}</dd>
             </div>
           </dl>
         </article>
+
+        {isDeveloper ? (
+          <article className="workspace-panel" id="ai">
+            <div className="section-head">
+              <h2>AI menu</h2>
+              <span className="pill">developer</span>
+            </div>
+            <p className="muted">
+              This menu groups multiple AI tools behind a single developer-only entrypoint.
+            </p>
+            <div className="status-grid">
+              <article className="card">
+                <p className="card-kicker">current</p>
+                <h3>Prompt flow</h3>
+                <p>Draft, clarify, approve, ticket, and launch implementation.</p>
+              </article>
+              <article className="card">
+                <p className="card-kicker">current</p>
+                <h3>Job status</h3>
+                <p>Follow AI-generated work from queue to PR publication.</p>
+              </article>
+              <article className="card">
+                <p className="card-kicker">future</p>
+                <h3>More tools</h3>
+                <p>The AI menu can grow with more backend-assisted capabilities.</p>
+              </article>
+            </div>
+          </article>
+        ) : (
+          <article className="workspace-panel" id="ai">
+            <div className="section-head">
+              <h2>AI menu</h2>
+              <span className="pill">restricted</span>
+            </div>
+            <p className="error-title">AI tools are available only to Keycloak developer-group members.</p>
+            <p className="muted">Ask an admin to add your account to the `developer` group to unlock this area.</p>
+          </article>
+        )}
+
+        {isDeveloper && (
+          <>
+            <PromptDraftPanel
+              onJobCreated={(createdJobId) => {
+                onJobCreated(createdJobId);
+                syncJobIdInUrl(createdJobId);
+              }}
+            />
+
+            {jobId && <JobStatusPanel jobId={jobId} />}
+          </>
+        )}
 
         <article className="workspace-panel" id="jira">
           <div className="section-head">

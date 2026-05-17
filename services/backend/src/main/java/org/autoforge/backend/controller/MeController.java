@@ -30,6 +30,7 @@ public class MeController {
       jwt.getClaimAsString("preferred_username"),
       jwt.getClaimAsString("email"),
       extractRoles(jwt),
+      extractGroups(jwt),
       Map.of(
         "issuer", jwt.getClaimAsString("iss"),
         "audience", String.valueOf(jwt.getAudience()),
@@ -62,5 +63,32 @@ public class MeController {
     }
 
     return roles.stream().sorted().toList();
+  }
+
+  private List<String> extractGroups(Jwt jwt) {
+    Set<String> groups = new TreeSet<>();
+
+    Object groupsClaim = jwt.getClaims().get("groups");
+    if (groupsClaim instanceof List<?> jwtGroups) {
+      groups.addAll(jwtGroups.stream()
+        .filter(String.class::isInstance)
+        .map(String.class::cast)
+        .map(MeController::normalizeGroupName)
+        .filter(group -> !group.isBlank())
+        .collect(Collectors.toSet()));
+    }
+
+    return groups.stream().sorted().toList();
+  }
+
+  private static String normalizeGroupName(String group) {
+    String normalized = group.trim();
+    if (normalized.startsWith("/")) {
+      normalized = normalized.substring(1);
+    }
+    if (normalized.contains("/")) {
+      normalized = normalized.substring(normalized.lastIndexOf('/') + 1);
+    }
+    return normalized;
   }
 }
