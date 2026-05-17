@@ -8,15 +8,21 @@ import org.autoforge.backend.dto.LearningMaterialAssignmentRequest;
 import org.autoforge.backend.dto.LearningMaterialResponse;
 import org.autoforge.backend.service.LearningMaterialService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +30,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class LearningMaterialController {
 
   private final LearningMaterialService learningMaterialService;
+
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @ResponseStatus(HttpStatus.CREATED)
+  public LearningMaterialResponse uploadMaterial(
+    @RequestParam(required = false) String title,
+    @RequestParam(required = false) String description,
+    @RequestParam("file") MultipartFile file,
+    Authentication authentication
+  ) {
+    UserContext context = currentUser(authentication);
+    return learningMaterialService.uploadMaterial(context.subject(), file, title, description);
+  }
 
   @GetMapping
   public List<LearningMaterialResponse> listMaterials(Authentication authentication) {

@@ -507,3 +507,14 @@ Taskok
 
 Megjegyzes
 - Az első Learning implementációs slice a hozzáférés- és hozzárendelés-kezelést vezeti be a tananyagokhoz.
+
+## 0.1.44
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-333`: Tananyag feltöltés és userhez kötött dokumentum metaadat
+
+Megjegyzes
+- A Learning backend megkapja a multipart alapú feltöltési slice-ot, a userhez kötött metadatákkal, méretkorláttal és kezdeti formátumtámogatással.
