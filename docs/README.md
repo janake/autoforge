@@ -9,6 +9,7 @@ Fő dokumentumok:
 - `docs/architecture.md`: public/private OCI felépítés, gateway lánc, OpenCode és workspace storage, a részletes ábra Confluence-ban él
 - `docs/ai-runtime-openrouter.md`: OpenRouter + OpenCode runtime döntés, secret izoláció és REST validációs terv
 - `docs/learning-rag-adb-vector.md`: Learning RAG Autonomous Database vector capability döntés
+- `docs/learning-api-contract.md`: Learning API contract web és Android klienshez
 - `docs/deployment.md`: verziózott image-ek, auto deploy workflow-k, host könyvtárak és secret-ek
 - `docs/authentication.md`: Keycloak PKCE login, frontend callback flow, backend JWT-validáció
 - `docs/ai-tooling.md`: ajánlott MCP-k, skillek és capability groupok az Autoforge stackhez

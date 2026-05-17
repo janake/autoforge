@@ -518,3 +518,14 @@ Taskok
 
 Megjegyzes
 - A Learning backend megkapja a multipart alapú feltöltési slice-ot, a userhez kötött metadatákkal, méretkorláttal és kezdeti formátumtámogatással.
+
+## 0.1.45
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-338`: Learning API contract web és Android klienshez
+
+Megjegyzes
+- A Learning namespace kliensfüggetlen contractját rögzíti, beleértve a bearer authot, a mobilbarát hibaszabályokat és a planned endpoint bővítési pontokat.
