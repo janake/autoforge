@@ -529,3 +529,14 @@ Taskok
 
 Megjegyzes
 - A Learning namespace kliensfüggetlen contractját rögzíti, beleértve a bearer authot, a mobilbarát hibaszabályokat és a planned endpoint bővítési pontokat.
+
+## 0.1.46
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-332`: Kérdésgenerálás és összefoglalók tananyagból
+
+Megjegyzes
+- A Learning backend megkapja a practice question és summary generálást, user-bound persistence-t és fallback üzenetet AI provider hiányában.

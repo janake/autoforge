@@ -5,8 +5,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.autoforge.backend.dto.LearningMaterialAssignmentRequest;
+import org.autoforge.backend.dto.LearningContentGenerationResponse;
 import org.autoforge.backend.dto.LearningMaterialResponse;
 import org.autoforge.backend.service.LearningMaterialService;
+import org.autoforge.backend.service.LearningContentGenerationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class LearningMaterialController {
 
   private final LearningMaterialService learningMaterialService;
+  private final LearningContentGenerationService learningContentGenerationService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
@@ -53,6 +56,20 @@ public class LearningMaterialController {
   public LearningMaterialResponse getMaterial(@PathVariable String materialId, Authentication authentication) {
     UserContext context = currentUser(authentication);
     return learningMaterialService.getMaterial(materialId, context.subject(), context.groups());
+  }
+
+  @PostMapping("/{materialId}/questions")
+  @ResponseStatus(HttpStatus.CREATED)
+  public LearningContentGenerationResponse generateQuestions(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningContentGenerationService.generateQuestions(materialId, context.subject());
+  }
+
+  @PostMapping("/{materialId}/summary")
+  @ResponseStatus(HttpStatus.CREATED)
+  public LearningContentGenerationResponse generateSummary(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningContentGenerationService.generateSummary(materialId, context.subject());
   }
 
   @PutMapping("/{materialId}/assignments")

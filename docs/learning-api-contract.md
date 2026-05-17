@@ -37,15 +37,14 @@
 - `studentSubjects`: direct assignment lista
 - `groupNames`: group assignment lista
 
-## Planned Learning endpoints
+## Learning generation endpoints
 
-Az API ugyanebben a namespace-ben bővíthető az alábbiakkal, anélkül hogy a kliens oldali auth vagy base URL modell változna:
+Az API ugyanebben a namespace-ben már támogatja az alábbi generálási műveleteket is:
 
-- ingestion státusz
-- tananyag chunk lista
-- kérdésgenerálás
-- összefoglaló generálás
-- learner profile
+- `POST /api/v1/learning/materials/{materialId}/questions`
+- `POST /api/v1/learning/materials/{materialId}/summary`
+
+Az API ugyanebben a namespace-ben tovább bővíthető ingestion státusz, tananyag chunk lista és learner profile endpointokkal, anélkül hogy a kliens oldali auth vagy base URL modell változna.
 
 ## Error contract
 
