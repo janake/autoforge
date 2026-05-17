@@ -507,3 +507,14 @@ Taskok
 
 Megjegyzes
 - Az első Learning implementációs slice a hozzáférés- és hozzárendelés-kezelést vezeti be a tananyagokhoz.
+
+## 0.1.44
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-338`: Learning API contract web és Android klienshez
+
+Megjegyzes
+- A Learning namespace kliensfüggetlen contractját rögzíti, beleértve a bearer authot, a mobilbarát hibaszabályokat és a planned endpoint bővítési pontokat.
