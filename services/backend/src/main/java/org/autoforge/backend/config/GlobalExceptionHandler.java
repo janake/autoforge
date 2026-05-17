@@ -4,6 +4,8 @@ import java.time.Instant;
 import jakarta.servlet.http.HttpServletRequest;
 import org.autoforge.backend.dto.ApiErrorResponse;
 import org.autoforge.backend.service.JobNotFoundException;
+import org.autoforge.backend.service.LearningMaterialAccessDeniedException;
+import org.autoforge.backend.service.LearningMaterialNotFoundException;
 import org.autoforge.backend.service.PromptDraftApprovalException;
 import org.autoforge.backend.service.PromptDraftNotFoundException;
 import org.autoforge.backend.service.PromptDraftTicketException;
@@ -54,6 +56,16 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(PromptDraftTicketException.class)
   public ResponseEntity<ApiErrorResponse> handleDraftTicket(PromptDraftTicketException ex, HttpServletRequest request) {
     return build(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(LearningMaterialNotFoundException.class)
+  public ResponseEntity<ApiErrorResponse> handleLearningMaterialNotFound(LearningMaterialNotFoundException ex, HttpServletRequest request) {
+    return build(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(LearningMaterialAccessDeniedException.class)
+  public ResponseEntity<ApiErrorResponse> handleLearningMaterialAccessDenied(LearningMaterialAccessDeniedException ex, HttpServletRequest request) {
+    return build(HttpStatus.FORBIDDEN, ex.getMessage(), request.getRequestURI());
   }
 
   private ResponseEntity<ApiErrorResponse> build(HttpStatus status, String message, String path) {
