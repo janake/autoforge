@@ -1,6 +1,10 @@
 spring:
   application:
     name: autoforge-backend
+  servlet:
+    multipart:
+      max-file-size: ${AUTOFORGE_LEARNING_MAX_FILE_SIZE:10MB}
+      max-request-size: ${AUTOFORGE_LEARNING_MAX_REQUEST_SIZE:10MB}
   datasource:
     url: ${AUTOFORGE_DB_URL:}
     username: ${AUTOFORGE_DB_USERNAME:}
