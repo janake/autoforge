@@ -5,8 +5,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.autoforge.backend.dto.LearningMaterialAssignmentRequest;
+import org.autoforge.backend.dto.LearningIngestionResponse;
 import org.autoforge.backend.dto.LearningMaterialResponse;
 import org.autoforge.backend.service.LearningMaterialService;
+import org.autoforge.backend.service.LearningIngestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class LearningMaterialController {
 
   private final LearningMaterialService learningMaterialService;
+  private final LearningIngestionService learningIngestionService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
@@ -41,6 +44,24 @@ public class LearningMaterialController {
   ) {
     UserContext context = currentUser(authentication);
     return learningMaterialService.uploadMaterial(context.subject(), file, title, description);
+  }
+
+  @GetMapping("/{materialId}/ingestion")
+  public LearningIngestionResponse getIngestion(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningIngestionService.getIngestion(materialId, context.subject());
+  }
+
+  @PostMapping("/{materialId}/ingestion")
+  public LearningIngestionResponse startIngestion(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningIngestionService.startIngestion(materialId, context.subject());
+  }
+
+  @PostMapping("/{materialId}/ingestion/retry")
+  public LearningIngestionResponse retryIngestion(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningIngestionService.retryIngestion(materialId, context.subject());
   }
 
   @GetMapping
