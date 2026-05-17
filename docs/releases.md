@@ -562,3 +562,14 @@ Taskok
 
 Megjegyzes
 - A Learning RAG adattárolási boundary megkapja a chunk source offseteket és az adapter-független embedding rekordokat.
+
+## 0.1.49
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-337`: Személyre szabott learner profile és retrieval context
+
+Megjegyzes
+- A Learning profilréteg user-scoped preferenciákat és prompt contextet ad a személyre szabott generáláshoz.

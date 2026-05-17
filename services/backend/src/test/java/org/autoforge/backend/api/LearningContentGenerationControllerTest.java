@@ -57,6 +57,7 @@ class LearningContentGenerationControllerTest {
       .andExpect(jsonPath("$.generationType").value(LearningContentGenerationType.QUESTION_SET.name()))
       .andExpect(jsonPath("$.fallbackUsed").value(true))
       .andExpect(jsonPath("$.fallbackReason").value("Real AI is unavailable because the learning generation provider is not configured."))
+      .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Tanulói profil:")))
       .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Mi a legfontosabb üzenete a tananyagnak?")))
       .andExpect(jsonPath("$.sources[0].chunkIndex").value(0));
 
