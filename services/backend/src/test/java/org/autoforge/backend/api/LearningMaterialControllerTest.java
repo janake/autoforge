@@ -1,12 +1,14 @@
 package org.autoforge.backend.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.autoforge.backend.domain.LearningAssignmentTargetType;
 import org.autoforge.backend.domain.LearningMaterial;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -105,5 +108,87 @@ class LearningMaterialControllerTest {
       .andExpect(status().isForbidden());
 
     assertThat(learningMaterialAssignmentRepository.findByMaterialId(material.getId())).isEmpty();
+  }
+
+  @Test
+  void ownerCanUploadLearningMaterialWithMetadata() throws Exception {
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "algebra.pdf",
+      "application/pdf",
+      "%PDF-1.4 learning material".getBytes(StandardCharsets.UTF_8)
+    );
+
+    mockMvc.perform(multipart("/api/v1/learning/materials")
+        .file(file)
+        .param("title", "Algebra alapok")
+        .param("description", "Bevezető feltöltött tananyag")
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.title").value("Algebra alapok"))
+      .andExpect(jsonPath("$.originalFilename").value("algebra.pdf"))
+      .andExpect(jsonPath("$.contentType").value("application/pdf"))
+      .andExpect(jsonPath("$.fileSize").value(file.getSize()))
+      .andExpect(jsonPath("$.ownerSubject").value("teacher-1"))
+      .andExpect(jsonPath("$.canManageAssignments").value(true));
+
+    LearningMaterial stored = learningMaterialRepository.findAll().get(0);
+    assertThat(stored.getOwnerSubject()).isEqualTo("teacher-1");
+    assertThat(stored.getOriginalFilename()).isEqualTo("algebra.pdf");
+    assertThat(stored.getContentType()).isEqualTo("application/pdf");
+    assertThat(stored.getFileSize()).isEqualTo(file.getSize());
+    assertThat(stored.getContent()).isEqualTo(file.getBytes());
+  }
+
+  @Test
+  void uploadRejectsUnsupportedFileFormat() throws Exception {
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "notes.exe",
+      "application/octet-stream",
+      "binary".getBytes(StandardCharsets.UTF_8)
+    );
+
+    mockMvc.perform(multipart("/api/v1/learning/materials")
+        .file(file)
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isBadRequest());
+
+    assertThat(learningMaterialRepository.findAll()).isEmpty();
+  }
+
+  @Test
+  void uploadRejectsFilesOverTheLimit() throws Exception {
+    byte[] content = new byte[10 * 1024 * 1024 + 1];
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "big.pdf",
+      "application/pdf",
+      content
+    );
+
+    mockMvc.perform(multipart("/api/v1/learning/materials")
+        .file(file)
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isBadRequest());
+
+    assertThat(learningMaterialRepository.findAll()).isEmpty();
+  }
+
+  @Test
+  void otherUserCannotReadUploadedMaterial() throws Exception {
+    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
+      "teacher-1",
+      "Algebra alapok",
+      "Bevezető tananyag",
+      "algebra.pdf",
+      "application/pdf",
+      27L,
+      "%PDF-1.4 learning material".getBytes(StandardCharsets.UTF_8)
+    ));
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-2"))))
+      .andExpect(status().isForbidden());
   }
 }

@@ -19,13 +19,48 @@ import org.autoforge.backend.repository.LearningMaterialRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
 public class LearningMaterialService {
 
+  private static final long MAX_UPLOAD_SIZE_BYTES = 10L * 1024 * 1024;
+  private static final Set<String> SUPPORTED_CONTENT_TYPES = Set.of(
+    "application/pdf",
+    "text/plain",
+    "text/markdown",
+    "application/markdown"
+  );
+  private static final Set<String> SUPPORTED_EXTENSIONS = Set.of("pdf", "txt", "md", "markdown");
+
   private final LearningMaterialRepository learningMaterialRepository;
   private final LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
+
+  @Transactional
+  public LearningMaterialResponse uploadMaterial(String subject, MultipartFile file, String title, String description) {
+    validateUpload(file);
+
+    String originalFilename = normalizeTitle(file.getOriginalFilename());
+    String resolvedTitle = firstNonBlank(title, originalFilename);
+    byte[] content;
+    try {
+      content = file.getBytes();
+    } catch (Exception exception) {
+      throw new IllegalStateException("Failed to read uploaded file", exception);
+    }
+
+    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
+      subject,
+      resolvedTitle,
+      description,
+      originalFilename,
+      normalizeTitle(file.getContentType()),
+      file.getSize(),
+      content
+    ));
+    return toResponse(material, subject);
+  }
 
   @Transactional(readOnly = true)
   public List<LearningMaterialResponse> listAccessibleMaterials(String subject, Collection<String> groups) {
@@ -130,6 +165,9 @@ public class LearningMaterialService {
       material.getId(),
       material.getTitle(),
       material.getDescription(),
+      material.getOriginalFilename(),
+      material.getContentType(),
+      material.getFileSize(),
       material.getOwnerSubject(),
       studentSubjects,
       groupNames,
@@ -176,5 +214,49 @@ public class LearningMaterialService {
       normalized = normalized.substring(normalized.lastIndexOf('/') + 1);
     }
     return normalized;
+  }
+
+  private void validateUpload(MultipartFile file) {
+    if (file == null || file.isEmpty()) {
+      throw new IllegalArgumentException("Uploaded file must not be empty");
+    }
+    if (file.getSize() > MAX_UPLOAD_SIZE_BYTES) {
+      throw new IllegalArgumentException("Uploaded file exceeds 10 MB");
+    }
+
+    String filename = file.getOriginalFilename();
+    String contentType = file.getContentType();
+    String extension = extractExtension(filename);
+    boolean supportedContentType = contentType != null && SUPPORTED_CONTENT_TYPES.contains(contentType.toLowerCase(Locale.ROOT));
+    boolean supportedExtension = extension != null && SUPPORTED_EXTENSIONS.contains(extension.toLowerCase(Locale.ROOT));
+
+    if (!supportedContentType && !supportedExtension) {
+      throw new IllegalArgumentException("Unsupported learning material format");
+    }
+  }
+
+  private static String firstNonBlank(String first, String fallback) {
+    if (first != null && !first.isBlank()) {
+      return first.trim();
+    }
+    if (fallback != null && !fallback.isBlank()) {
+      return fallback.trim();
+    }
+    throw new IllegalArgumentException("Learning material title is required");
+  }
+
+  private static String normalizeTitle(String value) {
+    return value == null ? null : value.trim();
+  }
+
+  private static String extractExtension(String filename) {
+    if (filename == null || filename.isBlank()) {
+      return null;
+    }
+    int lastDot = filename.lastIndexOf('.');
+    if (lastDot < 0 || lastDot == filename.length() - 1) {
+      return null;
+    }
+    return filename.substring(lastDot + 1);
   }
 }

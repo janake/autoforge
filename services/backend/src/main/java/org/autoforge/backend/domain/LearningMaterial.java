@@ -5,6 +5,7 @@ import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,6 +28,19 @@ public class LearningMaterial {
   @Column(name = "description", length = 4000)
   private String description;
 
+  @Column(name = "original_filename", length = 256)
+  private String originalFilename;
+
+  @Column(name = "content_type", length = 128)
+  private String contentType;
+
+  @Column(name = "file_size")
+  private Long fileSize;
+
+  @Lob
+  @Column(name = "content")
+  private byte[] content;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;
@@ -44,8 +58,30 @@ public class LearningMaterial {
     this.description = description;
   }
 
+  public LearningMaterial(String ownerSubject, String title, String description, String originalFilename, String contentType, Long fileSize, byte[] content) {
+    this.ownerSubject = ownerSubject;
+    this.title = title;
+    this.description = description;
+    this.originalFilename = originalFilename;
+    this.contentType = contentType;
+    this.fileSize = fileSize;
+    this.content = content;
+  }
+
   public static LearningMaterial create(String ownerSubject, String title, String description) {
     return new LearningMaterial(ownerSubject, title, description);
+  }
+
+  public static LearningMaterial createUploaded(
+    String ownerSubject,
+    String title,
+    String description,
+    String originalFilename,
+    String contentType,
+    Long fileSize,
+    byte[] content
+  ) {
+    return new LearningMaterial(ownerSubject, title, description, originalFilename, contentType, fileSize, content);
   }
 
   @PrePersist
@@ -69,6 +105,22 @@ public class LearningMaterial {
 
   public String getDescription() {
     return description;
+  }
+
+  public String getOriginalFilename() {
+    return originalFilename;
+  }
+
+  public String getContentType() {
+    return contentType;
+  }
+
+  public Long getFileSize() {
+    return fileSize;
+  }
+
+  public byte[] getContent() {
+    return content;
   }
 
   public Instant getCreatedAt() {

@@ -514,6 +514,17 @@ Statusz
 - in progress
 
 Taskok
+- `AUTO-333`: Tananyag feltöltés és userhez kötött dokumentum metaadat
+
+Megjegyzes
+- A Learning backend megkapja a multipart alapú feltöltési slice-ot, a userhez kötött metadatákkal, méretkorláttal és kezdeti formátumtámogatással.
+
+## 0.1.45
+
+Statusz
+- in progress
+
+Taskok
 - `AUTO-338`: Learning API contract web és Android klienshez
 
 Megjegyzes
