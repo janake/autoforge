@@ -486,6 +486,17 @@ Taskok
 Megjegyzes
 - A repo eltávolítja a helyi task és epic markdownokat, és a manifestekre/Jira state-re támaszkodik.
 
+## 0.1.42
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-93`: Autonomous DB vector capability check
+
+Megjegyzes
+- A Learning RAG sprint Autonomous Database vector capability döntése dokumentálva van secret-mentes runtime smoke checkkel és Always Free korlátokkal.
+
 ## 0.1.43
 
 Statusz
