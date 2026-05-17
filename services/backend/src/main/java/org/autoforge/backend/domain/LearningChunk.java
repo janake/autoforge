@@ -32,6 +32,12 @@ public class LearningChunk {
   @Column(name = "content", nullable = false, length = 4000)
   private String content;
 
+  @Column(name = "source_start_offset", nullable = false)
+  private int sourceStartOffset;
+
+  @Column(name = "source_end_offset", nullable = false)
+  private int sourceEndOffset;
+
   @Column(name = "token_estimate", nullable = false)
   private int tokenEstimate;
 
@@ -42,17 +48,37 @@ public class LearningChunk {
   protected LearningChunk() {
   }
 
-  private LearningChunk(String jobId, String materialId, String ownerSubject, int chunkIndex, String content, int tokenEstimate) {
+  private LearningChunk(
+    String jobId,
+    String materialId,
+    String ownerSubject,
+    int chunkIndex,
+    String content,
+    int sourceStartOffset,
+    int sourceEndOffset,
+    int tokenEstimate
+  ) {
     this.jobId = jobId;
     this.materialId = materialId;
     this.ownerSubject = ownerSubject;
     this.chunkIndex = chunkIndex;
     this.content = content;
+    this.sourceStartOffset = sourceStartOffset;
+    this.sourceEndOffset = sourceEndOffset;
     this.tokenEstimate = tokenEstimate;
   }
 
-  public static LearningChunk create(String jobId, String materialId, String ownerSubject, int chunkIndex, String content, int tokenEstimate) {
-    return new LearningChunk(jobId, materialId, ownerSubject, chunkIndex, content, tokenEstimate);
+  public static LearningChunk create(
+    String jobId,
+    String materialId,
+    String ownerSubject,
+    int chunkIndex,
+    String content,
+    int sourceStartOffset,
+    int sourceEndOffset,
+    int tokenEstimate
+  ) {
+    return new LearningChunk(jobId, materialId, ownerSubject, chunkIndex, content, sourceStartOffset, sourceEndOffset, tokenEstimate);
   }
 
   @PrePersist
@@ -84,6 +110,14 @@ public class LearningChunk {
 
   public String getContent() {
     return content;
+  }
+
+  public int getSourceStartOffset() {
+    return sourceStartOffset;
+  }
+
+  public int getSourceEndOffset() {
+    return sourceEndOffset;
   }
 
   public int getTokenEstimate() {

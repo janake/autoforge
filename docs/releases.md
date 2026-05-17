@@ -551,3 +551,14 @@ Taskok
 
 Megjegyzes
 - A Learning backend megkapja a practice question és summary generálást, user-bound persistence-t és fallback üzenetet AI provider hiányában.
+
+## 0.1.48
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-258`: RAG storage és document chunk modell tervezése
+
+Megjegyzes
+- A Learning RAG adattárolási boundary megkapja a chunk source offseteket és az adapter-független embedding rekordokat.
