@@ -12,6 +12,7 @@ import org.autoforge.backend.domain.PromptDraftMessage;
 import org.autoforge.backend.domain.PromptDraftMessageRole;
 import org.autoforge.backend.domain.PromptIntent;
 import org.autoforge.backend.domain.PromptDraftStatus;
+import org.autoforge.backend.config.BackendMvpProperties;
 import org.autoforge.backend.dto.AddPromptDraftMessageRequest;
 import org.autoforge.backend.dto.CreatePromptDraftRequest;
 import org.autoforge.backend.dto.JobResponse;
@@ -36,6 +37,7 @@ public class PromptDraftService {
   private final PromptDraftMessageRepository promptDraftMessageRepository;
   private final JiraIssueClient jiraIssueClient;
   private final JobService jobService;
+  private final BackendMvpProperties backendMvpProperties;
 
   @Transactional
   public PromptDraftResponse createDraft(CreatePromptDraftRequest request) {
@@ -164,6 +166,11 @@ public class PromptDraftService {
   }
 
   private List<String> clarificationQuestions(String text) {
+    String unavailableReason = realAiUnavailableReason();
+    if (unavailableReason != null) {
+      return List.of("Real AI is unavailable because %s. Please include the repository, success criteria, and intended change in your next message.".formatted(unavailableReason));
+    }
+
     String normalized = Objects.requireNonNullElse(text, "").toLowerCase(Locale.ROOT);
     List<String> questions = new ArrayList<>();
 
@@ -180,6 +187,26 @@ public class PromptDraftService {
     }
 
     return questions.stream().distinct().collect(Collectors.toList());
+  }
+
+  private String realAiUnavailableReason() {
+    BackendMvpProperties.Opencode opencode = backendMvpProperties == null ? null : backendMvpProperties.opencode();
+    if (opencode == null) {
+      return "the backend has no opencode configuration";
+    }
+    if (opencode.serverUrl() == null || opencode.serverUrl().isBlank()) {
+      return "OPENCODE_SERVER_URL is not configured";
+    }
+    if (opencode.username() == null || opencode.username().isBlank()) {
+      return "OPENCODE_SERVER_USERNAME is not configured";
+    }
+    if (opencode.password() == null || opencode.password().isBlank()) {
+      return "OPENCODE_SERVER_PASSWORD is not configured";
+    }
+    if (opencode.model() == null || opencode.model().isBlank()) {
+      return "OPENCODE_MODEL is not configured";
+    }
+    return null;
   }
 
   private void applyIntentClassification(PromptDraft draft, String text) {
