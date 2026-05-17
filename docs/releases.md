@@ -540,3 +540,14 @@ Taskok
 
 Megjegyzes
 - A Learning backend ingestion job, chunk és embedding modellel, valamint status/retry endpointokkal kap determinisztikus pipeline alapot.
+
+## 0.1.47
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-332`: Kérdésgenerálás és összefoglalók tananyagból
+
+Megjegyzes
+- A Learning backend megkapja a practice question és summary generálást, user-bound persistence-t és fallback üzenetet AI provider hiányában.
