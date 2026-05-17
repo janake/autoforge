@@ -11,6 +11,39 @@ export type BackendMeResponse = {
   };
 };
 
+export type LearningMaterialResponse = {
+  id: string;
+  title: string;
+  description: string | null;
+  originalFilename: string | null;
+  contentType: string | null;
+  fileSize: number | null;
+  ownerSubject: string;
+  studentSubjects: string[];
+  groupNames: string[];
+  canManageAssignments: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LearningContentGenerationType = "QUESTION_SET" | "SUMMARY";
+
+export type LearningContentSourceReference = {
+  chunkIndex: number;
+  excerpt: string;
+};
+
+export type LearningContentGenerationResponse = {
+  id: string;
+  materialId: string;
+  generationType: LearningContentGenerationType;
+  content: string;
+  sources: LearningContentSourceReference[];
+  fallbackUsed: boolean;
+  fallbackReason: string | null;
+  createdAt: string;
+};
+
 export type CreateJobRequest = {
   prompt: string;
 };

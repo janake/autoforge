@@ -562,3 +562,14 @@ Taskok
 
 Megjegyzes
 - A Learning RAG adattárolási boundary megkapja a chunk source offseteket és az adapter-független embedding rekordokat.
+
+## 0.1.49
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-335`: Learning navigáció és tanulási workspace shell
+
+Megjegyzes
+- A Learning web shell saját anyagokat, generált kérdéseket és összefoglalókat mutat upload CTA-val és user-scoped listákkal.

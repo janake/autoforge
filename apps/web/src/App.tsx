@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { getRuntimeConfig } from "./runtime-config";
-import { initializeKeycloak, loadAuthedJson, postAuthedJson, signIn, signOut } from "./auth/keycloak";
+import { initializeKeycloak, loadAuthedJson, postAuthedFormData, postAuthedJson, signIn, signOut } from "./auth/keycloak";
 import type {
   BackendMeResponse,
   CreateJobResponse,
+  LearningContentGenerationResponse,
+  LearningMaterialResponse,
   JobResponse,
   PromptDraftResponse,
   PromptIntent,
@@ -32,6 +34,7 @@ const publicSignals = [
 
 const dashboardNav = [
   { label: "Overview", href: "#overview" },
+  { label: "Learning", href: "#learning" },
   { label: "Jobs", href: "#jobs" },
   { label: "Status", href: "#job-status" },
   { label: "Jira", href: "#jira" },
@@ -93,6 +96,156 @@ function formatTimestamp(iso: string): string {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(iso));
+}
+
+type LearningWorkspaceItem = LearningMaterialResponse & {
+  generations: LearningContentGenerationResponse[];
+};
+
+type LearningWorkspaceState =
+  | { status: "loading" }
+  | { status: "ready"; materials: LearningWorkspaceItem[] }
+  | { status: "error"; message: string };
+
+function latestByType(
+  generations: LearningContentGenerationResponse[],
+  generationType: LearningContentGenerationResponse["generationType"]
+): LearningContentGenerationResponse | null {
+  return generations.find((generation) => generation.generationType === generationType) ?? null;
+}
+
+function LearningWorkspacePanel() {
+  const [state, setState] = useState<LearningWorkspaceState>({ status: "loading" });
+  const [refreshToken, setRefreshToken] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadWorkspace = async () => {
+      try {
+        const materials = await loadAuthedJson<LearningMaterialResponse[]>("/v1/learning/materials");
+        const items = await Promise.all(
+          materials.map(async (material) => ({
+            ...material,
+            generations: await loadAuthedJson<LearningContentGenerationResponse[]>(`/v1/learning/materials/${material.id}/generations`),
+          }))
+        );
+
+        if (!cancelled) {
+          setState({ status: "ready", materials: items });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setState({
+            status: "error",
+            message: error instanceof Error ? error.message : "Unable to load learning workspace.",
+          });
+        }
+      }
+    };
+
+    void loadWorkspace();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshToken]);
+
+  const uploadMaterial = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setUploadError(null);
+    setUploadStatus("Uploading material...");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      await postAuthedFormData<LearningMaterialResponse>("/v1/learning/materials", formData);
+      form.reset();
+      setRefreshToken((value) => value + 1);
+      setUploadStatus("Material uploaded.");
+    } catch (error) {
+      setUploadStatus(null);
+      setUploadError(error instanceof Error ? error.message : "Unable to upload learning material.");
+    }
+  };
+
+  return (
+    <article className="workspace-panel learning-panel" id="learning">
+      <div className="section-head">
+        <h2>Learning</h2>
+        <span className="pill">private</span>
+      </div>
+      <p className="muted">
+        Your own learning materials, generated questions, and summaries live here. The list is scoped to the signed-in user only.
+      </p>
+
+      <form className="prompt-form learning-upload-form" onSubmit={uploadMaterial}>
+        <div className="learning-upload-grid">
+          <label>
+            <span>Title</span>
+            <input name="title" placeholder="Algebra basics" />
+          </label>
+          <label>
+            <span>Description</span>
+            <input name="description" placeholder="Short note about the material" />
+          </label>
+          <label>
+            <span>File</span>
+            <input name="file" type="file" accept=".pdf,.txt,.md,.markdown" required />
+          </label>
+        </div>
+        <div className="prompt-actions">
+          <button className="primary-button" type="submit">Upload material</button>
+          <span className="muted">PDF, TXT, Markdown supported.</span>
+        </div>
+        {uploadStatus && <p className="success-title">{uploadStatus}</p>}
+        {uploadError && <p className="error-title">{uploadError}</p>}
+      </form>
+
+      {state.status === "loading" && <p className="muted">Loading your learning workspace...</p>}
+      {state.status === "error" && <p className="error-title">{state.message}</p>}
+
+      {state.status === "ready" && state.materials.length === 0 && (
+        <div className="learning-empty-state">
+          <h3>No learning materials yet</h3>
+          <p>Upload a file to start building your personal learning workspace.</p>
+        </div>
+      )}
+
+      {state.status === "ready" && state.materials.length > 0 && (
+        <div className="learning-material-grid">
+          {state.materials.map((material) => {
+            const latestQuestions = latestByType(material.generations, "QUESTION_SET");
+            const latestSummary = latestByType(material.generations, "SUMMARY");
+
+            return (
+              <article className="learning-material-card" key={material.id}>
+                <div className="section-head">
+                  <h3>{material.title}</h3>
+                  <span className="pill">{material.canManageAssignments ? "owned" : "shared"}</span>
+                </div>
+                <p className="muted">{material.description || material.originalFilename || "No description"}</p>
+
+                <div className="learning-generation-list">
+                  <section>
+                    <h4>Questions</h4>
+                    <p>{latestQuestions ? latestQuestions.content : "No questions generated yet."}</p>
+                  </section>
+                  <section>
+                    <h4>Summary</h4>
+                    <p>{latestSummary ? latestSummary.content : "No summary generated yet."}</p>
+                  </section>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </article>
+  );
 }
 
 function syncJobIdInUrl(jobId: string): void {
@@ -665,6 +818,8 @@ function PrivateWorkspace({
       </section>
 
       <section className="workspace-grid" aria-label="User workspace">
+        <LearningWorkspacePanel />
+
         <article className="workspace-panel" id="jobs">
           <div className="section-head">
             <h2>Profile</h2>

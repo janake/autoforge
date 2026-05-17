@@ -60,6 +60,14 @@ public class LearningContentGenerationService {
     return toResponse(saved, generated.sources());
   }
 
+  @Transactional(readOnly = true)
+  public List<LearningContentGenerationResponse> listGeneratedContent(String materialId, String subject) {
+    loadOwnedMaterial(materialId, subject);
+    return learningGeneratedContentRepository.findByMaterialIdAndOwnerSubjectOrderByCreatedAtDesc(materialId, subject).stream()
+      .map(content -> toResponse(content, parseSources(content.getSourceReferences())))
+      .toList();
+  }
+
   private LearningMaterial loadOwnedMaterial(String materialId, String subject) {
     LearningMaterial material = learningMaterialRepository.findById(materialId)
       .orElseThrow(() -> new LearningMaterialNotFoundException(materialId));
@@ -185,6 +193,27 @@ public class LearningContentGenerationService {
       content.getFallbackReason(),
       content.getCreatedAt()
     );
+  }
+
+  private List<LearningContentSourceReference> parseSources(String sourceReferences) {
+    if (sourceReferences == null || sourceReferences.isBlank()) {
+      return List.of();
+    }
+
+    return sourceReferences.lines()
+      .map(line -> line.replaceFirst("^chunk-", ""))
+      .map(line -> line.split(":\\s*", 2))
+      .filter(parts -> parts.length == 2)
+      .map(parts -> new LearningContentSourceReference(parseChunkIndex(parts[0]), parts[1]))
+      .toList();
+  }
+
+  private static int parseChunkIndex(String value) {
+    try {
+      return Integer.parseInt(value.trim());
+    } catch (Exception exception) {
+      return 0;
+    }
   }
 
   private record GeneratedContent(String content, String sourceText, List<LearningContentSourceReference> sources) {

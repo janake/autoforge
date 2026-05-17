@@ -443,6 +443,70 @@ code {
   min-height: 150px;
 }
 
+.learning-panel {
+  grid-column: 1 / -1;
+}
+
+.learning-upload-form {
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  background: rgba(12, 16, 24, 0.38);
+}
+
+.learning-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.learning-upload-grid input {
+  width: 100%;
+}
+
+.learning-empty-state {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  color: rgba(245, 239, 227, 0.82);
+}
+
+.learning-material-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.learning-material-card {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(12, 16, 24, 0.42);
+}
+
+.learning-material-card h3,
+.learning-generation-list h4 {
+  margin: 0;
+}
+
+.learning-generation-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.learning-generation-list section {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.learning-generation-list p {
+  margin: 10px 0 0;
+  white-space: pre-wrap;
+}
+
 .prompt-actions {
   display: flex;
   align-items: center;
@@ -477,6 +541,11 @@ code {
   .status-grid,
   .workspace-grid,
   .prompt-flow-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .learning-upload-grid,
+  .learning-generation-list {
     grid-template-columns: 1fr;
   }
 

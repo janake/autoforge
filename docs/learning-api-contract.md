@@ -31,6 +31,11 @@
 - Jogosulatlan hozzáférés esetén `403`.
 - Nem létező tananyag esetén `404`.
 
+### `GET /api/v1/learning/materials/{materialId}/generations`
+
+- A bejelentkezett user tananyaghoz kötött kérdés- és összefoglaló-generálásait listázza.
+- A válasz a Learning workspace shell számára szolgál.
+
 ### `PUT /api/v1/learning/materials/{materialId}/assignments`
 
 - Csak owner módosíthatja.
