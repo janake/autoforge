@@ -3,6 +3,7 @@ export type BackendMeResponse = {
   username: string;
   email: string | null;
   roles: string[];
+  groups: string[];
   claims: {
     issuer: string;
     audience: string;

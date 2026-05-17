@@ -19,11 +19,14 @@ import org.autoforge.backend.repository.PromptDraftRepository;
 import org.autoforge.backend.jira.CreateJiraIssueResponse;
 import org.autoforge.backend.jira.JiraIssueClient;
 import org.autoforge.backend.domain.JobStatus;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -53,10 +56,16 @@ class PromptDraftControllerTest {
     jobRepository.deleteAll();
   }
 
+  private static JwtRequestPostProcessor developerJwt() {
+    return jwt()
+      .jwt(token -> token.claim("groups", List.of("developer")))
+      .authorities(new SimpleGrantedAuthority("ROLE_developer"));
+  }
+
   @Test
   void createsClarifyingDraftWithoutJobs() throws Exception {
     mockMvc.perform(post("/api/v1/prompt-drafts")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -78,9 +87,22 @@ class PromptDraftControllerTest {
   }
 
   @Test
+  void rejectsPromptDraftAccessWithoutDeveloperGroup() throws Exception {
+    mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(jwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Audit the workflow"
+          }
+          """))
+      .andExpect(status().isForbidden());
+  }
+
+  @Test
   void becomesReadyForApprovalAfterSufficientClarification() throws Exception {
     var created = mockMvc.perform(post("/api/v1/prompt-drafts")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -93,7 +115,7 @@ class PromptDraftControllerTest {
     String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/messages", draftId)
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -108,7 +130,7 @@ class PromptDraftControllerTest {
       .andExpect(jsonPath("$.messages[3].role").value("ASSISTANT"));
 
     mockMvc.perform(get("/api/v1/prompt-drafts/{draftId}", draftId)
-        .with(jwt()))
+        .with(developerJwt()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("READY_FOR_APPROVAL"))
       .andExpect(jsonPath("$.readyForApproval").value(true));
@@ -117,7 +139,7 @@ class PromptDraftControllerTest {
   @Test
   void approvesReadyDraftAndRecordsApprover() throws Exception {
     var created = mockMvc.perform(post("/api/v1/prompt-drafts")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -138,7 +160,7 @@ class PromptDraftControllerTest {
             "selectedIntent": "FEATURE"
           }
           """)
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("APPROVED"))
       .andExpect(jsonPath("$.intent").value("FEATURE"))
@@ -153,7 +175,7 @@ class PromptDraftControllerTest {
   @Test
   void rejectsApprovalWhenDraftIsNotReady() throws Exception {
     var created = mockMvc.perform(post("/api/v1/prompt-drafts")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -172,7 +194,7 @@ class PromptDraftControllerTest {
             "selectedIntent": "FEATURE"
           }
           """)
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.status").value(409))
       .andExpect(jsonPath("$.message").value("Prompt draft is not ready for approval: " + draftId));
@@ -181,7 +203,7 @@ class PromptDraftControllerTest {
   @Test
   void rejectsEditingApprovedDraft() throws Exception {
     var created = mockMvc.perform(post("/api/v1/prompt-drafts")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -200,11 +222,11 @@ class PromptDraftControllerTest {
             "selectedIntent": "FEATURE"
           }
           """)
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk());
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/messages", draftId)
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -220,7 +242,7 @@ class PromptDraftControllerTest {
     when(jiraIssueClient.createIssue(any())).thenReturn(new CreateJiraIssueResponse("AUTO-999", "https://autoforge.atlassian.net/browse/AUTO-999"));
 
     var created = mockMvc.perform(post("/api/v1/prompt-drafts")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -239,18 +261,18 @@ class PromptDraftControllerTest {
             "selectedIntent": "FEATURE"
           }
           """)
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk());
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/jira-ticket", draftId)
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("TICKET_CREATED"))
       .andExpect(jsonPath("$.jiraIssueKey").value("AUTO-999"))
       .andExpect(jsonPath("$.jiraIssueUrl").value("https://autoforge.atlassian.net/browse/AUTO-999"));
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/jira-ticket", draftId)
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.jiraIssueKey").value("AUTO-999"));
 
@@ -263,7 +285,7 @@ class PromptDraftControllerTest {
     when(jiraIssueClient.createIssue(any())).thenReturn(new CreateJiraIssueResponse("AUTO-999", "https://autoforge.atlassian.net/browse/AUTO-999"));
 
     var created = mockMvc.perform(post("/api/v1/prompt-drafts")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -282,15 +304,15 @@ class PromptDraftControllerTest {
             "selectedIntent": "FEATURE"
           }
           """)
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk());
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/jira-ticket", draftId)
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk());
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/job", draftId)
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("QUEUED"))
       .andExpect(jsonPath("$.prUrl").value(""));
@@ -304,7 +326,7 @@ class PromptDraftControllerTest {
   @Test
   void rejectsJiraTicketCreationWhenDraftIsNotApproved() throws Exception {
     var created = mockMvc.perform(post("/api/v1/prompt-drafts")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -317,7 +339,7 @@ class PromptDraftControllerTest {
     String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/jira-ticket", draftId)
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.message").value("Prompt draft is not approved: " + draftId));
   }
@@ -325,7 +347,7 @@ class PromptDraftControllerTest {
   @Test
   void rejectsImplementationJobCreationBeforeTicketCreation() throws Exception {
     var created = mockMvc.perform(post("/api/v1/prompt-drafts")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -338,7 +360,7 @@ class PromptDraftControllerTest {
     String draftId = com.jayway.jsonpath.JsonPath.read(created.getResponse().getContentAsString(), "$.draftId");
 
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/job", draftId)
-        .with(jwt()))
+        .with(developerJwt()))
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.message").value("Prompt draft does not have a Jira ticket yet: " + draftId));
   }
@@ -346,7 +368,7 @@ class PromptDraftControllerTest {
   @Test
   void rejectsApprovalWithoutSelectedIntent() throws Exception {
     var created = mockMvc.perform(post("/api/v1/prompt-drafts")
-        .with(jwt())
+        .with(developerJwt())
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -361,7 +383,7 @@ class PromptDraftControllerTest {
     mockMvc.perform(post("/api/v1/prompt-drafts/{draftId}/approve", draftId)
         .contentType(MediaType.APPLICATION_JSON)
         .content("{}")
-        .with(jwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
+        .with(developerJwt().jwt(jwt -> jwt.claim("preferred_username", "janake"))))
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.message").value("Prompt draft approval requires a selected intent: " + draftId));
   }

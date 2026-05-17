@@ -29,6 +29,7 @@ class MeControllerTest {
         .claim("iss", "https://kc.prodet.org/realms/<keycloak-realm>")
         .claim("aud", List.of("autoforge-web"))
         .claim("azp", "autoforge-web")
+        .claim("groups", List.of("/developer", "/platform"))
         .claim("realm_access", Map.of("roles", List.of("admin", "builder")))
         .claim("resource_access", Map.of("autoforge-web", Map.of("roles", List.of("viewer")))))))
       .andExpect(status().isOk())
@@ -38,6 +39,8 @@ class MeControllerTest {
       .andExpect(jsonPath("$.roles[0]").value("admin"))
       .andExpect(jsonPath("$.roles[1]").value("builder"))
       .andExpect(jsonPath("$.roles[2]").value("viewer"))
+      .andExpect(jsonPath("$.groups[0]").value("developer"))
+      .andExpect(jsonPath("$.groups[1]").value("platform"))
       .andExpect(jsonPath("$.claims.issuer").value("https://kc.prodet.org/realms/<keycloak-realm>"))
       .andExpect(jsonPath("$.claims.authorizedParty").value("autoforge-web"));
   }
