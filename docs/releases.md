@@ -496,3 +496,14 @@ Taskok
 
 Megjegyzes
 - A Learning RAG sprint Autonomous Database vector capability döntése dokumentálva van secret-mentes runtime smoke checkkel és Always Free korlátokkal.
+
+## 0.1.43
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-341`: Tananyag hozzárendelés diákokhoz és tanulócsoportokhoz
+
+Megjegyzes
+- Az első Learning implementációs slice a hozzáférés- és hozzárendelés-kezelést vezeti be a tananyagokhoz.
