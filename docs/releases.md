@@ -529,3 +529,14 @@ Taskok
 
 Megjegyzes
 - A Learning namespace kliensfüggetlen contractját rögzíti, beleértve a bearer authot, a mobilbarát hibaszabályokat és a planned endpoint bővítési pontokat.
+
+## 0.1.46
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-331`: Tananyag ingestion, chunking és embedding pipeline
+
+Megjegyzes
+- A Learning backend ingestion job, chunk és embedding modellel, valamint status/retry endpointokkal kap determinisztikus pipeline alapot.
