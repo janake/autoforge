@@ -586,3 +586,14 @@ Taskok
 
 Megjegyzes
 - A Learning RAG relációs metadatáját, chunk/embedding boundary-ját és user isolation mezőit rögzíti az OCI Always Free kompatibilis MVP-hez.
+
+## 0.1.51
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-339`: AI kérdéssor generálás tananyagból és mentés DB-be
+
+Megjegyzes
+- A Learning kérdéssor generálás strukturált kérdés/opció/adatmodellje, fallback státusza és DB-s mentése kerül be.
