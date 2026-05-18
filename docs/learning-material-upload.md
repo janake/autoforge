@@ -14,7 +14,8 @@ Backend slice for `AUTO-333`.
 ## Storage
 
 - owner subject is taken from the JWT subject
-- original filename, content type, file size, and binary payload are persisted with the material
+- original filename, content type, file size, object key, object URI, content hash, and etag are persisted with the material
+- the upload flow prepares an object-storage plan before the DB write so the object reference is stable
 
 ## Supported initial formats
 

@@ -608,3 +608,14 @@ Taskok
 
 Megjegyzes
 - A Learning tananyag detail route a role-alapú UI mezőket, ingestions státuszt, hozzárendeléseket és generált tartalmakat mutatja.
+
+## 0.1.53
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-366`: Feltöltés utáni metadata mentés
+
+Megjegyzes
+- Az upload flow object storage reference-et, hash-t és metadata mezőket ment a Learning tananyag rekordba.

@@ -129,6 +129,10 @@ class LearningMaterialControllerTest {
       .andExpect(jsonPath("$.originalFilename").value("algebra.pdf"))
       .andExpect(jsonPath("$.contentType").value("application/pdf"))
       .andExpect(jsonPath("$.fileSize").value(file.getSize()))
+      .andExpect(jsonPath("$.storageObjectKey").value(org.hamcrest.Matchers.startsWith("teacher-1/")))
+      .andExpect(jsonPath("$.storageObjectUri").value(org.hamcrest.Matchers.startsWith("oci://learning-materials/")))
+      .andExpect(jsonPath("$.contentHash").value(org.hamcrest.Matchers.matchesPattern("[0-9a-f]{64}")))
+      .andExpect(jsonPath("$.contentETag").value(org.hamcrest.Matchers.matchesPattern("[0-9a-f]{32}")))
       .andExpect(jsonPath("$.ownerSubject").value("teacher-1"))
       .andExpect(jsonPath("$.canManageAssignments").value(true));
 
@@ -137,6 +141,10 @@ class LearningMaterialControllerTest {
     assertThat(stored.getOriginalFilename()).isEqualTo("algebra.pdf");
     assertThat(stored.getContentType()).isEqualTo("application/pdf");
     assertThat(stored.getFileSize()).isEqualTo(file.getSize());
+    assertThat(stored.getStorageObjectKey()).startsWith("teacher-1/");
+    assertThat(stored.getStorageObjectUri()).startsWith("oci://learning-materials/");
+    assertThat(stored.getContentHash()).matches("[0-9a-f]{64}");
+    assertThat(stored.getContentETag()).matches("[0-9a-f]{32}");
     assertThat(stored.getContent()).isEqualTo(file.getBytes());
   }
 
