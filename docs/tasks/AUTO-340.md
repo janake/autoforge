@@ -6,7 +6,7 @@ A Learning tananyag részletező oldalának role-alapú nézetet kell adnia: a d
 
 ## Statusz
 
-in progress
+under test
 
 ## Verzió
 
@@ -18,7 +18,7 @@ feature/AUTO-340-learning-detail
 
 ## PR
 
-- TBD
+- PR #154
 
 ## Cél
 
@@ -42,6 +42,7 @@ A learning listából egy külön detail route nyíljon meg, és azon a user sze
 
 - [x] A Jira issue-t `In Progress`-ra állítottam.
 - [x] A release manifestben rögzítettem a `0.1.52` célt.
+- [x] A PR megnyílt review/verification alatt.
 
 ## Eredmény
 
