@@ -5,6 +5,9 @@ import type {
   BackendMeResponse,
   CreateJobResponse,
   LearningContentGenerationResponse,
+  LearningIngestionResponse,
+  LearningQuestionPayload,
+  LearningQuestionSetPayload,
   LearningMaterialResponse,
   JobResponse,
   PromptDraftResponse,
@@ -91,6 +94,24 @@ function readJobIdFromUrl(): string {
   return new URLSearchParams(window.location.search).get("jobId") ?? "";
 }
 
+function readPathname(): string {
+  return window.location.pathname;
+}
+
+function parseLearningMaterialPath(pathname: string): string | null {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length === 3 && segments[0] === "learning" && segments[1] === "materials") {
+    return decodeURIComponent(segments[2]);
+  }
+  return null;
+}
+
+function syncPathnameInUrl(pathname: string): void {
+  const url = new URL(window.location.href);
+  url.pathname = pathname;
+  window.history.pushState({}, "", url);
+}
+
 function formatTimestamp(iso: string): string {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
@@ -114,7 +135,7 @@ function latestByType(
   return generations.find((generation) => generation.generationType === generationType) ?? null;
 }
 
-function LearningWorkspacePanel() {
+function LearningWorkspacePanel({ onOpenMaterial }: { onOpenMaterial: (materialId: string) => void }) {
   const [state, setState] = useState<LearningWorkspaceState>({ status: "loading" });
   const [refreshToken, setRefreshToken] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
@@ -228,6 +249,11 @@ function LearningWorkspacePanel() {
                   <span className="pill">{material.canManageAssignments ? "owned" : "shared"}</span>
                 </div>
                 <p className="muted">{material.description || material.originalFilename || "No description"}</p>
+                <div className="learning-card-actions">
+                  <button className="secondary-button" type="button" onClick={() => onOpenMaterial(material.id)}>
+                    Open detail
+                  </button>
+                </div>
 
                 <div className="learning-generation-list">
                   <section>
@@ -242,6 +268,203 @@ function LearningWorkspacePanel() {
               </article>
             );
           })}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function parseQuestionSet(structuredContent: string | null): LearningQuestionSetPayload | null {
+  if (!structuredContent) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(structuredContent) as LearningQuestionSetPayload;
+  } catch {
+    return null;
+  }
+}
+
+function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: string; onBack: () => void }) {
+  const [state, setState] = useState<
+    | { status: "loading" }
+    | {
+        status: "ready";
+        material: LearningMaterialResponse;
+        ingestion: LearningIngestionResponse;
+        generations: LearningContentGenerationResponse[];
+      }
+    | { status: "error"; message: string }
+  >({ status: "loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadDetail = async () => {
+      try {
+        const [material, ingestion, generations] = await Promise.all([
+          loadAuthedJson<LearningMaterialResponse>(`/v1/learning/materials/${materialId}`),
+          loadAuthedJson<LearningIngestionResponse>(`/v1/learning/materials/${materialId}/ingestion`),
+          loadAuthedJson<LearningContentGenerationResponse[]>(`/v1/learning/materials/${materialId}/generations`),
+        ]);
+
+        if (!cancelled) {
+          setState({ status: "ready", material, ingestion, generations });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setState({
+            status: "error",
+            message: error instanceof Error ? error.message : "Unable to load learning material detail.",
+          });
+        }
+      }
+    };
+
+    void loadDetail();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [materialId]);
+
+  return (
+    <article className="workspace-panel learning-detail-panel" id="learning-detail">
+      <div className="section-head learning-detail-head">
+        <div>
+          <p className="eyebrow">Learning detail</p>
+          <h2>{state.status === "ready" ? state.material.title : "Loading material..."}</h2>
+        </div>
+        <button className="secondary-button" type="button" onClick={onBack}>
+          Back to learning
+        </button>
+      </div>
+
+      {state.status === "loading" && <p className="muted">Loading material detail...</p>}
+
+      {state.status === "error" && <p className="error-title">{state.message}</p>}
+
+      {state.status === "ready" && (
+        <div className="learning-detail-layout">
+          <section className="learning-detail-hero">
+            <div className="section-head">
+              <h3>{state.material.title}</h3>
+              <span className={`pill ${state.material.canManageAssignments ? "done" : "pending"}`}>
+                {state.material.canManageAssignments ? "owner view" : "student view"}
+              </span>
+            </div>
+            <p className="muted">{state.material.description || state.material.originalFilename || "No description"}</p>
+            <dl className="profile-list compact learning-detail-meta">
+              <div>
+                <dt>Ingestion</dt>
+                <dd>{state.ingestion.status}</dd>
+              </div>
+              <div>
+                <dt>Generations</dt>
+                <dd>{state.generations.length}</dd>
+              </div>
+              <div>
+                <dt>Owner subject</dt>
+                <dd>{state.material.ownerSubject}</dd>
+              </div>
+              <div>
+                <dt>File</dt>
+                <dd>{state.material.originalFilename || "not uploaded"}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="learning-detail-grid">
+            {state.material.canManageAssignments ? (
+              <article className="card learning-detail-card">
+                <p className="card-kicker">owner</p>
+                <h3>Assignments and admin view</h3>
+                <dl className="profile-list compact">
+                  <div>
+                    <dt>Students</dt>
+                    <dd>{state.material.studentSubjects.length ? state.material.studentSubjects.join(", ") : "none"}</dd>
+                  </div>
+                  <div>
+                    <dt>Groups</dt>
+                    <dd>{state.material.groupNames.length ? state.material.groupNames.join(", ") : "none"}</dd>
+                  </div>
+                  <div>
+                    <dt>Ingestion retries</dt>
+                    <dd>{state.ingestion.retryCount}</dd>
+                  </div>
+                  <div>
+                    <dt>Last error</dt>
+                    <dd>{state.ingestion.lastError || "none"}</dd>
+                  </div>
+                </dl>
+              </article>
+            ) : (
+              <article className="card learning-detail-card">
+                <p className="card-kicker">student</p>
+                <h3>Your learning view</h3>
+                <p className="muted">This page shows the material, your generated content, and your own learning status only.</p>
+                <dl className="profile-list compact">
+                  <div>
+                    <dt>Current ingestion status</dt>
+                    <dd>{state.ingestion.status}</dd>
+                  </div>
+                  <div>
+                    <dt>Retry count</dt>
+                    <dd>{state.ingestion.retryCount}</dd>
+                  </div>
+                </dl>
+              </article>
+            )}
+
+            <article className="card learning-detail-card">
+              <p className="card-kicker">content</p>
+              <h3>Latest generated content</h3>
+              {state.generations.length === 0 ? (
+                <p className="muted">No generated questions or summaries yet.</p>
+              ) : (
+                <div className="learning-detail-generation-list">
+                  {state.generations.map((generation) => {
+                    const structured = parseQuestionSet(generation.structuredContent);
+
+                    return (
+                      <section className="learning-detail-generation-card" key={generation.id}>
+                        <div className="section-head">
+                          <h4>{generation.generationType === "QUESTION_SET" ? "Questions" : "Summary"}</h4>
+                          <span className={`pill status-pill ${generation.generationStatus === "COMPLETED" ? "done" : "failed"}`}>
+                            {generation.generationStatus}
+                          </span>
+                        </div>
+                        <p className="muted">
+                          {generation.fallbackUsed ? generation.fallbackReason || "Fallback used" : "Generated from the learning source material."}
+                        </p>
+                        <pre className="learning-detail-content">{generation.content}</pre>
+                        {structured && generation.generationType === "QUESTION_SET" && (
+                          <div className="learning-question-set">
+                            {structured.questions.map((question: LearningQuestionPayload, index: number) => (
+                              <article className="learning-question-card" key={`${generation.id}-${index}`}>
+                                <p className="card-kicker">Question {index + 1}</p>
+                                <h5>{question.prompt}</h5>
+                                <ul className="learning-option-list">
+                                  {question.options.map((option) => (
+                                    <li key={option.key} className={option.key === question.options[question.correctOptionIndex]?.key ? "correct" : ""}>
+                                      <strong>{option.key}.</strong> {option.text}
+                                    </li>
+                                  ))}
+                                </ul>
+                                <p className="muted">{question.explanation}</p>
+                              </article>
+                            ))}
+                          </div>
+                        )}
+                        {!!generation.errorMessage && <p className="error-title">{generation.errorMessage}</p>}
+                      </section>
+                    );
+                  })}
+                </div>
+              )}
+            </article>
+          </section>
         </div>
       )}
     </article>
@@ -756,11 +979,15 @@ function PrivateWorkspace({
   onSignOut,
   jobId,
   onJobCreated,
+  pathname,
+  onNavigate,
 }: {
   profile: BackendMeResponse;
   onSignOut: () => void;
   jobId: string;
   onJobCreated: (jobId: string) => void;
+  pathname: string;
+  onNavigate: (pathname: string) => void;
 }) {
   const config = useMemo(() => getRuntimeConfig(), []);
   const isDeveloper = profile.groups.includes("developer");
@@ -773,6 +1000,7 @@ function PrivateWorkspace({
     : profile.roles.length > 0
       ? "builder"
       : "member";
+  const learningMaterialId = parseLearningMaterialPath(pathname);
 
   return (
     <DashboardShell mode="authenticated" actionLabel="Sign out" onAction={onSignOut} navItems={navItems}>
@@ -818,7 +1046,11 @@ function PrivateWorkspace({
       </section>
 
       <section className="workspace-grid" aria-label="User workspace">
-        <LearningWorkspacePanel />
+        {learningMaterialId ? (
+          <LearningMaterialDetailPanel materialId={learningMaterialId} onBack={() => onNavigate("/")} />
+        ) : (
+          <LearningWorkspacePanel onOpenMaterial={(materialId) => onNavigate(`/learning/materials/${materialId}`)} />
+        )}
 
         <article className="workspace-panel" id="jobs">
           <div className="section-head">
@@ -981,6 +1213,7 @@ function PrivateWorkspace({
 function App() {
   const [session, setSession] = useState<SessionState>({ status: "loading" });
   const [jobId, setJobId] = useState(() => readJobIdFromUrl());
+  const [pathname, setPathname] = useState(() => readPathname());
   const apiRouteError =
     session.status === "error" && /Request failed with 404/.test(session.message);
 
@@ -1025,6 +1258,12 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const syncPath = () => setPathname(readPathname());
+    window.addEventListener("popstate", syncPath);
+    return () => window.removeEventListener("popstate", syncPath);
+  }, []);
+
   return (
     <main className="app-shell">
       {session.status === "loading" && (
@@ -1063,6 +1302,11 @@ function App() {
           onSignOut={() => void signOut()}
           jobId={jobId}
           onJobCreated={setJobId}
+          pathname={pathname}
+          onNavigate={(nextPathname) => {
+            syncPathnameInUrl(nextPathname);
+            setPathname(nextPathname);
+          }}
         />
       )}
 

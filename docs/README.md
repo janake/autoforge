@@ -11,6 +11,7 @@ Fő dokumentumok:
 - `docs/learning-rag-adb-vector.md`: Learning RAG Autonomous Database vector capability döntés
 - `docs/learning-api-contract.md`: Learning API contract web és Android klienshez
 - `docs/learning-content-generation.md`: Learning kérdésgenerálás és összefoglaló slice
+- `docs/learning-material-detail.md`: Learning tananyag detail route és role-alapú nézet
 - `docs/learning-ingestion-pipeline.md`: Learning ingestion, chunking és embedding pipeline
 - `docs/deployment.md`: verziózott image-ek, auto deploy workflow-k, host könyvtárak és secret-ek
 - `docs/authentication.md`: Keycloak PKCE login, frontend callback flow, backend JWT-validáció

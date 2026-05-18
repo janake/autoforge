@@ -33,6 +33,27 @@ export type LearningContentSourceReference = {
   excerpt: string;
 };
 
+export type LearningQuestionOptionPayload = {
+  key: string;
+  text: string;
+};
+
+export type LearningQuestionPayload = {
+  prompt: string;
+  options: LearningQuestionOptionPayload[];
+  correctOptionIndex: number;
+  explanation: string;
+  sources: LearningContentSourceReference[];
+  imageAssetReference: string | null;
+};
+
+export type LearningQuestionSetPayload = {
+  materialId: string;
+  materialTitle: string;
+  retrievalContext: string;
+  questions: LearningQuestionPayload[];
+};
+
 export type LearningContentGenerationResponse = {
   id: string;
   materialId: string;
@@ -41,7 +62,22 @@ export type LearningContentGenerationResponse = {
   sources: LearningContentSourceReference[];
   fallbackUsed: boolean;
   fallbackReason: string | null;
+  generationStatus: "COMPLETED" | "FAILED";
+  structuredContent: string | null;
+  errorMessage: string | null;
   createdAt: string;
+};
+
+export type LearningIngestionResponse = {
+  jobId: string;
+  materialId: string;
+  status: "QUEUED" | "PROCESSING" | "COMPLETED" | "FAILED";
+  retryCount: number;
+  chunkCount: number;
+  embeddingCount: number;
+  lastError: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type CreateJobRequest = {
