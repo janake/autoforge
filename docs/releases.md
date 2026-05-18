@@ -575,3 +575,14 @@ Taskok
 Megjegyzes
 - A Learning web shell saját anyagokat, generált kérdéseket és összefoglalókat mutat upload CTA-val és user-scoped listákkal.
 - A Learning profilréteg user-scoped preferenciákat és prompt contextet ad a személyre szabott generáláshoz.
+
+## 0.1.50
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-336`: Hibrid RAG adatmodell OCI Always Free célra
+
+Megjegyzes
+- A Learning RAG relációs metadatáját, chunk/embedding boundary-ját és user isolation mezőit rögzíti az OCI Always Free kompatibilis MVP-hez.
