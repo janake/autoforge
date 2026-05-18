@@ -42,6 +42,19 @@
 - `studentSubjects`: direct assignment lista
 - `groupNames`: group assignment lista
 
+## Learner profile endpointok
+
+### `GET /api/v1/learning/learner-profile`
+
+- A bejelentkezett user saját learner profilját adja vissza.
+- Alapértelmezett profil automatikusan létrejön, ha még nincs.
+- A válasz tartalmazza a retrieval contextet is.
+
+### `PUT /api/v1/learning/learner-profile`
+
+- A bejelentkezett user saját learner profilját frissíti.
+- A profil user-scoped, más subject nem módosíthatja.
+
 ## Learning generation endpoints
 
 Az API ugyanebben a namespace-ben már támogatja az alábbi generálási műveleteket is:

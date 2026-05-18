@@ -27,11 +27,12 @@ public class LearningContentGenerationService {
 
   private final LearningMaterialRepository learningMaterialRepository;
   private final LearningGeneratedContentRepository learningGeneratedContentRepository;
+  private final LearningLearnerProfileService learningLearnerProfileService;
 
   @Transactional
   public LearningContentGenerationResponse generateQuestions(String materialId, String subject) {
     LearningMaterial material = loadOwnedMaterial(materialId, subject);
-    GeneratedContent generated = generateFromMaterial(material, LearningContentGenerationType.QUESTION_SET);
+    GeneratedContent generated = generateFromMaterial(material, subject, LearningContentGenerationType.QUESTION_SET);
     LearningGeneratedContent saved = learningGeneratedContentRepository.save(LearningGeneratedContent.create(
       material.getId(),
       subject,
@@ -47,7 +48,7 @@ public class LearningContentGenerationService {
   @Transactional
   public LearningContentGenerationResponse generateSummary(String materialId, String subject) {
     LearningMaterial material = loadOwnedMaterial(materialId, subject);
-    GeneratedContent generated = generateFromMaterial(material, LearningContentGenerationType.SUMMARY);
+    GeneratedContent generated = generateFromMaterial(material, subject, LearningContentGenerationType.SUMMARY);
     LearningGeneratedContent saved = learningGeneratedContentRepository.save(LearningGeneratedContent.create(
       material.getId(),
       subject,
@@ -77,16 +78,20 @@ public class LearningContentGenerationService {
     return material;
   }
 
-  private GeneratedContent generateFromMaterial(LearningMaterial material, LearningContentGenerationType generationType) {
+  private GeneratedContent generateFromMaterial(LearningMaterial material, String subject, LearningContentGenerationType generationType) {
     List<LearningContentSourceReference> sources = buildSources(material);
+    String retrievalContext = learningLearnerProfileService.buildRetrievalContext(subject);
     if (generationType == LearningContentGenerationType.SUMMARY) {
-      return new GeneratedContent(summaryContent(material, sources), sourceText(sources), sources);
+      return new GeneratedContent(summaryContent(material, sources, retrievalContext), sourceText(sources), sources);
     }
-    return new GeneratedContent(questionSetContent(material, sources), sourceText(sources), sources);
+    return new GeneratedContent(questionSetContent(material, sources, retrievalContext), sourceText(sources), sources);
   }
 
-  private String questionSetContent(LearningMaterial material, List<LearningContentSourceReference> sources) {
+  private String questionSetContent(LearningMaterial material, List<LearningContentSourceReference> sources, String retrievalContext) {
     List<String> lines = new ArrayList<>();
+    lines.add("Tanulói profil:");
+    lines.add(retrievalContext);
+    lines.add("");
     lines.add("1. Mi a legfontosabb üzenete a tananyagnak?");
     if (!sources.isEmpty()) {
       lines.add("2. Hogyan kapcsolódik a(z) %s. chunk a fő témához?".formatted(sources.get(0).chunkIndex() + 1));
@@ -98,8 +103,11 @@ public class LearningContentGenerationService {
     return String.join("\n", lines);
   }
 
-  private String summaryContent(LearningMaterial material, List<LearningContentSourceReference> sources) {
+  private String summaryContent(LearningMaterial material, List<LearningContentSourceReference> sources, String retrievalContext) {
     List<String> lines = new ArrayList<>();
+    lines.add("Tanulói profil:");
+    lines.add(retrievalContext);
+    lines.add("");
     lines.add("- A tananyag címe: %s".formatted(material.getTitle()));
     if (material.getDescription() != null && !material.getDescription().isBlank()) {
       lines.add("- Leírás: %s".formatted(material.getDescription().trim()));
