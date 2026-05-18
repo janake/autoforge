@@ -569,7 +569,9 @@ Statusz
 - in progress
 
 Taskok
+- `AUTO-335`: Learning navigáció és tanulási workspace shell
 - `AUTO-337`: Személyre szabott learner profile és retrieval context
 
 Megjegyzes
+- A Learning web shell saját anyagokat, generált kérdéseket és összefoglalókat mutat upload CTA-val és user-scoped listákkal.
 - A Learning profilréteg user-scoped preferenciákat és prompt contextet ad a személyre szabott generáláshoz.

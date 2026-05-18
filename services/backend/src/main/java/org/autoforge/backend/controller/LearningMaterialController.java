@@ -93,6 +93,12 @@ public class LearningMaterialController {
     return learningContentGenerationService.generateSummary(materialId, context.subject());
   }
 
+  @GetMapping("/{materialId}/generations")
+  public List<LearningContentGenerationResponse> listGenerations(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningContentGenerationService.listGeneratedContent(materialId, context.subject());
+  }
+
   @PutMapping("/{materialId}/assignments")
   public LearningMaterialResponse replaceAssignments(
     @PathVariable String materialId,

@@ -69,6 +69,15 @@ export async function postAuthedJson<T>(path: string, body: unknown): Promise<T>
   return (await response.json()) as T;
 }
 
+export async function postAuthedFormData<T>(path: string, body: FormData): Promise<T> {
+  const response = await authedFetch(path, {
+    method: "POST",
+    body,
+  });
+
+  return (await response.json()) as T;
+}
+
 async function authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const client = createKeycloak();
   const runtimeConfig = getRuntimeConfig();
@@ -82,7 +91,7 @@ async function authedFetch(path: string, init: RequestInit = {}): Promise<Respon
     ...init,
     headers: {
       Authorization: `Bearer ${client.token ?? ""}`,
-      "Content-Type": "application/json",
+      ...(!(init.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
       ...(init.headers ?? {}),
     },
   });
