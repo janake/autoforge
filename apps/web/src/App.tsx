@@ -6,6 +6,7 @@ import type {
   CreateJobResponse,
   LearningContentGenerationResponse,
   LearningIngestionResponse,
+  LearningImageAssetResponse,
   LearningQuestionPayload,
   LearningQuestionSetPayload,
   LearningMaterialResponse,
@@ -461,6 +462,26 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                       </section>
                     );
                   })}
+                </div>
+              )}
+            </article>
+
+            <article className="card learning-detail-card learning-detail-image-card">
+              <p className="card-kicker">images</p>
+              <h3>Image assets</h3>
+              {state.material.imageAssets.length === 0 ? (
+                <p className="muted">No image assets are attached to this material yet.</p>
+              ) : (
+                <div className="learning-image-grid">
+                  {state.material.imageAssets.map((asset: LearningImageAssetResponse) => (
+                    <figure className="learning-image-card" key={asset.id}>
+                      <img src={asset.assetUrl} alt={asset.altText || "Learning asset"} />
+                      <figcaption>
+                        <strong>{asset.mimeType}</strong>
+                        <span>{Math.ceil(asset.sizeBytes / 1024)} KB</span>
+                      </figcaption>
+                    </figure>
+                  ))}
                 </div>
               )}
             </article>

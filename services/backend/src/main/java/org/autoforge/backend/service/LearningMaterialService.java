@@ -13,7 +13,9 @@ import org.autoforge.backend.domain.LearningAssignmentTargetType;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.domain.LearningMaterialAssignment;
 import org.autoforge.backend.dto.LearningMaterialAssignmentRequest;
+import org.autoforge.backend.dto.LearningImageAssetResponse;
 import org.autoforge.backend.dto.LearningMaterialResponse;
+import org.autoforge.backend.repository.LearningImageAssetRepository;
 import org.autoforge.backend.repository.LearningMaterialAssignmentRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class LearningMaterialService {
 
   private final LearningMaterialRepository learningMaterialRepository;
   private final LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
+  private final LearningImageAssetRepository learningImageAssetRepository;
 
   @Transactional
   public LearningMaterialResponse uploadMaterial(String subject, MultipartFile file, String title, String description) {
@@ -150,6 +153,18 @@ public class LearningMaterialService {
 
   private LearningMaterialResponse toResponse(LearningMaterial material, String subject) {
     List<LearningMaterialAssignment> assignments = learningMaterialAssignmentRepository.findByMaterialId(material.getId());
+    List<LearningImageAssetResponse> imageAssets = learningImageAssetRepository.findByMaterialIdOrderByCreatedAtAsc(material.getId()).stream()
+      .map(asset -> new LearningImageAssetResponse(
+        asset.getId(),
+        asset.getMaterialId(),
+        asset.getMimeType(),
+        asset.getSizeBytes(),
+        asset.getContentHash(),
+        asset.getAltText(),
+        "/api/v1/learning/image-assets/%s/proxy".formatted(asset.getId()),
+        asset.getCreatedAt()
+      ))
+      .toList();
     List<String> studentSubjects = assignments.stream()
       .filter(assignment -> assignment.getTargetType() == LearningAssignmentTargetType.STUDENT)
       .map(LearningMaterialAssignment::getTargetIdentifier)
@@ -172,6 +187,7 @@ public class LearningMaterialService {
       studentSubjects,
       groupNames,
       Objects.equals(material.getOwnerSubject(), subject),
+      imageAssets,
       material.getCreatedAt(),
       material.getUpdatedAt()
     );
