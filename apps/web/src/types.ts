@@ -22,8 +22,20 @@ export type LearningMaterialResponse = {
   studentSubjects: string[];
   groupNames: string[];
   canManageAssignments: boolean;
+  imageAssets: LearningImageAssetResponse[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type LearningImageAssetResponse = {
+  id: string;
+  materialId: string;
+  mimeType: string;
+  sizeBytes: number;
+  contentHash: string;
+  altText: string | null;
+  assetUrl: string;
+  createdAt: string;
 };
 
 export type LearningContentGenerationType = "QUESTION_SET" | "SUMMARY";

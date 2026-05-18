@@ -14,6 +14,7 @@ public record LearningMaterialResponse(
   List<String> studentSubjects,
   List<String> groupNames,
   boolean canManageAssignments,
+  List<LearningImageAssetResponse> imageAssets,
   Instant createdAt,
   Instant updatedAt
 ) {

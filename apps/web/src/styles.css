@@ -490,6 +490,38 @@ code {
   gap: 14px;
 }
 
+.learning-image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.learning-image-card {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.learning-image-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.learning-image-card figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  color: rgba(245, 239, 227, 0.78);
+}
+
 .learning-detail-content {
   margin: 12px 0 0;
   padding: 14px;
@@ -620,6 +652,7 @@ code {
 
   .learning-upload-grid,
   .learning-generation-list,
+  .learning-image-grid,
   .learning-detail-grid {
     grid-template-columns: 1fr;
   }
