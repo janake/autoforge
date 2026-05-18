@@ -619,3 +619,14 @@ Taskok
 
 Megjegyzes
 - Az upload flow object storage reference-et, hash-t és metadata mezőket ment a Learning tananyag rekordba.
+
+## 0.1.54
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-343`: Diák kérdéssor megoldás és tanulási eredmények mentése
+
+Megjegyzes
+- A Learning backend kérdéssor-listázást, diák válaszbeküldést, pontszámítást és owner/student scoped eredménylistát kap.
