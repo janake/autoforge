@@ -6,7 +6,7 @@ Az AI kérdéssor generálásnak strukturáltan kell eltárolnia a kérdéseket,
 
 ## Statusz
 
-in progress
+under test
 
 ## Verzió
 
@@ -18,7 +18,7 @@ feature/AUTO-339-ai-question-generation
 
 ## PR
 
-- TBD
+- PR #153
 
 ## Cél
 
@@ -42,6 +42,7 @@ A Learning `/questions` flow ne csak szöveget adjon vissza, hanem visszakereshe
 
 - [x] A Jira issue-t `In Progress`-ra állítottam.
 - [x] A release manifestben rögzítettem a `0.1.51` célt.
+- [x] A PR megnyílt review/verification alatt.
 
 ## Eredmény
 
