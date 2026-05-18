@@ -18,6 +18,10 @@ export type LearningMaterialResponse = {
   originalFilename: string | null;
   contentType: string | null;
   fileSize: number | null;
+  storageObjectKey: string | null;
+  storageObjectUri: string | null;
+  contentHash: string | null;
+  contentETag: string | null;
   ownerSubject: string;
   studentSubjects: string[];
   groupNames: string[];

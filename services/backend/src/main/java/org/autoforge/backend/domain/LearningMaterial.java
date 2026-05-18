@@ -37,6 +37,18 @@ public class LearningMaterial {
   @Column(name = "file_size")
   private Long fileSize;
 
+  @Column(name = "storage_object_key", length = 512)
+  private String storageObjectKey;
+
+  @Column(name = "storage_object_uri", length = 1000)
+  private String storageObjectUri;
+
+  @Column(name = "content_hash", length = 128)
+  private String contentHash;
+
+  @Column(name = "content_etag", length = 64)
+  private String contentETag;
+
   @Lob
   @Column(name = "content")
   private byte[] content;
@@ -68,6 +80,26 @@ public class LearningMaterial {
     this.content = content;
   }
 
+  public LearningMaterial(
+    String ownerSubject,
+    String title,
+    String description,
+    String originalFilename,
+    String contentType,
+    Long fileSize,
+    String storageObjectKey,
+    String storageObjectUri,
+    String contentHash,
+    String contentETag,
+    byte[] content
+  ) {
+    this(ownerSubject, title, description, originalFilename, contentType, fileSize, content);
+    this.storageObjectKey = storageObjectKey;
+    this.storageObjectUri = storageObjectUri;
+    this.contentHash = contentHash;
+    this.contentETag = contentETag;
+  }
+
   public static LearningMaterial create(String ownerSubject, String title, String description) {
     return new LearningMaterial(ownerSubject, title, description);
   }
@@ -82,6 +114,34 @@ public class LearningMaterial {
     byte[] content
   ) {
     return new LearningMaterial(ownerSubject, title, description, originalFilename, contentType, fileSize, content);
+  }
+
+  public static LearningMaterial createUploaded(
+    String ownerSubject,
+    String title,
+    String description,
+    String originalFilename,
+    String contentType,
+    Long fileSize,
+    String storageObjectKey,
+    String storageObjectUri,
+    String contentHash,
+    String contentETag,
+    byte[] content
+  ) {
+    return new LearningMaterial(
+      ownerSubject,
+      title,
+      description,
+      originalFilename,
+      contentType,
+      fileSize,
+      storageObjectKey,
+      storageObjectUri,
+      contentHash,
+      contentETag,
+      content
+    );
   }
 
   @PrePersist
@@ -117,6 +177,22 @@ public class LearningMaterial {
 
   public Long getFileSize() {
     return fileSize;
+  }
+
+  public String getStorageObjectKey() {
+    return storageObjectKey;
+  }
+
+  public String getStorageObjectUri() {
+    return storageObjectUri;
+  }
+
+  public String getContentHash() {
+    return contentHash;
+  }
+
+  public String getContentETag() {
+    return contentETag;
   }
 
   public byte[] getContent() {

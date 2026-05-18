@@ -39,6 +39,7 @@ public class LearningMaterialService {
   private final LearningMaterialRepository learningMaterialRepository;
   private final LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
   private final LearningImageAssetRepository learningImageAssetRepository;
+  private final LearningMaterialObjectStorageService learningMaterialObjectStorageService;
 
   @Transactional
   public LearningMaterialResponse uploadMaterial(String subject, MultipartFile file, String title, String description) {
@@ -46,6 +47,7 @@ public class LearningMaterialService {
 
     String originalFilename = normalizeTitle(file.getOriginalFilename());
     String resolvedTitle = firstNonBlank(title, originalFilename);
+    LearningMaterialObjectStorageService.OriginalFileStoragePlan storagePlan = learningMaterialObjectStorageService.prepareOriginalFile(subject, file);
     byte[] content;
     try {
       content = file.getBytes();
@@ -60,6 +62,10 @@ public class LearningMaterialService {
       originalFilename,
       normalizeTitle(file.getContentType()),
       file.getSize(),
+      storagePlan.objectKey(),
+      storagePlan.objectUri(),
+      storagePlan.contentHash(),
+      storagePlan.eTag(),
       content
     ));
     return toResponse(material, subject);
@@ -183,6 +189,10 @@ public class LearningMaterialService {
       material.getOriginalFilename(),
       material.getContentType(),
       material.getFileSize(),
+      material.getStorageObjectKey(),
+      material.getStorageObjectUri(),
+      material.getContentHash(),
+      material.getContentETag(),
       material.getOwnerSubject(),
       studentSubjects,
       groupNames,
