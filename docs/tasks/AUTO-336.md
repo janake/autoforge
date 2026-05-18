@@ -6,7 +6,7 @@ A Learning modul relációs adatmodelljét úgy kell rögzíteni, hogy az OCI Al
 
 ## Statusz
 
-in progress
+under test
 
 ## Verzió
 
@@ -18,7 +18,7 @@ feature/AUTO-336-hybrid-rag-model
 
 ## PR
 
-- TBD
+- PR #152
 
 ## Cél
 
@@ -42,6 +42,7 @@ A Learning adattárolási réteg legyen jól elkülönítve: relációs metadata
 
 - [x] A Jira issue-t `In Progress`-ra állítottam.
 - [x] A release manifestben rögzítettem a `0.1.50` célt.
+- [x] A PR megnyílt review/verification alatt.
 
 ## Eredmény
 
