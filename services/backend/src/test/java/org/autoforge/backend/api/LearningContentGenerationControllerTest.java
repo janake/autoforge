@@ -55,22 +55,34 @@ class LearningContentGenerationControllerTest {
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.materialId").value(material.getId()))
       .andExpect(jsonPath("$.generationType").value(LearningContentGenerationType.QUESTION_SET.name()))
+      .andExpect(jsonPath("$.generationStatus").value("COMPLETED"))
       .andExpect(jsonPath("$.fallbackUsed").value(true))
       .andExpect(jsonPath("$.fallbackReason").value("Real AI is unavailable because the learning generation provider is not configured."))
       .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Tanulói profil:")))
       .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Mi a legfontosabb üzenete a tananyagnak?")))
+      .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.containsString("\"questions\"")))
+      .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.containsString("\"options\"")))
       .andExpect(jsonPath("$.sources[0].chunkIndex").value(0));
 
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/summary", material.getId())
         .with(jwt().jwt(token -> token.subject("teacher-1"))))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.generationType").value(LearningContentGenerationType.SUMMARY.name()))
+      .andExpect(jsonPath("$.generationStatus").value("COMPLETED"))
+      .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.nullValue()))
       .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Chunk 1")))
       .andExpect(jsonPath("$.sources[0].excerpt").exists());
 
     assertThat(learningGeneratedContentRepository.findAll())
       .extracting(LearningGeneratedContent::getGenerationType)
       .containsExactlyInAnyOrder(LearningContentGenerationType.QUESTION_SET, LearningContentGenerationType.SUMMARY);
+
+    LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().stream()
+      .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
+      .findFirst()
+      .orElseThrow();
+    assertThat(questionSet.getStructuredContent()).contains("\"questions\"");
+    assertThat(questionSet.getGenerationStatus().name()).isEqualTo("COMPLETED");
   }
 
   @Test

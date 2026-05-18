@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,6 +33,10 @@ public class LearningGeneratedContent {
   @Column(name = "content", nullable = false, length = 4000)
   private String content;
 
+  @Lob
+  @Column(name = "structured_content")
+  private String structuredContent;
+
   @Column(name = "source_references", nullable = false, length = 4000)
   private String sourceReferences;
 
@@ -40,6 +45,13 @@ public class LearningGeneratedContent {
 
   @Column(name = "fallback_reason", length = 1000)
   private String fallbackReason;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "generation_status", nullable = false, length = 32)
+  private LearningGenerationStatus generationStatus;
+
+  @Column(name = "error_message", length = 1000)
+  private String errorMessage;
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -53,17 +65,23 @@ public class LearningGeneratedContent {
     String ownerSubject,
     LearningContentGenerationType generationType,
     String content,
+    String structuredContent,
     String sourceReferences,
     boolean fallbackUsed,
-    String fallbackReason
+    String fallbackReason,
+    LearningGenerationStatus generationStatus,
+    String errorMessage
   ) {
     this.materialId = materialId;
     this.ownerSubject = ownerSubject;
     this.generationType = generationType;
     this.content = content;
+    this.structuredContent = structuredContent;
     this.sourceReferences = sourceReferences;
     this.fallbackUsed = fallbackUsed;
     this.fallbackReason = fallbackReason;
+    this.generationStatus = generationStatus;
+    this.errorMessage = errorMessage;
   }
 
   public static LearningGeneratedContent create(
@@ -71,11 +89,25 @@ public class LearningGeneratedContent {
     String ownerSubject,
     LearningContentGenerationType generationType,
     String content,
+    String structuredContent,
     String sourceReferences,
     boolean fallbackUsed,
-    String fallbackReason
+    String fallbackReason,
+    LearningGenerationStatus generationStatus,
+    String errorMessage
   ) {
-    return new LearningGeneratedContent(materialId, ownerSubject, generationType, content, sourceReferences, fallbackUsed, fallbackReason);
+    return new LearningGeneratedContent(
+      materialId,
+      ownerSubject,
+      generationType,
+      content,
+      structuredContent,
+      sourceReferences,
+      fallbackUsed,
+      fallbackReason,
+      generationStatus,
+      errorMessage
+    );
   }
 
   @PrePersist
@@ -105,6 +137,10 @@ public class LearningGeneratedContent {
     return content;
   }
 
+  public String getStructuredContent() {
+    return structuredContent;
+  }
+
   public String getSourceReferences() {
     return sourceReferences;
   }
@@ -115,6 +151,14 @@ public class LearningGeneratedContent {
 
   public String getFallbackReason() {
     return fallbackReason;
+  }
+
+  public LearningGenerationStatus getGenerationStatus() {
+    return generationStatus;
+  }
+
+  public String getErrorMessage() {
+    return errorMessage;
   }
 
   public Instant getCreatedAt() {
