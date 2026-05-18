@@ -35,7 +35,7 @@ Megjegyzes
 ## 0.1.1
 
 Statusz
-- in progress
+- completed
 
 Taskok
 - `AUTO-15`: Landing page cleanup
@@ -49,7 +49,7 @@ Megjegyzes
 ## 0.1.2
 
 Statusz
-- in progress
+- completed
 
 Taskok
 - `AUTO-21`: Automatic version bump rule
@@ -619,6 +619,7 @@ Taskok
 
 Megjegyzes
 - Az upload flow object storage reference-et, hash-t és metadata mezőket ment a Learning tananyag rekordba.
+- PR #157 lezárta a slice-ot.
 
 ## 0.1.54
 
@@ -630,3 +631,14 @@ Taskok
 
 Megjegyzes
 - A Learning backend kérdéssor-listázást, diák válaszbeküldést, pontszámítást és owner/student scoped eredménylistát kap.
+
+## 0.1.55
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-358`: Object Storage hiba tesztek
+
+Megjegyzes
+- Az eredeti fájl Object Storage előkészítési hibaágai célzott teszteket kapnak, hogy olvasási hiba esetén kontrollált exception szülessen.
