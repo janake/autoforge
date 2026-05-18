@@ -290,6 +290,10 @@ public class LearningContentGenerationService {
     );
   }
 
+  public LearningContentGenerationResponse toResponse(LearningGeneratedContent content) {
+    return toResponse(content, parseSources(content.getSourceReferences()));
+  }
+
   private List<LearningContentSourceReference> parseSources(String sourceReferences) {
     if (sourceReferences == null || sourceReferences.isBlank()) {
       return List.of();

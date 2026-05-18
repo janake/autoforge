@@ -6,11 +6,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.autoforge.backend.dto.LearningMaterialAssignmentRequest;
 import org.autoforge.backend.dto.LearningContentGenerationResponse;
+import org.autoforge.backend.dto.LearningQuestionAttemptRequest;
+import org.autoforge.backend.dto.LearningQuestionAttemptResponse;
 import org.autoforge.backend.service.LearningContentGenerationService;
 import org.autoforge.backend.dto.LearningIngestionResponse;
 import org.autoforge.backend.dto.LearningMaterialResponse;
 import org.autoforge.backend.service.LearningMaterialService;
 import org.autoforge.backend.service.LearningIngestionService;
+import org.autoforge.backend.service.LearningQuestionAttemptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,6 +39,7 @@ public class LearningMaterialController {
   private final LearningMaterialService learningMaterialService;
   private final LearningContentGenerationService learningContentGenerationService;
   private final LearningIngestionService learningIngestionService;
+  private final LearningQuestionAttemptService learningQuestionAttemptService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
@@ -97,6 +101,29 @@ public class LearningMaterialController {
   public List<LearningContentGenerationResponse> listGenerations(@PathVariable String materialId, Authentication authentication) {
     UserContext context = currentUser(authentication);
     return learningContentGenerationService.listGeneratedContent(materialId, context.subject());
+  }
+
+  @GetMapping("/{materialId}/question-sets")
+  public List<LearningContentGenerationResponse> listQuestionSets(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningQuestionAttemptService.listQuestionSets(materialId, context.subject(), context.groups());
+  }
+
+  @PostMapping("/{materialId}/question-attempts")
+  @ResponseStatus(HttpStatus.CREATED)
+  public LearningQuestionAttemptResponse submitQuestionAttempt(
+    @PathVariable String materialId,
+    @RequestBody LearningQuestionAttemptRequest request,
+    Authentication authentication
+  ) {
+    UserContext context = currentUser(authentication);
+    return learningQuestionAttemptService.submitAttempt(materialId, context.subject(), context.groups(), request);
+  }
+
+  @GetMapping("/{materialId}/question-attempts")
+  public List<LearningQuestionAttemptResponse> listQuestionAttempts(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningQuestionAttemptService.listAttempts(materialId, context.subject(), context.groups());
   }
 
   @PutMapping("/{materialId}/assignments")
