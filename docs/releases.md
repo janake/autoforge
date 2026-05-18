@@ -597,3 +597,14 @@ Taskok
 
 Megjegyzes
 - A Learning kérdéssor generálás strukturált kérdés/opció/adatmodellje, fallback státusza és DB-s mentése kerül be.
+
+## 0.1.52
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-340`: Tananyag részletező weboldal jogosultságfüggő mezőkkel
+
+Megjegyzes
+- A Learning tananyag detail route a role-alapú UI mezőket, ingestions státuszt, hozzárendeléseket és generált tartalmakat mutatja.
