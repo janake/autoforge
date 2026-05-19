@@ -94,8 +94,11 @@ class LearningContentGenerationControllerTest {
       .andExpect(jsonPath("$.fallbackUsed").value(true))
       .andExpect(jsonPath("$.fallbackReason").value("Real AI is unavailable because the learning generation provider is not configured."))
       .andExpect(jsonPath("$.sourceVersions[0].contentHash").value("1111111111111111111111111111111111111111111111111111111111111111"))
+      .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.containsString("\"answerType\":\"SINGLE_CORRECT\"")))
+      .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.containsString("\"answerType\":\"MULTI_CORRECT\"")))
       .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Tanulói profil:")))
       .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Mi a legfontosabb üzenete a tananyagnak?")))
+      .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Válassz 2 választ")))
       .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.containsString("\"questions\"")))
       .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.containsString("\"options\"")))
       .andExpect(jsonPath("$.sources[0].chunkIndex").value(0));
@@ -217,7 +220,7 @@ class LearningContentGenerationControllerTest {
         .with(jwt().jwt(token -> token.subject("student-1")))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
-          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndex": 0}]}
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndexes": [0]}]}
           """.formatted(questionSet.getId())))
       .andExpect(status().isForbidden());
   }
@@ -278,17 +281,18 @@ class LearningContentGenerationControllerTest {
           {
             "generationId": "%s",
             "answers": [
-              {"questionIndex": 0, "selectedOptionIndex": 0},
-              {"questionIndex": 1, "selectedOptionIndex": 1}
+              {"questionIndex": 0, "selectedOptionIndexes": [0]},
+              {"questionIndex": 1, "selectedOptionIndexes": [0, 2]},
+              {"questionIndex": 2, "selectedOptionIndexes": [0]}
             ]
           }
           """.formatted(questionSet.getId())))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.materialId").value(material.getId()))
       .andExpect(jsonPath("$.studentSubject").value("student-1"))
-      .andExpect(jsonPath("$.score").value(1))
+      .andExpect(jsonPath("$.score").value(3))
       .andExpect(jsonPath("$.totalQuestions").value(3))
-      .andExpect(jsonPath("$.answers").value(org.hamcrest.Matchers.containsString("selectedOptionIndex")));
+      .andExpect(jsonPath("$.answers").value(org.hamcrest.Matchers.containsString("selectedOptionIndexes")));
 
     mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
         .with(jwt().jwt(token -> token.subject("teacher-1"))))
@@ -325,7 +329,7 @@ class LearningContentGenerationControllerTest {
         .with(jwt().jwt(token -> token.subject("student-1")))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
-          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndex": 0}]}
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndexes": [0]}]}
           """.formatted(questionSet.getId())))
       .andExpect(status().isCreated());
 

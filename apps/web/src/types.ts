@@ -88,10 +88,14 @@ export type LearningQuestionOptionPayload = {
   text: string;
 };
 
+export type LearningQuestionAnswerType = "SINGLE_CORRECT" | "MULTI_CORRECT";
+
 export type LearningQuestionPayload = {
   prompt: string;
   options: LearningQuestionOptionPayload[];
-  correctOptionIndex: number;
+  correctOptionIndex?: number | null;
+  answerType?: LearningQuestionAnswerType | null;
+  correctOptionIndexes?: number[] | null;
   explanation: string;
   sources: LearningContentSourceReference[];
   imageAssetReference: string | null;

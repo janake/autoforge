@@ -323,6 +323,22 @@ function parseQuestionSet(structuredContent: string | null): LearningQuestionSet
   }
 }
 
+function resolveQuestionCorrectOptionIndexes(question: LearningQuestionPayload): number[] {
+  if (question.correctOptionIndexes && question.correctOptionIndexes.length > 0) {
+    return question.correctOptionIndexes;
+  }
+
+  return question.correctOptionIndex == null ? [] : [question.correctOptionIndex];
+}
+
+function resolveQuestionAnswerType(question: LearningQuestionPayload): LearningQuestionPayload["answerType"] {
+  if (question.answerType) {
+    return question.answerType;
+  }
+
+  return resolveQuestionCorrectOptionIndexes(question).length > 1 ? "MULTI_CORRECT" : "SINGLE_CORRECT";
+}
+
 function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: string; onBack: () => void }) {
   const [refreshToken, setRefreshToken] = useState(0);
   const [sourceStatus, setSourceStatus] = useState<string | null>(null);
@@ -693,11 +709,18 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                           <div className="learning-question-set">
                             {structured.questions.map((question: LearningQuestionPayload, index: number) => (
                               <article className="learning-question-card" key={`${generation.id}-${index}`}>
-                                <p className="card-kicker">Question {index + 1}</p>
+                                <div className="section-head">
+                                  <p className="card-kicker">Question {index + 1}</p>
+                                  <span className="pill status-pill">
+                                    {resolveQuestionAnswerType(question) === "MULTI_CORRECT"
+                                      ? `Válassz ${resolveQuestionCorrectOptionIndexes(question).length} választ`
+                                      : "Válassz 1 választ"}
+                                  </span>
+                                </div>
                                 <h5>{question.prompt}</h5>
                                 <ul className="learning-option-list">
-                                  {question.options.map((option) => (
-                                    <li key={option.key} className={option.key === question.options[question.correctOptionIndex]?.key ? "correct" : ""}>
+                                  {question.options.map((option, optionIndex) => (
+                                    <li key={option.key} className={resolveQuestionCorrectOptionIndexes(question).includes(optionIndex) ? "correct" : ""}>
                                       <strong>{option.key}.</strong> {option.text}
                                     </li>
                                   ))}
