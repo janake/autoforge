@@ -708,3 +708,14 @@ Taskok
 
 Megjegyzes
 - A learning kérdéspayload most single- és multi-correct módot is hordoz, a generálás kevert kérdéstípusokat ad, a pontozás pedig halmazegyezést vár multi-correct esetben.
+
+## 0.1.62
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-391`: Teacher tananyag hozzárendelés diákhoz és csoporthoz
+
+Megjegyzes
+- A Learning detail oldalon az owner most közvetlenül szerkesztheti a student és group assignment listát, a backend pedig a meglévő assignment replace API-t használja.

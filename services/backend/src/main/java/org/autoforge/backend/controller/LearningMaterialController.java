@@ -102,13 +102,13 @@ public class LearningMaterialController {
   @GetMapping
   public List<LearningMaterialResponse> listMaterials(Authentication authentication) {
     UserContext context = currentUser(authentication);
-    return learningMaterialService.listAccessibleMaterials(context.subject(), context.groups());
+    return learningMaterialService.listAccessibleMaterials(context.subject(), context.groups(), context.canManageAssignments());
   }
 
   @GetMapping("/{materialId}")
   public LearningMaterialResponse getMaterial(@PathVariable String materialId, Authentication authentication) {
     UserContext context = currentUser(authentication);
-    return learningMaterialService.getMaterial(materialId, context.subject(), context.groups());
+    return learningMaterialService.getMaterial(materialId, context.subject(), context.groups(), context.canManageAssignments());
   }
 
   @PostMapping("/{materialId}/questions")
@@ -210,7 +210,7 @@ public class LearningMaterialController {
     Authentication authentication
   ) {
     UserContext context = currentUser(authentication);
-    return learningMaterialService.replaceAssignments(materialId, context.subject(), request);
+    return learningMaterialService.replaceAssignments(materialId, context.subject(), context.canManageAssignments(), request);
   }
 
   private UserContext currentUser(Authentication authentication) {
@@ -285,6 +285,10 @@ public class LearningMaterialController {
 
   private record UserContext(String subject, Set<String> groups, Set<String> roles, Set<String> normalizedGroups) {
     private boolean canCreateLearningContent() {
+      return canManageAssignments();
+    }
+
+    private boolean canManageAssignments() {
       return roles.contains("admin")
         || roles.contains("teacher")
         || roles.contains("learning_teacher")

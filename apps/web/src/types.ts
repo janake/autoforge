@@ -94,6 +94,11 @@ export type LearningQuestionDisputeResponse = {
   reviewedAt: string | null;
 };
 
+export type LearningMaterialAssignmentRequest = {
+  studentSubjects: string[];
+  groupNames: string[];
+};
+
 export type LearningContentGenerationType = "QUESTION_SET" | "SUMMARY";
 
 export type LearningQuestionSetStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
