@@ -43,17 +43,22 @@ public class LearningQuestionAttemptService {
     return learningGeneratedContentRepository
       .findByMaterialIdAndOwnerSubjectAndGenerationTypeOrderByCreatedAtDesc(materialId, material.getOwnerSubject(), LearningContentGenerationType.QUESTION_SET)
       .stream()
+      .filter(content -> learningContentGenerationService.isQuestionSetVisibleToViewer(content, material.getOwnerSubject(), subject))
       .map(content -> learningContentGenerationService.toResponse(content))
       .toList();
   }
 
   @Transactional
   public LearningQuestionAttemptResponse submitAttempt(String materialId, String subject, Collection<String> groups, LearningQuestionAttemptRequest request) {
-    loadAccessibleMaterial(materialId, subject, groups);
+    LearningMaterial material = loadAccessibleMaterial(materialId, subject, groups);
     LearningGeneratedContent generation = learningGeneratedContentRepository.findById(request.generationId())
       .filter(content -> Objects.equals(content.getMaterialId(), materialId))
       .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
       .orElseThrow(() -> new LearningMaterialNotFoundException(request.generationId()));
+
+    if (!learningContentGenerationService.canAttemptQuestionSet(generation, material.getOwnerSubject(), subject)) {
+      throw new LearningMaterialAccessDeniedException(materialId);
+    }
 
     LearningQuestionSetPayload questionSet = readQuestionSet(generation.getStructuredContent());
     List<LearningQuestionAnswerRequest> answers = request.answers() == null ? List.of() : request.answers();

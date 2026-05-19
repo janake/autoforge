@@ -128,13 +128,33 @@ public class LearningMaterialController {
   @GetMapping("/{materialId}/generations")
   public List<LearningContentGenerationResponse> listGenerations(@PathVariable String materialId, Authentication authentication) {
     UserContext context = currentUser(authentication);
-    return learningContentGenerationService.listGeneratedContent(materialId, context.subject());
+    return learningContentGenerationService.listGeneratedContent(materialId, context.subject(), context.groups());
   }
 
   @GetMapping("/{materialId}/question-sets")
   public List<LearningContentGenerationResponse> listQuestionSets(@PathVariable String materialId, Authentication authentication) {
     UserContext context = currentUser(authentication);
     return learningQuestionAttemptService.listQuestionSets(materialId, context.subject(), context.groups());
+  }
+
+  @PostMapping("/{materialId}/question-sets/{generationId}/publish")
+  public LearningContentGenerationResponse publishQuestionSet(
+    @PathVariable String materialId,
+    @PathVariable String generationId,
+    Authentication authentication
+  ) {
+    UserContext context = currentUser(authentication);
+    return learningContentGenerationService.publishQuestionSet(materialId, generationId, context.subject());
+  }
+
+  @PostMapping("/{materialId}/question-sets/{generationId}/archive")
+  public LearningContentGenerationResponse archiveQuestionSet(
+    @PathVariable String materialId,
+    @PathVariable String generationId,
+    Authentication authentication
+  ) {
+    UserContext context = currentUser(authentication);
+    return learningContentGenerationService.archiveQuestionSet(materialId, generationId, context.subject());
   }
 
   @PostMapping("/{materialId}/question-attempts")

@@ -1,9 +1,11 @@
 package org.autoforge.backend.service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,13 +13,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.autoforge.backend.domain.LearningContentGenerationType;
 import org.autoforge.backend.domain.LearningGenerationStatus;
 import org.autoforge.backend.domain.LearningGeneratedContent;
+import org.autoforge.backend.domain.LearningQuestionSetStatus;
 import org.autoforge.backend.domain.LearningMaterial;
+import org.autoforge.backend.domain.LearningAssignmentTargetType;
+import org.autoforge.backend.domain.LearningMaterialAssignment;
 import org.autoforge.backend.dto.LearningContentGenerationResponse;
 import org.autoforge.backend.dto.LearningContentSourceReference;
 import org.autoforge.backend.dto.LearningQuestionOptionPayload;
 import org.autoforge.backend.dto.LearningQuestionPayload;
 import org.autoforge.backend.dto.LearningQuestionSetPayload;
 import org.autoforge.backend.repository.LearningGeneratedContentRepository;
+import org.autoforge.backend.repository.LearningMaterialAssignmentRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,6 +39,7 @@ public class LearningContentGenerationService {
 
   private final LearningMaterialRepository learningMaterialRepository;
   private final LearningGeneratedContentRepository learningGeneratedContentRepository;
+  private final LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
   private final LearningLearnerProfileService learningLearnerProfileService;
   private final ObjectMapper objectMapper;
 
@@ -47,6 +54,7 @@ public class LearningContentGenerationService {
       generated.content(),
       generated.structuredContent(),
       generated.sourceText(),
+      LearningQuestionSetStatus.DRAFT,
       true,
       FALLBACK_REASON,
       LearningGenerationStatus.COMPLETED,
@@ -66,6 +74,7 @@ public class LearningContentGenerationService {
       generated.content(),
       null,
       generated.sourceText(),
+      null,
       true,
       FALLBACK_REASON,
       LearningGenerationStatus.COMPLETED,
@@ -75,11 +84,22 @@ public class LearningContentGenerationService {
   }
 
   @Transactional(readOnly = true)
-  public List<LearningContentGenerationResponse> listGeneratedContent(String materialId, String subject) {
-    loadOwnedMaterial(materialId, subject);
-    return learningGeneratedContentRepository.findByMaterialIdAndOwnerSubjectOrderByCreatedAtDesc(materialId, subject).stream()
+  public List<LearningContentGenerationResponse> listGeneratedContent(String materialId, String subject, Collection<String> groups) {
+    LearningMaterial material = loadAccessibleMaterial(materialId, subject, groups);
+    return learningGeneratedContentRepository.findByMaterialIdAndOwnerSubjectOrderByCreatedAtDesc(materialId, material.getOwnerSubject()).stream()
+      .filter(content -> isQuestionSetVisibleToViewer(content, material.getOwnerSubject(), subject))
       .map(content -> toResponse(content, parseSources(content.getSourceReferences())))
       .toList();
+  }
+
+  @Transactional
+  public LearningContentGenerationResponse publishQuestionSet(String materialId, String generationId, String subject) {
+    return updateQuestionSetStatus(materialId, generationId, subject, LearningQuestionSetStatus.PUBLISHED);
+  }
+
+  @Transactional
+  public LearningContentGenerationResponse archiveQuestionSet(String materialId, String generationId, String subject) {
+    return updateQuestionSetStatus(materialId, generationId, subject, LearningQuestionSetStatus.ARCHIVED);
   }
 
   private LearningMaterial loadOwnedMaterial(String materialId, String subject) {
@@ -91,12 +111,55 @@ public class LearningContentGenerationService {
     return material;
   }
 
+  private LearningMaterial loadAccessibleMaterial(String materialId, String subject, Collection<String> groups) {
+    LearningMaterial material = learningMaterialRepository.findById(materialId)
+      .orElseThrow(() -> new LearningMaterialNotFoundException(materialId));
+    if (Objects.equals(material.getOwnerSubject(), subject)) {
+      return material;
+    }
+
+    Set<String> normalizedGroups = normalizeGroups(groups);
+    for (LearningMaterialAssignment assignment : learningMaterialAssignmentRepository.findByMaterialId(materialId)) {
+      if (assignment.getTargetType() == LearningAssignmentTargetType.STUDENT && Objects.equals(assignment.getTargetIdentifier(), subject)) {
+        return material;
+      }
+      if (assignment.getTargetType() == LearningAssignmentTargetType.GROUP && normalizedGroups.contains(assignment.getTargetIdentifier())) {
+        return material;
+      }
+    }
+
+    throw new LearningMaterialAccessDeniedException(materialId);
+  }
+
+  public boolean isQuestionSetVisibleToViewer(LearningGeneratedContent content, String ownerSubject, String viewerSubject) {
+    if (content.getGenerationType() != LearningContentGenerationType.QUESTION_SET) {
+      return true;
+    }
+    if (Objects.equals(ownerSubject, viewerSubject)) {
+      return true;
+    }
+    return effectiveQuestionSetStatus(content) == LearningQuestionSetStatus.PUBLISHED;
+  }
+
+  public boolean canAttemptQuestionSet(LearningGeneratedContent content, String ownerSubject, String viewerSubject) {
+    if (content.getGenerationType() != LearningContentGenerationType.QUESTION_SET) {
+      return false;
+    }
+
+    LearningQuestionSetStatus status = effectiveQuestionSetStatus(content);
+    if (status == LearningQuestionSetStatus.ARCHIVED) {
+      return false;
+    }
+
+    return Objects.equals(ownerSubject, viewerSubject) || status == LearningQuestionSetStatus.PUBLISHED;
+  }
+
   private GeneratedContent generateFromMaterial(LearningMaterial material, String subject, LearningContentGenerationType generationType) {
     List<LearningContentSourceReference> sources = buildSources(material);
     String retrievalContext = learningLearnerProfileService.buildRetrievalContext(subject);
     if (generationType == LearningContentGenerationType.SUMMARY) {
-      return new GeneratedContent(summaryContent(material, sources, retrievalContext), null, sourceText(sources), sources);
-    }
+    return new GeneratedContent(summaryContent(material, sources, retrievalContext), null, sourceText(sources), sources);
+  }
     LearningQuestionSetPayload payload = questionSetPayload(material, sources, retrievalContext);
     return new GeneratedContent(questionSetContent(payload), writeJson(payload), sourceText(sources), sources);
   }
@@ -281,6 +344,7 @@ public class LearningContentGenerationService {
       content.getGenerationType(),
       content.getContent(),
       sources,
+      content.getGenerationType() == LearningContentGenerationType.QUESTION_SET ? effectiveQuestionSetStatus(content) : null,
       content.isFallbackUsed(),
       content.getFallbackReason(),
       content.getGenerationStatus(),
@@ -292,6 +356,35 @@ public class LearningContentGenerationService {
 
   public LearningContentGenerationResponse toResponse(LearningGeneratedContent content) {
     return toResponse(content, parseSources(content.getSourceReferences()));
+  }
+
+  private LearningContentGenerationResponse updateQuestionSetStatus(String materialId, String generationId, String subject, LearningQuestionSetStatus status) {
+    LearningMaterial material = loadOwnedMaterial(materialId, subject);
+    LearningGeneratedContent generation = learningGeneratedContentRepository.findById(generationId)
+      .filter(content -> Objects.equals(content.getMaterialId(), material.getId()))
+      .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
+      .filter(content -> Objects.equals(content.getOwnerSubject(), material.getOwnerSubject()))
+      .orElseThrow(() -> new LearningMaterialNotFoundException(generationId));
+
+    generation.setQuestionSetStatus(status);
+    return toResponse(learningGeneratedContentRepository.save(generation));
+  }
+
+  public LearningQuestionSetStatus effectiveQuestionSetStatus(LearningGeneratedContent content) {
+    if (content.getGenerationType() != LearningContentGenerationType.QUESTION_SET) {
+      return null;
+    }
+    return content.getQuestionSetStatus() == null ? LearningQuestionSetStatus.PUBLISHED : content.getQuestionSetStatus();
+  }
+
+  private Set<String> normalizeGroups(Collection<String> groups) {
+    return groups == null ? Set.of() : groups.stream()
+      .filter(Objects::nonNull)
+      .map(String::trim)
+      .filter(value -> !value.isBlank())
+      .map(value -> value.startsWith("/") ? value.substring(1) : value)
+      .map(value -> value.contains("/") ? value.substring(value.lastIndexOf('/') + 1) : value)
+      .collect(Collectors.toSet());
   }
 
   private List<LearningContentSourceReference> parseSources(String sourceReferences) {

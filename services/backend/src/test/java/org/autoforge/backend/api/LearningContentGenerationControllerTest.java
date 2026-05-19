@@ -69,6 +69,7 @@ class LearningContentGenerationControllerTest {
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.materialId").value(material.getId()))
       .andExpect(jsonPath("$.generationType").value(LearningContentGenerationType.QUESTION_SET.name()))
+      .andExpect(jsonPath("$.questionSetStatus").value("DRAFT"))
       .andExpect(jsonPath("$.generationStatus").value("COMPLETED"))
       .andExpect(jsonPath("$.fallbackUsed").value(true))
       .andExpect(jsonPath("$.fallbackReason").value("Real AI is unavailable because the learning generation provider is not configured."))
@@ -97,6 +98,91 @@ class LearningContentGenerationControllerTest {
       .orElseThrow();
     assertThat(questionSet.getStructuredContent()).contains("\"questions\"");
     assertThat(questionSet.getGenerationStatus().name()).isEqualTo("COMPLETED");
+  }
+
+  @Test
+  void assignedStudentSeesOnlyPublishedQuestionSets() throws Exception {
+    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
+      "teacher-1",
+      "Biológia",
+      "Gyakorló tananyag",
+      "biology.txt",
+      "text/plain",
+      32L,
+      "Sejtek és szövetek alapjai.\n\nMásodik bekezdés a részletekről.".getBytes(StandardCharsets.UTF_8)
+    ));
+    learningMaterialAssignmentRepository.save(LearningMaterialAssignment.create(material.getId(), LearningAssignmentTargetType.STUDENT, "student-1"));
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/questions", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isCreated());
+
+    LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().stream()
+      .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
+      .findFirst()
+      .orElseThrow();
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isEmpty());
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$[0].id").value(questionSet.getId()))
+      .andExpect(jsonPath("$[0].questionSetStatus").value("PUBLISHED"));
+  }
+
+  @Test
+  void archivedQuestionSetCannotBeUsedForNewAttempts() throws Exception {
+    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
+      "teacher-1",
+      "Kémia",
+      "Gyakorló tananyag",
+      "chemistry.txt",
+      "text/plain",
+      28L,
+      "Atomok és molekulák.\n\nMásodik bekezdés.".getBytes(StandardCharsets.UTF_8)
+    ));
+    learningMaterialAssignmentRepository.save(LearningMaterialAssignment.create(material.getId(), LearningAssignmentTargetType.STUDENT, "student-1"));
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/questions", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isCreated());
+
+    LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().stream()
+      .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
+      .findFirst()
+      .orElseThrow();
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/archive", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("ARCHIVED"));
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isEmpty());
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndex": 0}]}
+          """.formatted(questionSet.getId())))
+      .andExpect(status().isForbidden());
   }
 
   @Test
@@ -136,6 +222,11 @@ class LearningContentGenerationControllerTest {
       .andExpect(status().isCreated());
 
     LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().get(0);
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
 
     mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
         .with(jwt().jwt(token -> token.subject("student-1"))))
@@ -187,6 +278,12 @@ class LearningContentGenerationControllerTest {
       .andExpect(status().isCreated());
 
     LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().get(0);
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
+
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
         .with(jwt().jwt(token -> token.subject("student-1")))
         .contentType(MediaType.APPLICATION_JSON)

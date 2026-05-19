@@ -675,3 +675,14 @@ Taskok
 
 Megjegyzes
 - A Learning felület és backend explicit teacher/admin guardot kap a tananyag létrehozásához, miközben a student csak a hozzárendelt tananyagok megoldási útvonalait látja.
+
+## 0.1.59
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-439`: Kérdéssor draft és publikálás student-visible állapotba
+
+Megjegyzes
+- A Learning question set generálás draft státuszban indul, a teacher publish/archive műveletekkel kezeli a láthatóságot, a student pedig csak a publikált kérdéssorokat éri el.

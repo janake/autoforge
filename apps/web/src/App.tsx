@@ -137,6 +137,17 @@ function latestByType(
   return generations.find((generation) => generation.generationType === generationType) ?? null;
 }
 
+function questionSetStatusTone(status: LearningContentGenerationResponse["questionSetStatus"]): string {
+  switch (status) {
+    case "PUBLISHED":
+      return "done";
+    case "ARCHIVED":
+      return "failed";
+    default:
+      return "pending";
+  }
+}
+
 function canCreateLearningContent(roles: string[]): boolean {
   return roles
     .map((role) => role.trim().toLowerCase().replace(/-/g, "_"))
@@ -306,6 +317,8 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
   const [refreshToken, setRefreshToken] = useState(0);
   const [sourceStatus, setSourceStatus] = useState<string | null>(null);
   const [sourceError, setSourceError] = useState<string | null>(null);
+  const [generationStatus, setGenerationStatus] = useState<string | null>(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const [state, setState] = useState<
     | { status: "loading" }
     | {
@@ -378,6 +391,20 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
     } catch (error) {
       setSourceStatus(null);
       setSourceError(error instanceof Error ? error.message : "Unable to delete learning source.");
+    }
+  };
+
+  const updateQuestionSetStatus = async (generationId: string, action: "publish" | "archive") => {
+    setGenerationError(null);
+    setGenerationStatus(action === "publish" ? "Publishing question set..." : "Archiving question set...");
+
+    try {
+      await postAuthedJson<LearningContentGenerationResponse>(`/v1/learning/materials/${materialId}/question-sets/${generationId}/${action}`, {});
+      setRefreshToken((value) => value + 1);
+      setGenerationStatus(action === "publish" ? "Question set published." : "Question set archived.");
+    } catch (error) {
+      setGenerationStatus(null);
+      setGenerationError(error instanceof Error ? error.message : "Unable to update question set status.");
     }
   };
 
@@ -532,6 +559,8 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
             <article className="card learning-detail-card">
               <p className="card-kicker">content</p>
               <h3>Latest generated content</h3>
+              {generationStatus && <p className="success-title">{generationStatus}</p>}
+              {generationError && <p className="error-title">{generationError}</p>}
               {state.generations.length === 0 ? (
                 <p className="muted">No generated questions or summaries yet.</p>
               ) : (
@@ -543,14 +572,35 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                       <section className="learning-detail-generation-card" key={generation.id}>
                         <div className="section-head">
                           <h4>{generation.generationType === "QUESTION_SET" ? "Questions" : "Summary"}</h4>
-                          <span className={`pill status-pill ${generation.generationStatus === "COMPLETED" ? "done" : "failed"}`}>
-                            {generation.generationStatus}
-                          </span>
+                          <div className="learning-generation-badges">
+                            {generation.generationType === "QUESTION_SET" && generation.questionSetStatus && (
+                              <span className={`pill status-pill ${questionSetStatusTone(generation.questionSetStatus)}`}>
+                                {generation.questionSetStatus}
+                              </span>
+                            )}
+                            <span className={`pill status-pill ${generation.generationStatus === "COMPLETED" ? "done" : "failed"}`}>
+                              {generation.generationStatus}
+                            </span>
+                          </div>
                         </div>
                         <p className="muted">
                           {generation.fallbackUsed ? generation.fallbackReason || "Fallback used" : "Generated from the learning source material."}
                         </p>
                         <pre className="learning-detail-content">{generation.content}</pre>
+                        {state.material.canManageAssignments && generation.generationType === "QUESTION_SET" && (
+                          <div className="learning-card-actions">
+                            {generation.questionSetStatus !== "PUBLISHED" && (
+                              <button className="secondary-button" type="button" onClick={() => void updateQuestionSetStatus(generation.id, "publish")}>
+                                Publish
+                              </button>
+                            )}
+                            {generation.questionSetStatus !== "ARCHIVED" && (
+                              <button className="secondary-button" type="button" onClick={() => void updateQuestionSetStatus(generation.id, "archive")}>
+                                Archive
+                              </button>
+                            )}
+                          </div>
+                        )}
                         {structured && generation.generationType === "QUESTION_SET" && (
                           <div className="learning-question-set">
                             {structured.questions.map((question: LearningQuestionPayload, index: number) => (
