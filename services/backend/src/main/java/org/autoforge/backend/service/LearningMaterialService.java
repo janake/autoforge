@@ -76,7 +76,7 @@ public class LearningMaterialService {
       content
     ));
     saveSource(material.getId(), subject, "PRIMARY_UPLOAD", resolvedTitle, file, storagePlan, content);
-    return toResponse(material, subject);
+    return toResponse(material, subject, canCreateLearningContent);
   }
 
   @Transactional
@@ -91,7 +91,7 @@ public class LearningMaterialService {
     LearningMaterialObjectStorageService.OriginalFileStoragePlan storagePlan = learningMaterialObjectStorageService.prepareOriginalFile(subject, file);
     byte[] content = readBytes(file);
     saveSource(material.getId(), subject, "ADDITIONAL_UPLOAD", resolvedSourceName, file, storagePlan, content);
-    return toResponse(material, subject);
+    return toResponse(material, subject, true);
   }
 
   @Transactional
@@ -109,11 +109,11 @@ public class LearningMaterialService {
 
     source.markDeleted();
     learningMaterialSourceRepository.save(source);
-    return toResponse(material, subject);
+    return toResponse(material, subject, true);
   }
 
   @Transactional(readOnly = true)
-  public List<LearningMaterialResponse> listAccessibleMaterials(String subject, Collection<String> groups) {
+  public List<LearningMaterialResponse> listAccessibleMaterials(String subject, Collection<String> groups, boolean canManageAssignments) {
     Set<String> normalizedGroups = normalizeGroups(groups);
     Set<String> materialIds = new LinkedHashSet<>();
 
@@ -135,12 +135,12 @@ public class LearningMaterialService {
 
     return learningMaterialRepository.findAllById(materialIds).stream()
       .sorted(Comparator.comparing(LearningMaterial::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
-      .map(material -> toResponse(material, subject))
+      .map(material -> toResponse(material, subject, canManageAssignments))
       .toList();
   }
 
   @Transactional(readOnly = true)
-  public LearningMaterialResponse getMaterial(String materialId, String subject, Collection<String> groups) {
+  public LearningMaterialResponse getMaterial(String materialId, String subject, Collection<String> groups, boolean canManageAssignments) {
     LearningMaterial material = loadMaterial(materialId);
     Set<String> normalizedGroups = normalizeGroups(groups);
 
@@ -148,13 +148,13 @@ public class LearningMaterialService {
       throw new LearningMaterialAccessDeniedException(materialId);
     }
 
-    return toResponse(material, subject);
+    return toResponse(material, subject, canManageAssignments);
   }
 
   @Transactional
-  public LearningMaterialResponse replaceAssignments(String materialId, String subject, LearningMaterialAssignmentRequest request) {
+  public LearningMaterialResponse replaceAssignments(String materialId, String subject, boolean canManageAssignments, LearningMaterialAssignmentRequest request) {
     LearningMaterial material = loadMaterial(materialId);
-    if (!Objects.equals(material.getOwnerSubject(), subject)) {
+    if (!Objects.equals(material.getOwnerSubject(), subject) && !canManageAssignments) {
       throw new LearningMaterialAccessDeniedException(materialId);
     }
 
@@ -168,7 +168,7 @@ public class LearningMaterialService {
     groupNames.forEach(group -> assignments.add(LearningMaterialAssignment.create(materialId, LearningAssignmentTargetType.GROUP, group)));
     learningMaterialAssignmentRepository.saveAll(assignments);
 
-    return toResponse(material, subject);
+    return toResponse(material, subject, canManageAssignments);
   }
 
   @Transactional
@@ -198,7 +198,7 @@ public class LearningMaterialService {
     return false;
   }
 
-  private LearningMaterialResponse toResponse(LearningMaterial material, String subject) {
+  private LearningMaterialResponse toResponse(LearningMaterial material, String subject, boolean canManageAssignments) {
     List<LearningMaterialAssignment> assignments = learningMaterialAssignmentRepository.findByMaterialId(material.getId());
     List<LearningMaterialSourceResponse> sources = learningMaterialSourceRepository.findByMaterialIdAndDeletedAtIsNullOrderByCreatedAtAsc(material.getId()).stream()
       .map(source -> new LearningMaterialSourceResponse(
@@ -255,7 +255,7 @@ public class LearningMaterialService {
       material.getOwnerSubject(),
       studentSubjects,
       groupNames,
-      Objects.equals(material.getOwnerSubject(), subject),
+      Objects.equals(material.getOwnerSubject(), subject) || canManageAssignments,
       sources,
       imageAssets,
       material.getCreatedAt(),

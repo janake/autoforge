@@ -697,3 +697,14 @@ Taskok
 
 Megjegyzes
 - A generált tartalom most a forrás snapshotját is tárolja, így a régi generálások visszakövethetők maradnak még forrás törlése után is.
+
+## 0.1.62
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-391`: Teacher tananyag hozzárendelés diákhoz és csoporthoz
+
+Megjegyzes
+- A Learning detail oldalon az owner most közvetlenül szerkesztheti a student és group assignment listát, a backend pedig a meglévő assignment replace API-t használja.

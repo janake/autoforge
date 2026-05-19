@@ -60,6 +60,11 @@ export type LearningImageAssetResponse = {
   createdAt: string;
 };
 
+export type LearningMaterialAssignmentRequest = {
+  studentSubjects: string[];
+  groupNames: string[];
+};
+
 export type LearningContentGenerationType = "QUESTION_SET" | "SUMMARY";
 
 export type LearningQuestionSetStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
