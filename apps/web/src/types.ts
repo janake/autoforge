@@ -60,6 +60,40 @@ export type LearningImageAssetResponse = {
   createdAt: string;
 };
 
+export type LearningQuestionAttemptAnswerPayload = {
+  questionIndex: number;
+  selectedOptionIndexes: number[];
+};
+
+export type LearningQuestionAttemptResponse = {
+  id: string;
+  materialId: string;
+  generationId: string;
+  studentSubject: string;
+  score: number;
+  totalQuestions: number;
+  answers: string;
+  submittedAt: string;
+};
+
+export type LearningQuestionDisputeStatus = "OPEN" | "ACCEPTED" | "REJECTED";
+
+export type LearningQuestionDisputeResponse = {
+  id: string;
+  materialId: string;
+  attemptId: string;
+  studentSubject: string;
+  questionIndex: number;
+  selectedOptionIndex: number;
+  reason: string;
+  status: LearningQuestionDisputeStatus;
+  reviewerSubject: string | null;
+  reviewReason: string | null;
+  overrideScore: number | null;
+  createdAt: string;
+  reviewedAt: string | null;
+};
+
 export type LearningContentGenerationType = "QUESTION_SET" | "SUMMARY";
 
 export type LearningQuestionSetStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
