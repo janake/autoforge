@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import org.autoforge.backend.domain.LearningAssignmentTargetType;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.domain.LearningMaterialAssignment;
@@ -129,7 +130,7 @@ class LearningMaterialControllerTest {
         .file(file)
         .param("title", "Algebra alapok")
         .param("description", "Bevezető feltöltött tananyag")
-        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.title").value("Algebra alapok"))
       .andExpect(jsonPath("$.originalFilename").value("algebra.pdf"))
@@ -155,6 +156,24 @@ class LearningMaterialControllerTest {
     assertThat(stored.getContentETag()).matches("[0-9a-f]{32}");
     assertThat(stored.getContent()).isEqualTo(file.getBytes());
     assertThat(learningMaterialSourceRepository.findByMaterialIdAndDeletedAtIsNullOrderByCreatedAtAsc(stored.getId())).hasSize(1);
+  }
+
+  @Test
+  void studentCannotUploadLearningMaterial() throws Exception {
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "notes.txt",
+      "text/plain",
+      "student content".getBytes(StandardCharsets.UTF_8)
+    );
+
+    mockMvc.perform(multipart("/api/v1/learning/materials")
+        .file(file)
+        .with(jwt().jwt(token -> token.subject("student-1").claim("realm_access", Map.of("roles", List.of("student"))))))
+      .andExpect(status().isForbidden());
+
+    assertThat(learningMaterialRepository.findAll()).isEmpty();
+    assertThat(learningMaterialSourceRepository.findAll()).isEmpty();
   }
 
   @Test
@@ -201,7 +220,7 @@ class LearningMaterialControllerTest {
 
     mockMvc.perform(multipart("/api/v1/learning/materials")
         .file(file)
-        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
       .andExpect(status().isBadRequest());
 
     assertThat(learningMaterialRepository.findAll()).isEmpty();
@@ -219,7 +238,7 @@ class LearningMaterialControllerTest {
 
     mockMvc.perform(multipart("/api/v1/learning/materials")
         .file(file)
-        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
       .andExpect(status().isBadRequest());
 
     assertThat(learningMaterialRepository.findAll()).isEmpty();

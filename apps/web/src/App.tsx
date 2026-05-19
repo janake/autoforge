@@ -137,11 +137,18 @@ function latestByType(
   return generations.find((generation) => generation.generationType === generationType) ?? null;
 }
 
-function LearningWorkspacePanel({ onOpenMaterial }: { onOpenMaterial: (materialId: string) => void }) {
+function canCreateLearningContent(roles: string[]): boolean {
+  return roles
+    .map((role) => role.trim().toLowerCase().replace(/-/g, "_"))
+    .some((role) => role === "admin" || role === "teacher" || role === "learning_teacher");
+}
+
+function LearningWorkspacePanel({ roles, onOpenMaterial }: { roles: string[]; onOpenMaterial: (materialId: string) => void }) {
   const [state, setState] = useState<LearningWorkspaceState>({ status: "loading" });
   const [refreshToken, setRefreshToken] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const canUploadMaterials = canCreateLearningContent(roles);
 
   useEffect(() => {
     let cancelled = false;
@@ -205,28 +212,35 @@ function LearningWorkspacePanel({ onOpenMaterial }: { onOpenMaterial: (materialI
         Your own learning materials, generated questions, and summaries live here. The list is scoped to the signed-in user only.
       </p>
 
-      <form className="prompt-form learning-upload-form" onSubmit={uploadMaterial}>
-        <div className="learning-upload-grid">
-          <label>
-            <span>Title</span>
-            <input name="title" placeholder="Algebra basics" />
-          </label>
-          <label>
-            <span>Description</span>
-            <input name="description" placeholder="Short note about the material" />
-          </label>
-          <label>
-            <span>File</span>
-            <input name="file" type="file" accept=".pdf,.txt,.md,.markdown" required />
-          </label>
+      {canUploadMaterials ? (
+        <form className="prompt-form learning-upload-form" onSubmit={uploadMaterial}>
+          <div className="learning-upload-grid">
+            <label>
+              <span>Title</span>
+              <input name="title" placeholder="Algebra basics" />
+            </label>
+            <label>
+              <span>Description</span>
+              <input name="description" placeholder="Short note about the material" />
+            </label>
+            <label>
+              <span>File</span>
+              <input name="file" type="file" accept=".pdf,.txt,.md,.markdown" required />
+            </label>
+          </div>
+          <div className="prompt-actions">
+            <button className="primary-button" type="submit">Upload material</button>
+            <span className="muted">PDF, TXT, Markdown supported.</span>
+          </div>
+          {uploadStatus && <p className="success-title">{uploadStatus}</p>}
+          {uploadError && <p className="error-title">{uploadError}</p>}
+        </form>
+      ) : (
+        <div className="learning-empty-state">
+          <h3>Student learning mode</h3>
+          <p>Only teacher/admin roles can create learning materials. Assigned materials remain available below.</p>
         </div>
-        <div className="prompt-actions">
-          <button className="primary-button" type="submit">Upload material</button>
-          <span className="muted">PDF, TXT, Markdown supported.</span>
-        </div>
-        {uploadStatus && <p className="success-title">{uploadStatus}</p>}
-        {uploadError && <p className="error-title">{uploadError}</p>}
-      </form>
+      )}
 
       {state.status === "loading" && <p className="muted">Loading your learning workspace...</p>}
       {state.status === "error" && <p className="error-title">{state.message}</p>}
@@ -1167,7 +1181,7 @@ function PrivateWorkspace({
         {learningMaterialId ? (
           <LearningMaterialDetailPanel materialId={learningMaterialId} onBack={() => onNavigate("/")} />
         ) : (
-          <LearningWorkspacePanel onOpenMaterial={(materialId) => onNavigate(`/learning/materials/${materialId}`)} />
+          <LearningWorkspacePanel roles={profile.roles} onOpenMaterial={(materialId) => onNavigate(`/learning/materials/${materialId}`)} />
         )}
 
         <article className="workspace-panel" id="jobs">

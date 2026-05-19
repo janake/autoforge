@@ -12,6 +12,32 @@ This file is mandatory for every AI agent working in this repository. Before sta
 - Use placeholders or configured secrets for sensitive values, for example `${AUTOFORGE_SSH_KEY}`, `<registry-owner>`, `<repo-url>`.
 - Before starting any task, check whether a relevant skill exists; if one does, use it.
 
+## MCP And Skill Usage Protocol
+
+Every agent must use the available MCP, skill, and capability-group guidance before asking the user for information that tools can retrieve.
+
+1. Always read `docs/ai-tooling.md` and `ops/ai/mcps.yaml` when a task needs external state, Jira, GitHub, runtime, OCI, browser, frontend, backend, or dependency context.
+2. Identify the relevant group/skill/MCP stack from `docs/ai-tooling.md` before implementation and before opening a PR.
+3. If the platform exposes a native MCP/tool namespace, use that native tool first.
+4. If no native MCP namespace is exposed, use the documented local launcher or repo script for the MCP.
+5. Do not claim an MCP is unavailable only because direct environment variables are not visible. Many local MCP launchers resolve credentials from OCI Vault display-name lookup or configured secret OCIDs.
+6. Never print secret values, tokens, credentials, OCIDs, or raw Vault payloads. It is acceptable to report that lookup succeeded or failed without showing values.
+7. If an MCP lookup fails, report the exact non-secret failure mode and the exact launcher/tool that failed.
+8. Do not ask the user for a Jira issue title, sprint order, status, target version, or scope until Jira MCP lookup has been attempted.
+9. If a skill exists in the runtime skill registry, load it with the skill tool. If no runtime skill exists, follow the corresponding guidance in `docs/ai-tooling.md` and document which group/skill/MCP stack was used.
+
+### Jira MCP Required Usage
+
+Jira is the single source of truth for task scope, status, and execution order. For Jira work, use the `jira` MCP from `ops/ai/mcps.yaml`.
+
+- Native Jira MCP tools, when exposed, include `jira_search`, `jira_get_issue`, `jira_list_transitions`, `jira_transition_issue`, `jira_add_comment`, `jira_list_boards`, `jira_list_sprints`, and `jira_get_sprint_issues`.
+- Local launcher: `ops/mcp/jira-local.sh`.
+- Local MCP server: `ops/mcp/jira-server.mjs`.
+- Credential resolution order is direct env (`JIRA_BASE_URL`, `JIRA_PROJECT_KEY`, `JIRA_EMAIL`, `JIRA_API_TOKEN`), explicit OCI secret OCID env (`OCI_<NAME>_SECRET_OCID`), then OCI Vault display-name lookup for the same names.
+- To identify the next task, query the active sprint or JQL before guessing. Examples: `jira_search` with `project = AUTO AND status != Done ORDER BY Rank ASC`; or list boards, list active sprints, then call `jira_get_sprint_issues`.
+- Before starting a Jira story, transition it to `In Progress`.
+- After opening a PR for a Jira story, transition it to `Under Test` and add a comment with branch, PR, version, and verification summary.
+
 ## Task Classification
 
 Classify every new request before making changes.

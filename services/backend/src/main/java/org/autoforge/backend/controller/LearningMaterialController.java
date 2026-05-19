@@ -56,7 +56,7 @@ public class LearningMaterialController {
     Authentication authentication
   ) {
     UserContext context = currentUser(authentication);
-    return learningMaterialService.uploadMaterial(context.subject(), file, title, description);
+    return learningMaterialService.uploadMaterial(context.subject(), context.canCreateLearningContent(), file, title, description);
   }
 
   @PostMapping(value = "/{materialId}/sources", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -199,7 +199,38 @@ public class LearningMaterialController {
     }
 
     Jwt jwt = token.getToken();
-    return new UserContext(jwt.getSubject(), extractGroups(jwt));
+    Set<String> groups = extractGroups(jwt);
+    return new UserContext(jwt.getSubject(), groups, extractRoles(jwt), groups);
+  }
+
+  private Set<String> extractRoles(Jwt jwt) {
+    Set<String> roles = new java.util.TreeSet<>();
+
+    Object realmAccess = jwt.getClaims().get("realm_access");
+    if (realmAccess instanceof java.util.Map<?, ?> access && access.get("roles") instanceof List<?> realmRoles) {
+      roles.addAll(realmRoles.stream()
+        .filter(Objects::nonNull)
+        .filter(String.class::isInstance)
+        .map(String.class::cast)
+        .map(LearningMaterialController::normalizePermissionName)
+        .collect(Collectors.toSet()));
+    }
+
+    Object resourceAccess = jwt.getClaims().get("resource_access");
+    if (resourceAccess instanceof java.util.Map<?, ?> access) {
+      access.values().forEach(clientAccess -> {
+        if (clientAccess instanceof java.util.Map<?, ?> client && client.get("roles") instanceof List<?> clientRoles) {
+          roles.addAll(clientRoles.stream()
+            .filter(Objects::nonNull)
+            .filter(String.class::isInstance)
+            .map(String.class::cast)
+            .map(LearningMaterialController::normalizePermissionName)
+            .collect(Collectors.toSet()));
+        }
+      });
+    }
+
+    return roles;
   }
 
   private Set<String> extractGroups(Jwt jwt) {
@@ -228,6 +259,17 @@ public class LearningMaterialController {
     return normalized;
   }
 
-  private record UserContext(String subject, Set<String> groups) {
+  private static String normalizePermissionName(String value) {
+    return value == null ? "" : value.trim().toLowerCase(java.util.Locale.ROOT).replace('-', '_');
+  }
+
+  private record UserContext(String subject, Set<String> groups, Set<String> roles, Set<String> normalizedGroups) {
+    private boolean canCreateLearningContent() {
+      return roles.contains("admin")
+        || roles.contains("teacher")
+        || roles.contains("learning_teacher")
+        || normalizedGroups.contains("teacher")
+        || normalizedGroups.contains("teachers");
+    }
   }
 }
