@@ -642,3 +642,14 @@ Taskok
 
 Megjegyzes
 - Az eredeti fájl Object Storage előkészítési hibaágai célzott teszteket kapnak, hogy olvasási hiba esetén kontrollált exception szülessen.
+
+## 0.1.56
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-397`: Teacher hibabejelentés review és pontszám felülbírálás
+
+Megjegyzes
+- A student saját question attempthez dispute-ot nyithat, a teacher review-zhatja és score override-ot menthet.

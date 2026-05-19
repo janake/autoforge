@@ -8,6 +8,7 @@ import org.autoforge.backend.service.LearningMaterialAccessDeniedException;
 import org.autoforge.backend.service.LearningMaterialNotFoundException;
 import org.autoforge.backend.service.LearningIngestionAccessDeniedException;
 import org.autoforge.backend.service.LearningIngestionNotFoundException;
+import org.autoforge.backend.service.LearningQuestionDisputeNotFoundException;
 import org.autoforge.backend.service.PromptDraftApprovalException;
 import org.autoforge.backend.service.PromptDraftNotFoundException;
 import org.autoforge.backend.service.PromptDraftTicketException;
@@ -84,6 +85,11 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(LearningIngestionAccessDeniedException.class)
   public ResponseEntity<ApiErrorResponse> handleLearningIngestionAccessDenied(LearningIngestionAccessDeniedException ex, HttpServletRequest request) {
     return build(HttpStatus.FORBIDDEN, ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(LearningQuestionDisputeNotFoundException.class)
+  public ResponseEntity<ApiErrorResponse> handleLearningQuestionDisputeNotFound(LearningQuestionDisputeNotFoundException ex, HttpServletRequest request) {
+    return build(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
   }
 
   private ResponseEntity<ApiErrorResponse> build(HttpStatus status, String message, String path) {
