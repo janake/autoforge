@@ -8,12 +8,16 @@ import org.autoforge.backend.dto.LearningMaterialAssignmentRequest;
 import org.autoforge.backend.dto.LearningContentGenerationResponse;
 import org.autoforge.backend.dto.LearningQuestionAttemptRequest;
 import org.autoforge.backend.dto.LearningQuestionAttemptResponse;
+import org.autoforge.backend.dto.LearningQuestionDisputeRequest;
+import org.autoforge.backend.dto.LearningQuestionDisputeResponse;
+import org.autoforge.backend.dto.LearningQuestionDisputeReviewRequest;
 import org.autoforge.backend.service.LearningContentGenerationService;
 import org.autoforge.backend.dto.LearningIngestionResponse;
 import org.autoforge.backend.dto.LearningMaterialResponse;
 import org.autoforge.backend.service.LearningMaterialService;
 import org.autoforge.backend.service.LearningIngestionService;
 import org.autoforge.backend.service.LearningQuestionAttemptService;
+import org.autoforge.backend.service.LearningQuestionDisputeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,6 +44,7 @@ public class LearningMaterialController {
   private final LearningContentGenerationService learningContentGenerationService;
   private final LearningIngestionService learningIngestionService;
   private final LearningQuestionAttemptService learningQuestionAttemptService;
+  private final LearningQuestionDisputeService learningQuestionDisputeService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
@@ -124,6 +129,35 @@ public class LearningMaterialController {
   public List<LearningQuestionAttemptResponse> listQuestionAttempts(@PathVariable String materialId, Authentication authentication) {
     UserContext context = currentUser(authentication);
     return learningQuestionAttemptService.listAttempts(materialId, context.subject(), context.groups());
+  }
+
+  @PostMapping("/{materialId}/question-attempts/{attemptId}/disputes")
+  @ResponseStatus(HttpStatus.CREATED)
+  public LearningQuestionDisputeResponse createQuestionDispute(
+    @PathVariable String materialId,
+    @PathVariable String attemptId,
+    @RequestBody LearningQuestionDisputeRequest request,
+    Authentication authentication
+  ) {
+    UserContext context = currentUser(authentication);
+    return learningQuestionDisputeService.createDispute(materialId, context.subject(), context.groups(), attemptId, request);
+  }
+
+  @GetMapping("/{materialId}/question-disputes")
+  public List<LearningQuestionDisputeResponse> listQuestionDisputes(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningQuestionDisputeService.listDisputes(materialId, context.subject(), context.groups());
+  }
+
+  @PostMapping("/{materialId}/question-disputes/{disputeId}/review")
+  public LearningQuestionDisputeResponse reviewQuestionDispute(
+    @PathVariable String materialId,
+    @PathVariable String disputeId,
+    @RequestBody LearningQuestionDisputeReviewRequest request,
+    Authentication authentication
+  ) {
+    UserContext context = currentUser(authentication);
+    return learningQuestionDisputeService.reviewDispute(materialId, context.subject(), context.groups(), disputeId, request);
   }
 
   @PutMapping("/{materialId}/assignments")
