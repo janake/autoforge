@@ -46,7 +46,10 @@ public class LearningMaterialService {
   private final LearningMaterialObjectStorageService learningMaterialObjectStorageService;
 
   @Transactional
-  public LearningMaterialResponse uploadMaterial(String subject, MultipartFile file, String title, String description) {
+  public LearningMaterialResponse uploadMaterial(String subject, boolean canCreateLearningContent, MultipartFile file, String title, String description) {
+    if (!canCreateLearningContent) {
+      throw new LearningMaterialAccessDeniedException("learning-material-upload");
+    }
     validateUpload(file);
 
     String originalFilename = normalizeTitle(file.getOriginalFilename());

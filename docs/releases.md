@@ -664,3 +664,14 @@ Taskok
 
 Megjegyzes
 - A Learning tananyagok több forrást kezelnek, a detail nézet source listát és owner műveleteket kap, az ingestion pedig az aktív source-okból dolgozik.
+
+## 0.1.58
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-372`: Learning teacher CRUD és student megoldási jogosultságok
+
+Megjegyzes
+- A Learning felület és backend explicit teacher/admin guardot kap a tananyag létrehozásához, miközben a student csak a hozzárendelt tananyagok megoldási útvonalait látja.
