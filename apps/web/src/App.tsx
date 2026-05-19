@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { getRuntimeConfig } from "./runtime-config";
-import { initializeKeycloak, loadAuthedJson, postAuthedFormData, postAuthedJson, signIn, signOut } from "./auth/keycloak";
+import { deleteAuthedJson, initializeKeycloak, loadAuthedJson, postAuthedFormData, postAuthedJson, signIn, signOut } from "./auth/keycloak";
 import type {
   BackendMeResponse,
   CreateJobResponse,
@@ -10,6 +10,7 @@ import type {
   LearningQuestionPayload,
   LearningQuestionSetPayload,
   LearningMaterialResponse,
+  LearningMaterialSourceResponse,
   JobResponse,
   PromptDraftResponse,
   PromptIntent,
@@ -288,6 +289,9 @@ function parseQuestionSet(structuredContent: string | null): LearningQuestionSet
 }
 
 function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: string; onBack: () => void }) {
+  const [refreshToken, setRefreshToken] = useState(0);
+  const [sourceStatus, setSourceStatus] = useState<string | null>(null);
+  const [sourceError, setSourceError] = useState<string | null>(null);
   const [state, setState] = useState<
     | { status: "loading" }
     | {
@@ -328,7 +332,40 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
     return () => {
       cancelled = true;
     };
-  }, [materialId]);
+  }, [materialId, refreshToken]);
+
+  const uploadSource = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSourceError(null);
+    setSourceStatus("Uploading source...");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      await postAuthedFormData<LearningMaterialResponse>(`/v1/learning/materials/${materialId}/sources`, formData);
+      form.reset();
+      setRefreshToken((value) => value + 1);
+      setSourceStatus("Source uploaded.");
+    } catch (error) {
+      setSourceStatus(null);
+      setSourceError(error instanceof Error ? error.message : "Unable to upload learning source.");
+    }
+  };
+
+  const deleteSource = async (sourceId: string) => {
+    setSourceError(null);
+    setSourceStatus("Deleting source...");
+
+    try {
+      await deleteAuthedJson<LearningMaterialResponse>(`/v1/learning/materials/${materialId}/sources/${sourceId}`);
+      setRefreshToken((value) => value + 1);
+      setSourceStatus("Source deleted.");
+    } catch (error) {
+      setSourceStatus(null);
+      setSourceError(error instanceof Error ? error.message : "Unable to delete learning source.");
+    }
+  };
 
   return (
     <article className="workspace-panel learning-detail-panel" id="learning-detail">
@@ -417,6 +454,66 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                 </dl>
               </article>
             )}
+
+            <article className="card learning-detail-card">
+              <p className="card-kicker">sources</p>
+              <div className="section-head">
+                <h3>Learning sources</h3>
+                <span className="pill">{state.material.sources.length}</span>
+              </div>
+              {state.material.canManageAssignments && (
+                <form className="prompt-form learning-upload-form" onSubmit={uploadSource}>
+                  <div className="learning-upload-grid">
+                    <label>
+                      <span>Source name</span>
+                      <input name="sourceName" placeholder="Lecture notes" />
+                    </label>
+                    <label>
+                      <span>File</span>
+                      <input name="file" type="file" accept=".pdf,.txt,.md,.markdown" required />
+                    </label>
+                  </div>
+                  <div className="prompt-actions">
+                    <button className="primary-button" type="submit">Add source</button>
+                    <span className="muted">Sources are included in ingestion and generation.</span>
+                  </div>
+                </form>
+              )}
+              {sourceStatus && <p className="success-title">{sourceStatus}</p>}
+              {sourceError && <p className="error-title">{sourceError}</p>}
+              {state.material.sources.length === 0 ? (
+                <p className="muted">No active sources yet.</p>
+              ) : (
+                <div className="learning-source-list">
+                  {state.material.sources.map((source: LearningMaterialSourceResponse) => (
+                    <article className="learning-source-card" key={source.id}>
+                      <div className="section-head">
+                        <div>
+                          <h4>{source.sourceName}</h4>
+                          <p className="muted">{source.originalFilename || source.contentType || "Uploaded source"}</p>
+                        </div>
+                        <span className={`pill ${source.sourceType === "PRIMARY_UPLOAD" ? "done" : "pending"}`}>{source.sourceType}</span>
+                      </div>
+                      <dl className="profile-list compact">
+                        <div>
+                          <dt>File size</dt>
+                          <dd>{source.fileSize ? `${Math.ceil(source.fileSize / 1024)} KB` : "unknown"}</dd>
+                        </div>
+                        <div>
+                          <dt>Created</dt>
+                          <dd>{formatTimestamp(source.createdAt)}</dd>
+                        </div>
+                      </dl>
+                      {state.material.canManageAssignments && (
+                        <button className="secondary-button" type="button" onClick={() => void deleteSource(source.id)}>
+                          Delete source
+                        </button>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              )}
+            </article>
 
             <article className="card learning-detail-card">
               <p className="card-kicker">content</p>
