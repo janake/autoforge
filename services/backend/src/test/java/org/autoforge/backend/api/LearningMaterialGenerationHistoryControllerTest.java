@@ -55,7 +55,8 @@ class LearningMaterialGenerationHistoryControllerTest {
         .with(jwt().jwt(token -> token.subject("teacher-1"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$[0].generationType").value("SUMMARY"))
-      .andExpect(jsonPath("$[1].generationType").value("QUESTION_SET"));
+      .andExpect(jsonPath("$[1].generationType").value("QUESTION_SET"))
+      .andExpect(jsonPath("$[1].questionSetStatus").value("DRAFT"));
   }
 
   @Test

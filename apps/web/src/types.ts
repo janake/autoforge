@@ -62,6 +62,8 @@ export type LearningImageAssetResponse = {
 
 export type LearningContentGenerationType = "QUESTION_SET" | "SUMMARY";
 
+export type LearningQuestionSetStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+
 export type LearningContentSourceReference = {
   chunkIndex: number;
   excerpt: string;
@@ -94,6 +96,7 @@ export type LearningContentGenerationResponse = {
   generationType: LearningContentGenerationType;
   content: string;
   sources: LearningContentSourceReference[];
+  questionSetStatus: LearningQuestionSetStatus | null;
   fallbackUsed: boolean;
   fallbackReason: string | null;
   generationStatus: "COMPLETED" | "FAILED";

@@ -40,6 +40,10 @@ public class LearningGeneratedContent {
   @Column(name = "source_references", nullable = false, length = 4000)
   private String sourceReferences;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "question_set_status", length = 32)
+  private LearningQuestionSetStatus questionSetStatus;
+
   @Column(name = "fallback_used", nullable = false)
   private boolean fallbackUsed;
 
@@ -67,6 +71,7 @@ public class LearningGeneratedContent {
     String content,
     String structuredContent,
     String sourceReferences,
+    LearningQuestionSetStatus questionSetStatus,
     boolean fallbackUsed,
     String fallbackReason,
     LearningGenerationStatus generationStatus,
@@ -78,6 +83,7 @@ public class LearningGeneratedContent {
     this.content = content;
     this.structuredContent = structuredContent;
     this.sourceReferences = sourceReferences;
+    this.questionSetStatus = questionSetStatus;
     this.fallbackUsed = fallbackUsed;
     this.fallbackReason = fallbackReason;
     this.generationStatus = generationStatus;
@@ -91,6 +97,7 @@ public class LearningGeneratedContent {
     String content,
     String structuredContent,
     String sourceReferences,
+    LearningQuestionSetStatus questionSetStatus,
     boolean fallbackUsed,
     String fallbackReason,
     LearningGenerationStatus generationStatus,
@@ -103,6 +110,7 @@ public class LearningGeneratedContent {
       content,
       structuredContent,
       sourceReferences,
+      questionSetStatus,
       fallbackUsed,
       fallbackReason,
       generationStatus,
@@ -143,6 +151,14 @@ public class LearningGeneratedContent {
 
   public String getSourceReferences() {
     return sourceReferences;
+  }
+
+  public LearningQuestionSetStatus getQuestionSetStatus() {
+    return questionSetStatus;
+  }
+
+  public void setQuestionSetStatus(LearningQuestionSetStatus questionSetStatus) {
+    this.questionSetStatus = questionSetStatus;
   }
 
   public boolean isFallbackUsed() {
