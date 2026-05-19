@@ -78,6 +78,14 @@ export async function postAuthedFormData<T>(path: string, body: FormData): Promi
   return (await response.json()) as T;
 }
 
+export async function deleteAuthedJson<T>(path: string): Promise<T> {
+  const response = await authedFetch(path, {
+    method: "DELETE",
+  });
+
+  return (await response.json()) as T;
+}
+
 async function authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const client = createKeycloak();
   const runtimeConfig = getRuntimeConfig();

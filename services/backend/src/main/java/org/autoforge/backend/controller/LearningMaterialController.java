@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,6 +57,28 @@ public class LearningMaterialController {
   ) {
     UserContext context = currentUser(authentication);
     return learningMaterialService.uploadMaterial(context.subject(), file, title, description);
+  }
+
+  @PostMapping(value = "/{materialId}/sources", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @ResponseStatus(HttpStatus.CREATED)
+  public LearningMaterialResponse addSource(
+    @PathVariable String materialId,
+    @RequestParam(required = false) String sourceName,
+    @RequestParam("file") MultipartFile file,
+    Authentication authentication
+  ) {
+    UserContext context = currentUser(authentication);
+    return learningMaterialService.addSource(materialId, context.subject(), file, sourceName);
+  }
+
+  @DeleteMapping("/{materialId}/sources/{sourceId}")
+  public LearningMaterialResponse deleteSource(
+    @PathVariable String materialId,
+    @PathVariable String sourceId,
+    Authentication authentication
+  ) {
+    UserContext context = currentUser(authentication);
+    return learningMaterialService.deleteSource(materialId, context.subject(), sourceId);
   }
 
   @GetMapping("/{materialId}/ingestion")

@@ -653,3 +653,14 @@ Taskok
 
 Megjegyzes
 - A student saját question attempthez dispute-ot nyithat, a teacher review-zhatja és score override-ot menthet.
+
+## 0.1.57
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-371`: Tananyag több source életciklus és ingestion update
+
+Megjegyzes
+- A Learning tananyagok több forrást kezelnek, a detail nézet source listát és owner műveleteket kap, az ingestion pedig az aktív source-okból dolgozik.

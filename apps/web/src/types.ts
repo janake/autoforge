@@ -26,7 +26,25 @@ export type LearningMaterialResponse = {
   studentSubjects: string[];
   groupNames: string[];
   canManageAssignments: boolean;
+  sources: LearningMaterialSourceResponse[];
   imageAssets: LearningImageAssetResponse[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LearningMaterialSourceResponse = {
+  id: string;
+  materialId: string;
+  sourceType: string;
+  sourceName: string;
+  originalFilename: string | null;
+  contentType: string | null;
+  fileSize: number | null;
+  storageObjectKey: string;
+  storageObjectUri: string;
+  contentHash: string;
+  contentETag: string;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };

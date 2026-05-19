@@ -12,12 +12,15 @@ import java.util.stream.Collectors;
 import org.autoforge.backend.domain.LearningAssignmentTargetType;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.domain.LearningMaterialAssignment;
+import org.autoforge.backend.domain.LearningMaterialSource;
 import org.autoforge.backend.dto.LearningMaterialAssignmentRequest;
 import org.autoforge.backend.dto.LearningImageAssetResponse;
 import org.autoforge.backend.dto.LearningMaterialResponse;
+import org.autoforge.backend.dto.LearningMaterialSourceResponse;
 import org.autoforge.backend.repository.LearningImageAssetRepository;
 import org.autoforge.backend.repository.LearningMaterialAssignmentRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
+import org.autoforge.backend.repository.LearningMaterialSourceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,7 @@ public class LearningMaterialService {
 
   private final LearningMaterialRepository learningMaterialRepository;
   private final LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
+  private final LearningMaterialSourceRepository learningMaterialSourceRepository;
   private final LearningImageAssetRepository learningImageAssetRepository;
   private final LearningMaterialObjectStorageService learningMaterialObjectStorageService;
 
@@ -68,6 +72,40 @@ public class LearningMaterialService {
       storagePlan.eTag(),
       content
     ));
+    saveSource(material.getId(), subject, "PRIMARY_UPLOAD", resolvedTitle, file, storagePlan, content);
+    return toResponse(material, subject);
+  }
+
+  @Transactional
+  public LearningMaterialResponse addSource(String materialId, String subject, MultipartFile file, String sourceName) {
+    LearningMaterial material = loadMaterial(materialId);
+    if (!Objects.equals(material.getOwnerSubject(), subject)) {
+      throw new LearningMaterialAccessDeniedException(materialId);
+    }
+
+    validateUpload(file);
+    String resolvedSourceName = firstNonBlank(sourceName, firstNonBlank(file.getOriginalFilename(), "source"));
+    LearningMaterialObjectStorageService.OriginalFileStoragePlan storagePlan = learningMaterialObjectStorageService.prepareOriginalFile(subject, file);
+    byte[] content = readBytes(file);
+    saveSource(material.getId(), subject, "ADDITIONAL_UPLOAD", resolvedSourceName, file, storagePlan, content);
+    return toResponse(material, subject);
+  }
+
+  @Transactional
+  public LearningMaterialResponse deleteSource(String materialId, String subject, String sourceId) {
+    LearningMaterial material = loadMaterial(materialId);
+    if (!Objects.equals(material.getOwnerSubject(), subject)) {
+      throw new LearningMaterialAccessDeniedException(materialId);
+    }
+
+    LearningMaterialSource source = learningMaterialSourceRepository.findByIdAndDeletedAtIsNull(sourceId)
+      .orElseThrow(() -> new LearningMaterialNotFoundException(sourceId));
+    if (!Objects.equals(source.getMaterialId(), materialId)) {
+      throw new LearningMaterialNotFoundException(sourceId);
+    }
+
+    source.markDeleted();
+    learningMaterialSourceRepository.save(source);
     return toResponse(material, subject);
   }
 
@@ -159,6 +197,24 @@ public class LearningMaterialService {
 
   private LearningMaterialResponse toResponse(LearningMaterial material, String subject) {
     List<LearningMaterialAssignment> assignments = learningMaterialAssignmentRepository.findByMaterialId(material.getId());
+    List<LearningMaterialSourceResponse> sources = learningMaterialSourceRepository.findByMaterialIdAndDeletedAtIsNullOrderByCreatedAtAsc(material.getId()).stream()
+      .map(source -> new LearningMaterialSourceResponse(
+        source.getId(),
+        source.getMaterialId(),
+        source.getSourceType(),
+        source.getSourceName(),
+        source.getOriginalFilename(),
+        source.getContentType(),
+        source.getFileSize(),
+        source.getStorageObjectKey(),
+        source.getStorageObjectUri(),
+        source.getContentHash(),
+        source.getContentETag(),
+        source.getDeletedAt(),
+        source.getCreatedAt(),
+        source.getUpdatedAt()
+      ))
+      .toList();
     List<LearningImageAssetResponse> imageAssets = learningImageAssetRepository.findByMaterialIdOrderByCreatedAtAsc(material.getId()).stream()
       .map(asset -> new LearningImageAssetResponse(
         asset.getId(),
@@ -197,10 +253,44 @@ public class LearningMaterialService {
       studentSubjects,
       groupNames,
       Objects.equals(material.getOwnerSubject(), subject),
+      sources,
       imageAssets,
       material.getCreatedAt(),
       material.getUpdatedAt()
     );
+  }
+
+  private void saveSource(
+    String materialId,
+    String ownerSubject,
+    String sourceType,
+    String sourceName,
+    MultipartFile file,
+    LearningMaterialObjectStorageService.OriginalFileStoragePlan storagePlan,
+    byte[] content
+  ) {
+    learningMaterialSourceRepository.save(LearningMaterialSource.create(
+      materialId,
+      ownerSubject,
+      sourceType,
+      sourceName,
+      normalizeTitle(file.getOriginalFilename()),
+      normalizeTitle(file.getContentType()),
+      file.getSize(),
+      storagePlan.objectKey(),
+      storagePlan.objectUri(),
+      storagePlan.contentHash(),
+      storagePlan.eTag(),
+      content
+    ));
+  }
+
+  private byte[] readBytes(MultipartFile file) {
+    try {
+      return file.getBytes();
+    } catch (Exception exception) {
+      throw new IllegalStateException("Failed to read uploaded file", exception);
+    }
   }
 
   private static List<String> normalizedDistinctSubjects(Collection<String> values) {

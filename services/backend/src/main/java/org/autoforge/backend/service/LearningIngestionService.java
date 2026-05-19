@@ -10,12 +10,14 @@ import org.autoforge.backend.domain.LearningEmbedding;
 import org.autoforge.backend.domain.LearningIngestionJob;
 import org.autoforge.backend.domain.LearningIngestionStatus;
 import org.autoforge.backend.domain.LearningMaterial;
+import org.autoforge.backend.domain.LearningMaterialSource;
 import org.autoforge.backend.dto.LearningEmbeddingPayload;
 import org.autoforge.backend.dto.LearningIngestionResponse;
 import org.autoforge.backend.repository.LearningChunkRepository;
 import org.autoforge.backend.repository.LearningEmbeddingRepository;
 import org.autoforge.backend.repository.LearningIngestionJobRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
+import org.autoforge.backend.repository.LearningMaterialSourceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,7 @@ public class LearningIngestionService {
   private final LearningIngestionJobRepository learningIngestionJobRepository;
   private final LearningChunkRepository learningChunkRepository;
   private final LearningEmbeddingRepository learningEmbeddingRepository;
+  private final LearningMaterialSourceRepository learningMaterialSourceRepository;
   private final LearningEmbeddingProvider learningEmbeddingProvider;
 
   @Transactional
@@ -175,7 +178,19 @@ public class LearningIngestionService {
     );
   }
 
-  private static String extractText(LearningMaterial material) {
+  private String extractText(LearningMaterial material) {
+    List<LearningMaterialSource> sources = learningMaterialSourceRepository.findByMaterialIdAndDeletedAtIsNullOrderByCreatedAtAsc(material.getId());
+    if (!sources.isEmpty()) {
+      String joinedSources = sources.stream()
+        .map(source -> new String(source.getContent() == null ? new byte[0] : source.getContent(), StandardCharsets.UTF_8).trim())
+        .filter(content -> !content.isBlank())
+        .reduce((left, right) -> left + "\n\n" + right)
+        .orElse("");
+      if (!joinedSources.isBlank()) {
+        return joinedSources;
+      }
+    }
+
     if (material.getContent() == null || material.getContent().length == 0) {
       return material.getTitle() + "\n" + Objects.toString(material.getDescription(), "");
     }

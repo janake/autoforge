@@ -11,6 +11,7 @@
 - The list view links into the detail route for a single material.
 - The student view shows the learning content, ingestion status, and generated content history.
 - The owner view shows assignments, ingestion metadata, and generated content history.
+- The owner view also manages material sources, including add and soft-delete actions.
 - Unauthorized access is surfaced as an error state instead of leaking the material.
 
 ## Notes
