@@ -12,10 +12,12 @@ import org.autoforge.backend.domain.LearningContentGenerationType;
 import org.autoforge.backend.domain.LearningGeneratedContent;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.domain.LearningMaterialAssignment;
+import org.autoforge.backend.domain.LearningMaterialSource;
 import org.autoforge.backend.domain.LearningAssignmentTargetType;
 import org.autoforge.backend.repository.LearningGeneratedContentRepository;
 import org.autoforge.backend.repository.LearningMaterialAssignmentRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
+import org.autoforge.backend.repository.LearningMaterialSourceRepository;
 import org.autoforge.backend.repository.LearningQuestionAttemptRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,9 @@ class LearningContentGenerationControllerTest {
   private LearningMaterialRepository learningMaterialRepository;
 
   @Autowired
+  private LearningMaterialSourceRepository learningMaterialSourceRepository;
+
+  @Autowired
   private LearningGeneratedContentRepository learningGeneratedContentRepository;
 
   @Autowired
@@ -48,6 +53,7 @@ class LearningContentGenerationControllerTest {
   void cleanState() {
     learningQuestionAttemptRepository.deleteAll();
     learningMaterialAssignmentRepository.deleteAll();
+    learningMaterialSourceRepository.deleteAll();
     learningGeneratedContentRepository.deleteAll();
     learningMaterialRepository.deleteAll();
   }
@@ -63,6 +69,20 @@ class LearningContentGenerationControllerTest {
       68L,
       "Első bekezdés az anyagról.\n\nMásodik bekezdés a részletekről.".getBytes(StandardCharsets.UTF_8)
     ));
+    learningMaterialSourceRepository.save(LearningMaterialSource.create(
+      material.getId(),
+      "teacher-1",
+      "PRIMARY_UPLOAD",
+      "Algebra alapok",
+      "algebra.txt",
+      "text/plain",
+      68L,
+      "teacher-1/source-1",
+      "oci://learning-materials/teacher-1/source-1",
+      "1111111111111111111111111111111111111111111111111111111111111111",
+      "11111111111111111111111111111111",
+      "Első bekezdés az anyagról.\n\nMásodik bekezdés a részletekről.".getBytes(StandardCharsets.UTF_8)
+    ));
 
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/questions", material.getId())
         .with(jwt().jwt(token -> token.subject("teacher-1"))))
@@ -73,6 +93,7 @@ class LearningContentGenerationControllerTest {
       .andExpect(jsonPath("$.generationStatus").value("COMPLETED"))
       .andExpect(jsonPath("$.fallbackUsed").value(true))
       .andExpect(jsonPath("$.fallbackReason").value("Real AI is unavailable because the learning generation provider is not configured."))
+      .andExpect(jsonPath("$.sourceVersions[0].contentHash").value("1111111111111111111111111111111111111111111111111111111111111111"))
       .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Tanulói profil:")))
       .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Mi a legfontosabb üzenete a tananyagnak?")))
       .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.containsString("\"questions\"")))
@@ -84,6 +105,7 @@ class LearningContentGenerationControllerTest {
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.generationType").value(LearningContentGenerationType.SUMMARY.name()))
       .andExpect(jsonPath("$.generationStatus").value("COMPLETED"))
+      .andExpect(jsonPath("$.sourceVersions[0].sourceName").value("Algebra alapok"))
       .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.nullValue()))
       .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Chunk 1")))
       .andExpect(jsonPath("$.sources[0].excerpt").exists());
@@ -98,6 +120,21 @@ class LearningContentGenerationControllerTest {
       .orElseThrow();
     assertThat(questionSet.getStructuredContent()).contains("\"questions\"");
     assertThat(questionSet.getGenerationStatus().name()).isEqualTo("COMPLETED");
+
+    LearningMaterialSource source = learningMaterialSourceRepository.findByMaterialIdAndDeletedAtIsNullOrderByCreatedAtAsc(material.getId()).get(0);
+    source.markDeleted();
+    learningMaterialSourceRepository.save(source);
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/summary", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.sourceVersions").isEmpty());
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/generations", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$[0].sourceVersions").isEmpty())
+      .andExpect(jsonPath("$[1].sourceVersions[0].contentHash").value("1111111111111111111111111111111111111111111111111111111111111111"));
   }
 
   @Test
