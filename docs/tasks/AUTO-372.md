@@ -1,12 +1,12 @@
 # [AUTO-372] Learning teacher CRUD és student megoldási jogosultságok
 
-Statusz: In Progress
+Statusz: Under Test
 
 Verzió: 0.1.58
 
 Branch: `feature/AUTO-372-learning-permissions`
 
-PR: pending
+PR: https://github.com/janake/autoforge/pull/162
 
 ## Cél
 
@@ -30,7 +30,8 @@ A Learning modulban a teacher/admin szerepkör kezelje a tananyag létrehozási 
 - `mvn -q -f services/backend/pom.xml -Dtest=LearningMaterialControllerTest test` - célzott backend regression teszt sikeres
 - `npm install` - web workspace függőségek telepítve az új worktree-ben
 - `npm run build:web` - web build sikeres
+- `gh pr create` - PR megnyitva: https://github.com/janake/autoforge/pull/162
 
 ## Megjegyzés
 
-A PR és végső verifikáció folyamatban van.
+A PR megnyílt, a story Under Test státuszba kerül.
