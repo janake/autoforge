@@ -7,6 +7,7 @@ import type {
   LearningContentGenerationResponse,
   LearningIngestionResponse,
   LearningImageAssetResponse,
+  LearningSourceVersionReference,
   LearningQuestionPayload,
   LearningQuestionSetPayload,
   LearningMaterialResponse,
@@ -586,6 +587,18 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                         <p className="muted">
                           {generation.fallbackUsed ? generation.fallbackReason || "Fallback used" : "Generated from the learning source material."}
                         </p>
+                        {generation.sourceVersions.length > 0 && (
+                          <dl className="profile-list compact">
+                            <div>
+                              <dt>Source versions</dt>
+                              <dd>{generation.sourceVersions.map((source: LearningSourceVersionReference) => source.sourceName).join(", ")}</dd>
+                            </div>
+                            <div>
+                              <dt>Source hashes</dt>
+                              <dd>{generation.sourceVersions.map((source: LearningSourceVersionReference) => source.contentHash.slice(0, 12)).join(", ")}</dd>
+                            </div>
+                          </dl>
+                        )}
                         <pre className="learning-detail-content">{generation.content}</pre>
                         {state.material.canManageAssignments && generation.generationType === "QUESTION_SET" && (
                           <div className="learning-card-actions">

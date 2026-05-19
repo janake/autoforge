@@ -40,6 +40,10 @@ public class LearningGeneratedContent {
   @Column(name = "source_references", nullable = false, length = 4000)
   private String sourceReferences;
 
+  @Lob
+  @Column(name = "source_version_references")
+  private String sourceVersionReferences;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "question_set_status", length = 32)
   private LearningQuestionSetStatus questionSetStatus;
@@ -71,6 +75,7 @@ public class LearningGeneratedContent {
     String content,
     String structuredContent,
     String sourceReferences,
+    String sourceVersionReferences,
     LearningQuestionSetStatus questionSetStatus,
     boolean fallbackUsed,
     String fallbackReason,
@@ -83,6 +88,7 @@ public class LearningGeneratedContent {
     this.content = content;
     this.structuredContent = structuredContent;
     this.sourceReferences = sourceReferences;
+    this.sourceVersionReferences = sourceVersionReferences;
     this.questionSetStatus = questionSetStatus;
     this.fallbackUsed = fallbackUsed;
     this.fallbackReason = fallbackReason;
@@ -97,6 +103,7 @@ public class LearningGeneratedContent {
     String content,
     String structuredContent,
     String sourceReferences,
+    String sourceVersionReferences,
     LearningQuestionSetStatus questionSetStatus,
     boolean fallbackUsed,
     String fallbackReason,
@@ -110,6 +117,7 @@ public class LearningGeneratedContent {
       content,
       structuredContent,
       sourceReferences,
+      sourceVersionReferences,
       questionSetStatus,
       fallbackUsed,
       fallbackReason,
@@ -151,6 +159,14 @@ public class LearningGeneratedContent {
 
   public String getSourceReferences() {
     return sourceReferences;
+  }
+
+  public String getSourceVersionReferences() {
+    return sourceVersionReferences;
+  }
+
+  public void setSourceVersionReferences(String sourceVersionReferences) {
+    this.sourceVersionReferences = sourceVersionReferences;
   }
 
   public LearningQuestionSetStatus getQuestionSetStatus() {

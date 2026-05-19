@@ -17,14 +17,17 @@ import org.autoforge.backend.domain.LearningQuestionSetStatus;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.domain.LearningAssignmentTargetType;
 import org.autoforge.backend.domain.LearningMaterialAssignment;
+import org.autoforge.backend.domain.LearningMaterialSource;
 import org.autoforge.backend.dto.LearningContentGenerationResponse;
 import org.autoforge.backend.dto.LearningContentSourceReference;
 import org.autoforge.backend.dto.LearningQuestionOptionPayload;
 import org.autoforge.backend.dto.LearningQuestionPayload;
 import org.autoforge.backend.dto.LearningQuestionSetPayload;
+import org.autoforge.backend.dto.LearningSourceVersionReference;
 import org.autoforge.backend.repository.LearningGeneratedContentRepository;
 import org.autoforge.backend.repository.LearningMaterialAssignmentRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
+import org.autoforge.backend.repository.LearningMaterialSourceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +43,7 @@ public class LearningContentGenerationService {
   private final LearningMaterialRepository learningMaterialRepository;
   private final LearningGeneratedContentRepository learningGeneratedContentRepository;
   private final LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
+  private final LearningMaterialSourceRepository learningMaterialSourceRepository;
   private final LearningLearnerProfileService learningLearnerProfileService;
   private final ObjectMapper objectMapper;
 
@@ -47,6 +51,7 @@ public class LearningContentGenerationService {
   public LearningContentGenerationResponse generateQuestions(String materialId, String subject) {
     LearningMaterial material = loadOwnedMaterial(materialId, subject);
     GeneratedContent generated = generateFromMaterial(material, subject, LearningContentGenerationType.QUESTION_SET);
+    List<LearningSourceVersionReference> sourceVersions = captureSourceVersions(material.getId());
     LearningGeneratedContent saved = learningGeneratedContentRepository.save(LearningGeneratedContent.create(
       material.getId(),
       subject,
@@ -54,6 +59,7 @@ public class LearningContentGenerationService {
       generated.content(),
       generated.structuredContent(),
       generated.sourceText(),
+      writeJson(sourceVersions),
       LearningQuestionSetStatus.DRAFT,
       true,
       FALLBACK_REASON,
@@ -67,6 +73,7 @@ public class LearningContentGenerationService {
   public LearningContentGenerationResponse generateSummary(String materialId, String subject) {
     LearningMaterial material = loadOwnedMaterial(materialId, subject);
     GeneratedContent generated = generateFromMaterial(material, subject, LearningContentGenerationType.SUMMARY);
+    List<LearningSourceVersionReference> sourceVersions = captureSourceVersions(material.getId());
     LearningGeneratedContent saved = learningGeneratedContentRepository.save(LearningGeneratedContent.create(
       material.getId(),
       subject,
@@ -74,6 +81,7 @@ public class LearningContentGenerationService {
       generated.content(),
       null,
       generated.sourceText(),
+      writeJson(sourceVersions),
       null,
       true,
       FALLBACK_REASON,
@@ -337,6 +345,14 @@ public class LearningContentGenerationService {
     }
   }
 
+  private String writeJson(Object payload) {
+    try {
+      return objectMapper.writeValueAsString(payload);
+    } catch (JsonProcessingException exception) {
+      throw new IllegalStateException("Failed to serialize learning source version references", exception);
+    }
+  }
+
   private LearningContentGenerationResponse toResponse(LearningGeneratedContent content, List<LearningContentSourceReference> sources) {
     return new LearningContentGenerationResponse(
       content.getId(),
@@ -344,6 +360,7 @@ public class LearningContentGenerationService {
       content.getGenerationType(),
       content.getContent(),
       sources,
+      parseSourceVersions(content.getSourceVersionReferences()),
       content.getGenerationType() == LearningContentGenerationType.QUESTION_SET ? effectiveQuestionSetStatus(content) : null,
       content.isFallbackUsed(),
       content.getFallbackReason(),
@@ -356,6 +373,34 @@ public class LearningContentGenerationService {
 
   public LearningContentGenerationResponse toResponse(LearningGeneratedContent content) {
     return toResponse(content, parseSources(content.getSourceReferences()));
+  }
+
+  private List<LearningSourceVersionReference> captureSourceVersions(String materialId) {
+    return learningMaterialSourceRepository.findByMaterialIdAndDeletedAtIsNullOrderByCreatedAtAsc(materialId).stream()
+      .map(source -> new LearningSourceVersionReference(
+        source.getId(),
+        source.getSourceName(),
+        source.getOriginalFilename(),
+        source.getContentHash(),
+        source.getContentETag(),
+        source.getCreatedAt()
+      ))
+      .toList();
+  }
+
+  private List<LearningSourceVersionReference> parseSourceVersions(String sourceVersionReferences) {
+    if (sourceVersionReferences == null || sourceVersionReferences.isBlank()) {
+      return List.of();
+    }
+
+    try {
+      return objectMapper.readValue(
+        sourceVersionReferences,
+        objectMapper.getTypeFactory().constructCollectionType(List.class, LearningSourceVersionReference.class)
+      );
+    } catch (JsonProcessingException exception) {
+      throw new IllegalStateException("Failed to parse learning source version references", exception);
+    }
   }
 
   private LearningContentGenerationResponse updateQuestionSetStatus(String materialId, String generationId, String subject, LearningQuestionSetStatus status) {

@@ -69,6 +69,15 @@ export type LearningContentSourceReference = {
   excerpt: string;
 };
 
+export type LearningSourceVersionReference = {
+  id: string;
+  sourceName: string;
+  originalFilename: string | null;
+  contentHash: string;
+  contentETag: string;
+  createdAt: string;
+};
+
 export type LearningQuestionOptionPayload = {
   key: string;
   text: string;
@@ -96,6 +105,7 @@ export type LearningContentGenerationResponse = {
   generationType: LearningContentGenerationType;
   content: string;
   sources: LearningContentSourceReference[];
+  sourceVersions: LearningSourceVersionReference[];
   questionSetStatus: LearningQuestionSetStatus | null;
   fallbackUsed: boolean;
   fallbackReason: string | null;
