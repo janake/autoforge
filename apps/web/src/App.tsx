@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { getRuntimeConfig } from "./runtime-config";
-import { deleteAuthedJson, initializeKeycloak, loadAuthedJson, postAuthedFormData, postAuthedJson, signIn, signOut } from "./auth/keycloak";
+import { deleteAuthedJson, initializeKeycloak, loadAuthedJson, postAuthedFormData, postAuthedJson, putAuthedJson, signIn, signOut } from "./auth/keycloak";
 import type {
   BackendMeResponse,
   CreateJobResponse,
@@ -10,6 +10,7 @@ import type {
   LearningSourceVersionReference,
   LearningQuestionPayload,
   LearningQuestionSetPayload,
+  LearningMaterialAssignmentRequest,
   LearningMaterialResponse,
   LearningMaterialSourceResponse,
   JobResponse,
@@ -147,6 +148,14 @@ function questionSetStatusTone(status: LearningContentGenerationResponse["questi
     default:
       return "pending";
   }
+}
+
+function parseAssignmentList(value: string): string[] {
+  return value
+    .split(/[\n,]/)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0)
+    .filter((entry, index, entries) => entries.indexOf(entry) === index);
 }
 
 function canCreateLearningContent(roles: string[]): boolean {
@@ -336,6 +345,10 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
   const [sourceError, setSourceError] = useState<string | null>(null);
   const [generationStatus, setGenerationStatus] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [assignmentStatus, setAssignmentStatus] = useState<string | null>(null);
+  const [assignmentError, setAssignmentError] = useState<string | null>(null);
+  const [studentSubjectsText, setStudentSubjectsText] = useState("");
+  const [groupNamesText, setGroupNamesText] = useState("");
   const [state, setState] = useState<
     | { status: "loading" }
     | {
@@ -346,6 +359,20 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
       }
     | { status: "error"; message: string }
   >({ status: "loading" });
+
+  useEffect(() => {
+    if (state.status !== "ready") {
+      return;
+    }
+
+    setStudentSubjectsText(state.material.studentSubjects.join(", "));
+    setGroupNamesText(state.material.groupNames.join(", "));
+  }, [
+    refreshToken,
+    state.status,
+    state.status === "ready" ? state.material.studentSubjects.join("\u0000") : null,
+    state.status === "ready" ? state.material.groupNames.join("\u0000") : null,
+  ]);
 
   useEffect(() => {
     let cancelled = false;
@@ -408,6 +435,24 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
     } catch (error) {
       setSourceStatus(null);
       setSourceError(error instanceof Error ? error.message : "Unable to delete learning source.");
+    }
+  };
+
+  const replaceAssignments = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAssignmentError(null);
+    setAssignmentStatus("Saving assignments...");
+
+    try {
+      await putAuthedJson<LearningMaterialResponse>(`/v1/learning/materials/${materialId}/assignments`, {
+        studentSubjects: parseAssignmentList(studentSubjectsText),
+        groupNames: parseAssignmentList(groupNamesText),
+      } satisfies LearningMaterialAssignmentRequest);
+      setRefreshToken((value) => value + 1);
+      setAssignmentStatus("Assignments saved.");
+    } catch (error) {
+      setAssignmentStatus(null);
+      setAssignmentError(error instanceof Error ? error.message : "Unable to save assignments.");
     }
   };
 
@@ -476,6 +521,36 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
               <article className="card learning-detail-card">
                 <p className="card-kicker">owner</p>
                 <h3>Assignments and admin view</h3>
+                <form className="prompt-form" onSubmit={replaceAssignments}>
+                  <div className="learning-upload-grid">
+                    <label>
+                      <span>Student subjects</span>
+                      <textarea
+                        name="studentSubjects"
+                        rows={4}
+                        placeholder="student-1, student-2"
+                        value={studentSubjectsText}
+                        onChange={(event) => setStudentSubjectsText(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      <span>Group names</span>
+                      <textarea
+                        name="groupNames"
+                        rows={4}
+                        placeholder="group-a, group-b"
+                        value={groupNamesText}
+                        onChange={(event) => setGroupNamesText(event.target.value)}
+                      />
+                    </label>
+                  </div>
+                  <div className="prompt-actions">
+                    <button className="primary-button" type="submit">Save assignments</button>
+                    <span className="muted">Comma or newline separated values.</span>
+                  </div>
+                </form>
+                {assignmentStatus && <p className="success-title">{assignmentStatus}</p>}
+                {assignmentError && <p className="error-title">{assignmentError}</p>}
                 <dl className="profile-list compact">
                   <div>
                     <dt>Students</dt>
