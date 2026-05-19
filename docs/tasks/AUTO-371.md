@@ -6,7 +6,7 @@ Verzió: 0.1.57
 
 Branch: `feature/AUTO-371-multi-source-lifecycle`
 
-PR: pending
+PR: #161
 
 ## Cél
 
@@ -27,7 +27,9 @@ A learning tananyagok több source rekordot kezeljenek, a tananyag detail oldalo
 - `git worktree` a dedikált `AUTO-371` branchhez
 - `mvn -q -f services/backend/pom.xml test` - backend test suite lefuttatva, sikeres
 - `npm run build:web` - web build lefuttatva, sikeres
+- `git push -u origin feature/AUTO-371-multi-source-lifecycle` - branch feltolva
+- `gh pr create` - PR megnyitva
 
 ## Megjegyzés
 
-A PR még nincs megnyitva; a végső commit/push/PR lépés hátravan.
+A PR megnyílt, a review/verification az open PR alatt folyik.
