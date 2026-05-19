@@ -86,7 +86,7 @@ class LearningQuestionDisputeControllerTest {
         .content("""
           {
             "generationId": "%s",
-            "answers": [{"questionIndex": 0, "selectedOptionIndex": 1}]
+            "answers": [{"questionIndex": 0, "selectedOptionIndexes": [1]}]
           }
           """.formatted(questionSet.getId())))
       .andExpect(status().isCreated())
@@ -164,7 +164,7 @@ class LearningQuestionDisputeControllerTest {
         .with(jwt().jwt(token -> token.subject("student-1")))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
-          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndex": 1}]}
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndexes": [1]}]}
           """.formatted(questionSet.getId())))
       .andExpect(status().isCreated());
 

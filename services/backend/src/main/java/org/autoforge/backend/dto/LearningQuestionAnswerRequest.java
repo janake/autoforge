@@ -1,7 +1,9 @@
 package org.autoforge.backend.dto;
 
+import java.util.List;
+
 public record LearningQuestionAnswerRequest(
   int questionIndex,
-  int selectedOptionIndex
+  List<Integer> selectedOptionIndexes
 ) {
 }
