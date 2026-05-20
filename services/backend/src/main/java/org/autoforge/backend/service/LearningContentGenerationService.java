@@ -167,8 +167,8 @@ public class LearningContentGenerationService {
     List<LearningContentSourceReference> sources = buildSources(material);
     String retrievalContext = learningLearnerProfileService.buildRetrievalContext(subject);
     if (generationType == LearningContentGenerationType.SUMMARY) {
-      return new GeneratedContent(summaryContent(material, sources, retrievalContext), null, sourceText(sources), sources);
-    }
+    return new GeneratedContent(summaryContent(material, sources, retrievalContext), null, sourceText(sources), sources);
+  }
     LearningQuestionSetPayload payload = questionSetPayload(material, sources, retrievalContext);
     return new GeneratedContent(questionSetContent(payload), writeJson(payload), sourceText(sources), sources);
   }

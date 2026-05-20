@@ -1,12 +1,12 @@
 # [AUTO-439] Kérdéssor draft és publikálás student-visible állapotba
 
-Statusz: In Progress
+Statusz: Under Test
 
 Verzió: 0.1.59
 
 Branch: `feature/AUTO-439-question-draft-publish`
 
-PR: pending
+PR: #169
 
 ## Cél
 
@@ -26,8 +26,10 @@ A Learning modulban a kérdéssor generálás draft státuszban induljon, a teac
 - `jira_transition_issue(AUTO-439, In Progress)` - Jira státusz állítás
 - `git worktree add -b feature/AUTO-439-question-draft-publish ... origin/main` - dedikált worktree létrehozása
 - `npm install` - web workspace függőségek telepítve az új worktree-ben
+- `git merge origin/main` - branch frissítve a legutóbbi learning changes-re
 - `mvn -q -f services/backend/pom.xml -Dtest=LearningContentGenerationControllerTest,LearningMaterialGenerationHistoryControllerTest test` - backend regression tesztek sikeresek
 - `npm run build:web` - web build sikeres
+- `gh pr create` - PR megnyitva
 
 ## Megjegyzés
 

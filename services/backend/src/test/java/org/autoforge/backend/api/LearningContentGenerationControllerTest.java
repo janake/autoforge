@@ -141,6 +141,91 @@ class LearningContentGenerationControllerTest {
   }
 
   @Test
+  void assignedStudentSeesOnlyPublishedQuestionSetsAfterPublish() throws Exception {
+    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
+      "teacher-1",
+      "Biológia",
+      "Gyakorló tananyag",
+      "biology.txt",
+      "text/plain",
+      32L,
+      "Sejtek és szövetek alapjai.\n\nMásodik bekezdés a részletekről.".getBytes(StandardCharsets.UTF_8)
+    ));
+    learningMaterialAssignmentRepository.save(LearningMaterialAssignment.create(material.getId(), LearningAssignmentTargetType.STUDENT, "student-1"));
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/questions", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isCreated());
+
+    LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().stream()
+      .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
+      .findFirst()
+      .orElseThrow();
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isEmpty());
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$[0].id").value(questionSet.getId()))
+      .andExpect(jsonPath("$[0].questionSetStatus").value("PUBLISHED"));
+  }
+
+  @Test
+  void archivedQuestionSetCannotBeUsedForNewAttemptsAfterArchive() throws Exception {
+    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
+      "teacher-1",
+      "Kémia",
+      "Gyakorló tananyag",
+      "chemistry.txt",
+      "text/plain",
+      28L,
+      "Atomok és molekulák.\n\nMásodik bekezdés.".getBytes(StandardCharsets.UTF_8)
+    ));
+    learningMaterialAssignmentRepository.save(LearningMaterialAssignment.create(material.getId(), LearningAssignmentTargetType.STUDENT, "student-1"));
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/questions", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isCreated());
+
+    LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().stream()
+      .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
+      .findFirst()
+      .orElseThrow();
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/archive", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("ARCHIVED"));
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isEmpty());
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndexes": [0]}]}
+          """.formatted(questionSet.getId())))
+      .andExpect(status().isForbidden());
+  }
+
+  @Test
   void assignedStudentSeesOnlyPublishedQuestionSets() throws Exception {
     LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
       "teacher-1",
@@ -220,7 +305,7 @@ class LearningContentGenerationControllerTest {
         .with(jwt().jwt(token -> token.subject("student-1")))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
-          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndexes": [0]}]}
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndex": 0}]}
           """.formatted(questionSet.getId())))
       .andExpect(status().isForbidden());
   }
