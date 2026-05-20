@@ -226,11 +226,23 @@ const tools = [
   },
 ];
 
+const secretCache = new Map();
+let jiraConfigCache = null;
+
 function getSecret(name) {
-  if (process.env[name]) return process.env[name];
+  if (secretCache.has(name)) return secretCache.get(name);
+
+  if (process.env[name]) {
+    secretCache.set(name, process.env[name]);
+    return process.env[name];
+  }
 
   const ocid = process.env[`OCI_${name}_SECRET_OCID`];
-  if (ocid) return getOciSecretValue(ocid);
+  if (ocid) {
+    const value = getOciSecretValue(ocid);
+    secretCache.set(name, value);
+    return value;
+  }
 
   const raw = execFileSync("oci", [
     "search",
@@ -251,7 +263,9 @@ function getSecret(name) {
     throw new Error(`Expected exactly one ACTIVE OCI Vault secret named ${name}, found ${matches.length}`);
   }
 
-  return getOciSecretValue(matches[0].identifier);
+  const value = getOciSecretValue(matches[0].identifier);
+  secretCache.set(name, value);
+  return value;
 }
 
 function getOciSecretValue(secretId) {
@@ -270,12 +284,15 @@ function getOciSecretValue(secretId) {
 }
 
 function jiraConfig() {
+  if (jiraConfigCache) return jiraConfigCache;
+
   const baseUrl = getSecret("JIRA_BASE_URL").replace(/\/+$/, "");
   const email = getSecret("JIRA_EMAIL");
   const token = getSecret("JIRA_API_TOKEN");
   const auth = Buffer.from(`${email}:${token}`).toString("base64");
 
-  return { baseUrl, auth };
+  jiraConfigCache = { baseUrl, auth };
+  return jiraConfigCache;
 }
 
 function defaultProjectKey() {

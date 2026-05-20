@@ -785,3 +785,14 @@ Taskok
 
 Megjegyzes
 - A Learning modul assignment módosításaihoz audit trail kerül, a tanár pedig a material detail oldalon látja a saját assignment eseményeit.
+
+## 0.1.69
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-447`: Jira MCP times out on repeated secret resolution
+
+Megjegyzes
+- A Jira MCP processzen belül cache-eli a Jira secret és auth konfigurációt, hogy a sprint audit és transition műveletek ne timeoutoljanak ismételt OCI Vault feloldás miatt.
