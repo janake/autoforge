@@ -44,7 +44,7 @@ public class SecurityConfig {
       .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info", "/api/v1/health").permitAll()
-        .requestMatchers("/api/v1/prompt-drafts/**", "/api/v1/jobs/**").hasRole("developer")
+        .requestMatchers("/api/v1/prompt-drafts/**", "/api/v1/jobs/**").hasAnyRole("developer", "teacher", "learning_teacher")
         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
         .anyRequest().authenticated())
       .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
