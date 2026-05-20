@@ -857,7 +857,7 @@ Megjegyzes
 ## 0.1.75
 
 Statusz
-- in progress
+- completed
 
 Taskok
 - `AUTO-464`: Activate AI engine - backend learning content generation
