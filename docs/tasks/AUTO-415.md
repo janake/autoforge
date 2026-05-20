@@ -1,12 +1,12 @@
 # [AUTO-415] Tanulasi eredmeny dashboard tananyaghoz es csoporthoz
 
-Statusz: In Progress
+Statusz: Under Test
 
 Verzio: 0.1.65
 
 Branch: `feature/AUTO-415-teacher-dashboard`
 
-PR: pending
+PR: #174
 
 ## Cél
 
@@ -30,6 +30,9 @@ A Learning modulban a tanar a tananyaghoz es csoporthoz kotott progress adatokbo
 - `apps/web/src/App.tsx` - teacher dashboard aggregacio es csoport filter elkezdve
 - `npm run typecheck:web` - frontend verifikacio jelenleg kornyezeti deps hianya miatt nem futott le
 - `npm run test:backend` - backend tesztek futtatva, hibajelzes nelkul
+- `git commit -m "[AUTO-415] add teacher progress dashboard"` - task changes committed
+- `git push -u origin feature/AUTO-415-teacher-dashboard` - branch pushed
+- `gh pr create` - PR megnyitva
 
 ## Megjegyzes
 
