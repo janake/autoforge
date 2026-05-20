@@ -1,12 +1,12 @@
 # [AUTO-433] Tananyag forrásverziózás és generált tartalom eredete
 
-Statusz: In Progress
+Statusz: Under Test
 
 Verzió: 0.1.60
 
 Branch: `feature/AUTO-433-source-versioning`
 
-PR: pending
+PR: #170
 
 ## Cél
 
@@ -26,8 +26,10 @@ A Learning modulban a generált kérdéssor és összefoglaló tárolja, hogy me
 - `jira_transition_issue(AUTO-433, In Progress)` - Jira státusz állítás
 - `git worktree add -b feature/AUTO-433-source-versioning ... origin/main` - dedikált worktree létrehozása
 - `npm install` - web workspace függőségek telepítve az új worktree-ben
+- `git merge origin/main` - branch frissítve a legutóbbi learning changes-re
 - `mvn -q -f services/backend/pom.xml -Dtest=LearningContentGenerationControllerTest,LearningMaterialGenerationHistoryControllerTest test` - backend regression tesztek sikeresek
 - `npm run build:web` - web build sikeres
+- `gh pr create` - PR megnyitva
 
 ## Megjegyzés
 
