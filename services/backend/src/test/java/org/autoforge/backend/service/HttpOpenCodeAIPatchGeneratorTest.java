@@ -48,7 +48,8 @@ class HttpOpenCodeAIPatchGeneratorTest {
         "http://127.0.0.1:%d".formatted(port),
         "opencode",
         "secret",
-        "autoforge-openrouter/deepseek/deepseek-chat"
+        "autoforge-openrouter/deepseek/deepseek-chat",
+        null
       )),
       new ObjectMapper()
     );

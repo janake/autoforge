@@ -20,7 +20,8 @@ public record BackendMvpProperties(
     String serverUrl,
     String username,
     String password,
-    String model
+    String model,
+    String apiKey
   ) {
   }
 }

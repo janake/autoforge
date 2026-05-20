@@ -27,3 +27,4 @@ autoforge:
       username: opencode
       password: test-token
       model: autoforge-openrouter/deepseek/deepseek-chat
+      api-key: test-api-key

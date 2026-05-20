@@ -44,6 +44,7 @@ autoforge:
       username: ${OPENCODE_SERVER_USERNAME:opencode}
       password: ${OPENCODE_SERVER_PASSWORD:}
       model: ${OPENCODE_MODEL:autoforge-openrouter/deepseek/deepseek-chat}
+      api-key: ${OPENCODE_API_KEY:}
     github:
       token: ${AUTOFORGE_GITHUB_TOKEN:}
       owner: ${AUTOFORGE_GITHUB_OWNER:}

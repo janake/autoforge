@@ -121,8 +121,14 @@ public class HttpLearningAiEngineProvider implements LearningAiEngineProvider {
       context.generationType() == LearningContentGenerationType.QUESTION_SET ? "questions" : "summary",
       context.title()
     );
+    var fields = new java.util.LinkedHashMap<String, Object>();
+    fields.put("title", title.length() > 200 ? title.substring(0, 200) : title);
+    String apiKey = opencode.apiKey();
+    if (apiKey != null && !apiKey.isBlank()) {
+      fields.put("apiKey", apiKey);
+    }
     try {
-      return objectMapper.writeValueAsString(java.util.Map.of("title", title.length() > 200 ? title.substring(0, 200) : title));
+      return objectMapper.writeValueAsString(fields);
     } catch (IOException exception) {
       throw new OpenCodeClientException("Failed to build session payload", exception);
     }
