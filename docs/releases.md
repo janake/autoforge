@@ -752,3 +752,14 @@ Taskok
 
 Megjegyzes
 - A Learning modul teacher dashboard slice-a progress sorokhoz csoportmetadata-t kot, es a material detail oldalon aggregalt progress listat ad filterezessel.
+
+## 0.1.66
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-445`: AGENT.md Jira-first workflow rule
+
+Megjegyzes
+- Az AGENT.md most kimondja, hogy Jira a forras a task scope, statusz es vegrehajtasi sorrend kezelesere.
