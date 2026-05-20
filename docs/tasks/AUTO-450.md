@@ -24,3 +24,4 @@ Az `AGENT.md` tartalmazzon kötelezo PR body sablont, hogy minden sessionben lat
 - `git worktree add feature/AUTO-450-pr-body-format` - dedikalt worktree/branch letrehozva
 - `git diff --check` - ok
 - `gh pr create` - PR megnyitva
+- `gh api ... body="$body"` - PR body ujrairva valodi multiline Markdown tartalommal

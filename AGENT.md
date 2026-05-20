@@ -129,6 +129,7 @@ Required Jira behavior:
 ```
 
 - Keep `Version` and `Verification` visible at the top of every PR body.
+- When using GitHub CLI or API, write PR bodies from a real Markdown file or a true multiline string. Never pass escaped `\n` sequences or a literal `@file` value that renders poorly in GitHub.
 - For non-major tasks, the target version should be the next automatic `PATCH` or `MINOR` version.
 - Do not use generic-only titles like `fix:` or `docs:` without the task ID.
 - Keep commits focused and do not include unrelated cleanup.
