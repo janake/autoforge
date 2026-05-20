@@ -50,6 +50,12 @@ class JobControllerTest {
       .authorities(new SimpleGrantedAuthority("ROLE_developer"));
   }
 
+  private static JwtRequestPostProcessor teacherJwt() {
+    return jwt()
+      .jwt(token -> token.claim("groups", List.of("teacher")))
+      .authorities(new SimpleGrantedAuthority("ROLE_teacher"));
+  }
+
   @Test
   void createsQueuedJobFromValidRequestAndPersistsIt() throws Exception {
     mockMvc.perform(post("/api/v1/jobs")
@@ -87,6 +93,21 @@ class JobControllerTest {
           }
           """))
       .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void allowsJobCreationForTeacherGroupMembers() throws Exception {
+    mockMvc.perform(post("/api/v1/jobs")
+        .with(teacherJwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Implement teacher-accessible job creation"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.jobId").isNotEmpty())
+      .andExpect(jsonPath("$.status").value("QUEUED"));
   }
 
   @Test

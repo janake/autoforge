@@ -796,3 +796,14 @@ Taskok
 
 Megjegyzes
 - A Jira MCP processzen belül cache-eli a Jira secret és auth konfigurációt, hogy a sprint audit és transition műveletek ne timeoutoljanak ismételt OCI Vault feloldás miatt.
+
+## 0.1.70
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-449`: Allow teacher group access to AI prompt tools
+
+Megjegyzes
+- A prompt draft flow, job endpointok es az AI menu Keycloak teacher csoporttagoknak is elerhetove valik.
