@@ -277,7 +277,7 @@ public class LearningMaterialController {
       .map(String.class::cast)
       .map(LearningMaterialController::normalizeGroupName)
       .filter(group -> !group.isBlank())
-      .collect(Collectors.toSet());
+      .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
   }
 
   private static String normalizeGroupName(String group) {
