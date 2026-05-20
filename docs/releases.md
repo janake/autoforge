@@ -899,3 +899,14 @@ Taskok
 Megjegyzes
 - A prompt draft create/add message flow az OpenCode/OpenRouter AI-t hasznalja a pontosito valaszokhoz.
 - AI konfiguracio vagy runtime hiba eseten a prompt draft endpoint `503 Service Unavailable` valaszt ad hardcoded fallback kerdesek helyett.
+
+## 0.1.78
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-473`: Public frontend deploy did not include prompt draft error message fix
+
+Megjegyzes
+- A frontend API helper a backend `ApiErrorResponse.message` mezot jeleniti meg nem-2xx valaszoknal, hogy a prompt draft AI konfiguracios hibak lathatoak legyenek.

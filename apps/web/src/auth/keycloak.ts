@@ -117,8 +117,23 @@ async function authedFetch(path: string, init: RequestInit = {}): Promise<Respon
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with ${response.status}`);
+    throw new Error(await errorMessageForResponse(response));
   }
 
   return response;
+}
+
+async function errorMessageForResponse(response: Response): Promise<string> {
+  const fallback = `Request failed with ${response.status}`;
+
+  try {
+    const body = (await response.json()) as { message?: unknown };
+    if (typeof body.message === "string" && body.message.trim()) {
+      return body.message.trim();
+    }
+  } catch {
+    // Keep the status-only fallback when the server returns an empty or non-JSON error body.
+  }
+
+  return fallback;
 }
