@@ -26,7 +26,25 @@ export type LearningMaterialResponse = {
   studentSubjects: string[];
   groupNames: string[];
   canManageAssignments: boolean;
+  sources: LearningMaterialSourceResponse[];
   imageAssets: LearningImageAssetResponse[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LearningMaterialSourceResponse = {
+  id: string;
+  materialId: string;
+  sourceType: string;
+  sourceName: string;
+  originalFilename: string | null;
+  contentType: string | null;
+  fileSize: number | null;
+  storageObjectKey: string;
+  storageObjectUri: string;
+  contentHash: string;
+  contentETag: string;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -42,11 +60,27 @@ export type LearningImageAssetResponse = {
   createdAt: string;
 };
 
+export type LearningMaterialAssignmentRequest = {
+  studentSubjects: string[];
+  groupNames: string[];
+};
+
 export type LearningContentGenerationType = "QUESTION_SET" | "SUMMARY";
+
+export type LearningQuestionSetStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
 export type LearningContentSourceReference = {
   chunkIndex: number;
   excerpt: string;
+};
+
+export type LearningSourceVersionReference = {
+  id: string;
+  sourceName: string;
+  originalFilename: string | null;
+  contentHash: string;
+  contentETag: string;
+  createdAt: string;
 };
 
 export type LearningQuestionOptionPayload = {
@@ -54,10 +88,14 @@ export type LearningQuestionOptionPayload = {
   text: string;
 };
 
+export type LearningQuestionAnswerType = "SINGLE_CORRECT" | "MULTI_CORRECT";
+
 export type LearningQuestionPayload = {
   prompt: string;
   options: LearningQuestionOptionPayload[];
-  correctOptionIndex: number;
+  correctOptionIndex?: number | null;
+  answerType?: LearningQuestionAnswerType | null;
+  correctOptionIndexes?: number[] | null;
   explanation: string;
   sources: LearningContentSourceReference[];
   imageAssetReference: string | null;
@@ -76,6 +114,8 @@ export type LearningContentGenerationResponse = {
   generationType: LearningContentGenerationType;
   content: string;
   sources: LearningContentSourceReference[];
+  sourceVersions: LearningSourceVersionReference[];
+  questionSetStatus: LearningQuestionSetStatus | null;
   fallbackUsed: boolean;
   fallbackReason: string | null;
   generationStatus: "COMPLETED" | "FAILED";

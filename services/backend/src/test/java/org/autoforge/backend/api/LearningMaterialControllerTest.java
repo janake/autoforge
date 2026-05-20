@@ -10,11 +10,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import org.autoforge.backend.domain.LearningAssignmentTargetType;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.domain.LearningMaterialAssignment;
+import org.autoforge.backend.domain.LearningMaterialSource;
 import org.autoforge.backend.repository.LearningMaterialAssignmentRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
+import org.autoforge.backend.repository.LearningMaterialSourceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +40,12 @@ class LearningMaterialControllerTest {
   @Autowired
   private LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
 
+  @Autowired
+  private LearningMaterialSourceRepository learningMaterialSourceRepository;
+
   @BeforeEach
   void cleanState() {
+    learningMaterialSourceRepository.deleteAll();
     learningMaterialAssignmentRepository.deleteAll();
     learningMaterialRepository.deleteAll();
   }
@@ -123,7 +130,7 @@ class LearningMaterialControllerTest {
         .file(file)
         .param("title", "Algebra alapok")
         .param("description", "Bevezető feltöltött tananyag")
-        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
       .andExpect(status().isCreated())
       .andExpect(jsonPath("$.title").value("Algebra alapok"))
       .andExpect(jsonPath("$.originalFilename").value("algebra.pdf"))
@@ -134,7 +141,9 @@ class LearningMaterialControllerTest {
       .andExpect(jsonPath("$.contentHash").value(org.hamcrest.Matchers.matchesPattern("[0-9a-f]{64}")))
       .andExpect(jsonPath("$.contentETag").value(org.hamcrest.Matchers.matchesPattern("[0-9a-f]{32}")))
       .andExpect(jsonPath("$.ownerSubject").value("teacher-1"))
-      .andExpect(jsonPath("$.canManageAssignments").value(true));
+      .andExpect(jsonPath("$.canManageAssignments").value(true))
+      .andExpect(jsonPath("$.sources[0].sourceType").value("PRIMARY_UPLOAD"))
+      .andExpect(jsonPath("$.sources[0].sourceName").value("Algebra alapok"));
 
     LearningMaterial stored = learningMaterialRepository.findAll().get(0);
     assertThat(stored.getOwnerSubject()).isEqualTo("teacher-1");
@@ -146,6 +155,58 @@ class LearningMaterialControllerTest {
     assertThat(stored.getContentHash()).matches("[0-9a-f]{64}");
     assertThat(stored.getContentETag()).matches("[0-9a-f]{32}");
     assertThat(stored.getContent()).isEqualTo(file.getBytes());
+    assertThat(learningMaterialSourceRepository.findByMaterialIdAndDeletedAtIsNullOrderByCreatedAtAsc(stored.getId())).hasSize(1);
+  }
+
+  @Test
+  void studentCannotUploadLearningMaterial() throws Exception {
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "notes.txt",
+      "text/plain",
+      "student content".getBytes(StandardCharsets.UTF_8)
+    );
+
+    mockMvc.perform(multipart("/api/v1/learning/materials")
+        .file(file)
+        .with(jwt().jwt(token -> token.subject("student-1").claim("realm_access", Map.of("roles", List.of("student"))))))
+      .andExpect(status().isForbidden());
+
+    assertThat(learningMaterialRepository.findAll()).isEmpty();
+    assertThat(learningMaterialSourceRepository.findAll()).isEmpty();
+  }
+
+  @Test
+  void ownerCanAddAndDeleteMaterialSources() throws Exception {
+    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.create("teacher-1", "Több forrás", "source lifecycle"));
+
+    MockMultipartFile sourceFile = new MockMultipartFile(
+      "file",
+      "notes.txt",
+      "text/plain",
+      "Első forrás szövege".getBytes(StandardCharsets.UTF_8)
+    );
+
+    String addResponse = mockMvc.perform(multipart("/api/v1/learning/materials/{materialId}/sources", material.getId())
+        .file(sourceFile)
+        .param("sourceName", "Jegyzet 1")
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.sources[0].sourceName").value("Jegyzet 1"))
+      .andExpect(jsonPath("$.sources[0].sourceType").value("ADDITIONAL_UPLOAD"))
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    String sourceId = com.jayway.jsonpath.JsonPath.read(addResponse, "$.sources[0].id");
+
+    mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete("/api/v1/learning/materials/{materialId}/sources/{sourceId}", material.getId(), sourceId)
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.sources").isEmpty());
+
+    LearningMaterialSource deletedSource = learningMaterialSourceRepository.findById(sourceId).orElseThrow();
+    assertThat(deletedSource.getDeletedAt()).isNotNull();
   }
 
   @Test
@@ -159,7 +220,7 @@ class LearningMaterialControllerTest {
 
     mockMvc.perform(multipart("/api/v1/learning/materials")
         .file(file)
-        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
       .andExpect(status().isBadRequest());
 
     assertThat(learningMaterialRepository.findAll()).isEmpty();
@@ -177,7 +238,7 @@ class LearningMaterialControllerTest {
 
     mockMvc.perform(multipart("/api/v1/learning/materials")
         .file(file)
-        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
       .andExpect(status().isBadRequest());
 
     assertThat(learningMaterialRepository.findAll()).isEmpty();

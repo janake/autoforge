@@ -21,6 +21,7 @@ import org.autoforge.backend.repository.LearningChunkRepository;
 import org.autoforge.backend.repository.LearningEmbeddingRepository;
 import org.autoforge.backend.repository.LearningIngestionJobRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
+import org.autoforge.backend.repository.LearningMaterialSourceRepository;
 import org.autoforge.backend.service.LearningEmbeddingProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,9 @@ class LearningIngestionControllerTest {
   private LearningMaterialRepository learningMaterialRepository;
 
   @Autowired
+  private LearningMaterialSourceRepository learningMaterialSourceRepository;
+
+  @Autowired
   private LearningIngestionJobRepository learningIngestionJobRepository;
 
   @Autowired
@@ -57,6 +61,7 @@ class LearningIngestionControllerTest {
     learningEmbeddingRepository.deleteAll();
     learningChunkRepository.deleteAll();
     learningIngestionJobRepository.deleteAll();
+    learningMaterialSourceRepository.deleteAll();
     learningMaterialRepository.deleteAll();
   }
 
@@ -112,6 +117,56 @@ class LearningIngestionControllerTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.status").value("COMPLETED"))
       .andExpect(jsonPath("$.retryCount").value(0));
+  }
+
+  @Test
+  void startIngestionUsesActiveSourcesBeforeMaterialBody() throws Exception {
+    when(learningEmbeddingProvider.embed(anyString())).thenAnswer(invocation -> new LearningEmbeddingPayload("mock-embed", 4, "[0.1, 0.2, 0.3, 0.4]"));
+
+    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.create(
+      "teacher-1",
+      "Több forrás",
+      "source ingestion"
+    ));
+    learningMaterialSourceRepository.save(org.autoforge.backend.domain.LearningMaterialSource.create(
+      material.getId(),
+      "teacher-1",
+      "PRIMARY_UPLOAD",
+      "Első forrás",
+      "first.txt",
+      "text/plain",
+      18L,
+      "teacher-1/source-1",
+      "oci://learning-materials/teacher-1/source-1",
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "0123456789abcdef0123456789abcdef",
+      "Első bekezdés".getBytes(StandardCharsets.UTF_8)
+    ));
+    learningMaterialSourceRepository.save(org.autoforge.backend.domain.LearningMaterialSource.create(
+      material.getId(),
+      "teacher-1",
+      "ADDITIONAL_UPLOAD",
+      "Második forrás",
+      "second.txt",
+      "text/plain",
+      19L,
+      "teacher-1/source-2",
+      "oci://learning-materials/teacher-1/source-2",
+      "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+      "abcdef0123456789abcdef0123456789",
+      "Második bekezdés".getBytes(StandardCharsets.UTF_8)
+    ));
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/ingestion", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.status").value("COMPLETED"))
+      .andExpect(jsonPath("$.chunkCount").value(2));
+
+    List<LearningChunk> chunks = learningChunkRepository.findAll();
+    assertThat(chunks).hasSize(2);
+    assertThat(chunks.get(0).getContent()).contains("Első bekezdés");
+    assertThat(chunks.get(1).getContent()).contains("Második bekezdés");
   }
 
   @Test

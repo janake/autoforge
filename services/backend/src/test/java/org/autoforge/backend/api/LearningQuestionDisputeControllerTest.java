@@ -75,13 +75,18 @@ class LearningQuestionDisputeControllerTest {
 
     LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().get(0);
 
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
+
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
         .with(jwt().jwt(token -> token.subject("student-1")))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
             "generationId": "%s",
-            "answers": [{"questionIndex": 0, "selectedOptionIndex": 1}]
+            "answers": [{"questionIndex": 0, "selectedOptionIndexes": [1]}]
           }
           """.formatted(questionSet.getId())))
       .andExpect(status().isCreated())
@@ -149,11 +154,17 @@ class LearningQuestionDisputeControllerTest {
       .andExpect(status().isCreated());
 
     LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().get(0);
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
+
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
         .with(jwt().jwt(token -> token.subject("student-1")))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
-          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndex": 1}]}
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndexes": [1]}]}
           """.formatted(questionSet.getId())))
       .andExpect(status().isCreated());
 
