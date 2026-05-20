@@ -1,12 +1,12 @@
 # [AUTO-445] AGENT.md Jira-first workflow rule
 
-Statusz: To Do
+Statusz: Under Review
 
 Verzio: 0.1.66
 
 Branch: `feature/AUTO-445-jira-first-source-of-truth`
 
-PR: 
+PR: #176
 
 ## Cél
 
@@ -21,7 +21,11 @@ Az AGENT.md mondja ki egyertelmuen, hogy a Jira a task scope, statusz es vegreha
 ## Lepesnaplo
 
 - `jira_create_issue(AUTO-445)` - uj task letrehozva
+- `jira_transition_issue(AUTO-445, In Progress)` - Jira statusz allitasa
 - `git worktree add -b feature/AUTO-445-jira-first-source-of-truth ... origin/main` - dedikalt worktree letrehozva
+- `git commit -m "[AUTO-445] document Jira as source of truth"` - dokumentacio commitolva
+- `git push origin feature/AUTO-445-jira-first-source-of-truth` - branch feltolva
+- `gh pr create` - PR megnyitva
 
 ## Megjegyzes
 
