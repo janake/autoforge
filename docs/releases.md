@@ -752,3 +752,14 @@ Taskok
 
 Megjegyzes
 - A Learning modul teacher dashboard slice-a progress sorokhoz csoportmetadata-t kot, es a material detail oldalon aggregalt progress listat ad filterezessel.
+
+## 0.1.67
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-446`: Jira MCP fixVersion support
+
+Megjegyzes
+- A Jira MCP szerver most tudja a `fixVersion`/`fixVersions` shorthandot normalizalni, es a hianyzo Jira verziokat on-demand letrehozza.
