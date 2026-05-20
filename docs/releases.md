@@ -763,3 +763,14 @@ Taskok
 
 Megjegyzes
 - Az AGENT.md most kimondja, hogy Jira a forras a task scope, statusz es vegrehajtasi sorrend kezelesere.
+
+## 0.1.67
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-446`: Jira MCP fixVersion support
+
+Megjegyzes
+- A Jira MCP szerver most tudja a `fixVersion`/`fixVersions` shorthandot normalizalni, es a hianyzo Jira verziokat on-demand letrehozza.

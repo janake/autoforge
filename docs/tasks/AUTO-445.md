@@ -26,6 +26,7 @@ Az AGENT.md mondja ki egyertelmuen, hogy a Jira a task scope, statusz es vegreha
 - `git commit -m "[AUTO-445] document Jira as source of truth"` - dokumentacio commitolva
 - `git push origin feature/AUTO-445-jira-first-source-of-truth` - branch feltolva
 - `gh pr create` - PR megnyitva
+- `git merge origin/main` - PR conflict feloldva a release manifestben
 
 ## Megjegyzes
 
