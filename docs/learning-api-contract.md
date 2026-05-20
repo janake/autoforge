@@ -19,6 +19,19 @@
 - `description`: opcionális
 - A backend az owner subjectet a JWT subjectből veszi.
 - A fájlmetaadatok: eredeti fájlnév, content type, méret, bináris payload.
+- A backend az első feltöltést primary source rekordként is eltárolja.
+
+### `POST /api/v1/learning/materials/{materialId}/sources`
+
+- `multipart/form-data`
+- `file`: kötelező
+- `sourceName`: opcionális
+- Csak a tananyag owner adhat hozzá további source-ot.
+
+### `DELETE /api/v1/learning/materials/{materialId}/sources/{sourceId}`
+
+- A source soft delete-tel inaktiválódik.
+- Csak a tananyag owner törölheti.
 
 ### `GET /api/v1/learning/materials`
 
@@ -30,6 +43,7 @@
 - Egy tananyag részletei.
 - Jogosulatlan hozzáférés esetén `403`.
 - Nem létező tananyag esetén `404`.
+- A válasz tartalmazza az aktív source-ok listáját is.
 
 ### `GET /api/v1/learning/materials/{materialId}/generations`
 

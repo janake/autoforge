@@ -35,7 +35,7 @@ Megjegyzes
 ## 0.1.1
 
 Statusz
-- in progress
+- completed
 
 Taskok
 - `AUTO-15`: Landing page cleanup
@@ -49,7 +49,7 @@ Megjegyzes
 ## 0.1.2
 
 Statusz
-- in progress
+- completed
 
 Taskok
 - `AUTO-21`: Automatic version bump rule
@@ -619,6 +619,7 @@ Taskok
 
 Megjegyzes
 - Az upload flow object storage reference-et, hash-t és metadata mezőket ment a Learning tananyag rekordba.
+- PR #157 lezárta a slice-ot.
 
 ## 0.1.54
 
@@ -630,3 +631,91 @@ Taskok
 
 Megjegyzes
 - A Learning backend kérdéssor-listázást, diák válaszbeküldést, pontszámítást és owner/student scoped eredménylistát kap.
+
+## 0.1.55
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-358`: Object Storage hiba tesztek
+
+Megjegyzes
+- Az eredeti fájl Object Storage előkészítési hibaágai célzott teszteket kapnak, hogy olvasási hiba esetén kontrollált exception szülessen.
+
+## 0.1.56
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-397`: Teacher hibabejelentés review és pontszám felülbírálás
+
+Megjegyzes
+- A student saját question attempthez dispute-ot nyithat, a teacher review-zhatja és score override-ot menthet.
+
+## 0.1.57
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-371`: Tananyag több source életciklus és ingestion update
+
+Megjegyzes
+- A Learning tananyagok több forrást kezelnek, a detail nézet source listát és owner műveleteket kap, az ingestion pedig az aktív source-okból dolgozik.
+
+## 0.1.58
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-372`: Learning teacher CRUD és student megoldási jogosultságok
+
+Megjegyzes
+- A Learning felület és backend explicit teacher/admin guardot kap a tananyag létrehozásához, miközben a student csak a hozzárendelt tananyagok megoldási útvonalait látja.
+
+## 0.1.59
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-439`: Kérdéssor draft és publikálás student-visible állapotba
+
+Megjegyzes
+- A Learning question set generálás draft státuszban indul, a teacher publish/archive műveletekkel kezeli a láthatóságot, a student pedig csak a publikált kérdéssorokat éri el.
+
+## 0.1.60
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-433`: Tananyag forrásverziózás és generált tartalom eredete
+
+Megjegyzes
+- A generált tartalom most a forrás snapshotját is tárolja, így a régi generálások visszakövethetők maradnak még forrás törlése után is.
+
+## 0.1.61
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-374`: Egy- és többhelyes válaszos kérdések AI promptban és pontozásban
+
+Megjegyzes
+- A learning kérdéspayload most single- és multi-correct módot is hordoz, a generálás kevert kérdéstípusokat ad, a pontozás pedig halmazegyezést vár multi-correct esetben.
+
+## 0.1.62
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-391`: Teacher tananyag hozzárendelés diákhoz és csoporthoz
+
+Megjegyzes
+- A Learning detail oldalon az owner most közvetlenül szerkesztheti a student és group assignment listát, a backend pedig a meglévő assignment replace API-t használja.

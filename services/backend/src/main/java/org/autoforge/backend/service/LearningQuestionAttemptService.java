@@ -1,7 +1,10 @@
 package org.autoforge.backend.service;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,25 +46,31 @@ public class LearningQuestionAttemptService {
     return learningGeneratedContentRepository
       .findByMaterialIdAndOwnerSubjectAndGenerationTypeOrderByCreatedAtDesc(materialId, material.getOwnerSubject(), LearningContentGenerationType.QUESTION_SET)
       .stream()
+      .filter(content -> learningContentGenerationService.isQuestionSetVisibleToViewer(content, material.getOwnerSubject(), subject))
       .map(content -> learningContentGenerationService.toResponse(content))
       .toList();
   }
 
   @Transactional
   public LearningQuestionAttemptResponse submitAttempt(String materialId, String subject, Collection<String> groups, LearningQuestionAttemptRequest request) {
-    loadAccessibleMaterial(materialId, subject, groups);
+    LearningMaterial material = loadAccessibleMaterial(materialId, subject, groups);
     LearningGeneratedContent generation = learningGeneratedContentRepository.findById(request.generationId())
       .filter(content -> Objects.equals(content.getMaterialId(), materialId))
       .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
       .orElseThrow(() -> new LearningMaterialNotFoundException(request.generationId()));
 
+    if (!learningContentGenerationService.canAttemptQuestionSet(generation, material.getOwnerSubject(), subject)) {
+      throw new LearningMaterialAccessDeniedException(materialId);
+    }
+
     LearningQuestionSetPayload questionSet = readQuestionSet(generation.getStructuredContent());
     List<LearningQuestionAnswerRequest> answers = request.answers() == null ? List.of() : request.answers();
+    Map<Integer, Set<Integer>> submittedAnswers = submittedAnswerSets(answers, questionSet.questions().size());
     int score = 0;
-    for (LearningQuestionAnswerRequest answer : answers) {
-      if (answer.questionIndex() >= 0
-        && answer.questionIndex() < questionSet.questions().size()
-        && questionSet.questions().get(answer.questionIndex()).correctOptionIndex() == answer.selectedOptionIndex()) {
+    for (int questionIndex = 0; questionIndex < questionSet.questions().size(); questionIndex++) {
+      Set<Integer> selectedOptionIndexes = submittedAnswers.getOrDefault(questionIndex, Set.of());
+      Set<Integer> correctOptionIndexes = new HashSet<>(questionSet.questions().get(questionIndex).resolvedCorrectOptionIndexes());
+      if (selectedOptionIndexes.equals(correctOptionIndexes)) {
         score++;
       }
     }
@@ -140,5 +149,18 @@ public class LearningQuestionAttemptService {
       attempt.getAnswers(),
       attempt.getSubmittedAt()
     );
+  }
+
+  private Map<Integer, Set<Integer>> submittedAnswerSets(List<LearningQuestionAnswerRequest> answers, int questionCount) {
+    Map<Integer, Set<Integer>> submittedAnswers = new LinkedHashMap<>();
+    for (LearningQuestionAnswerRequest answer : answers) {
+      if (answer.questionIndex() < 0 || answer.questionIndex() >= questionCount) {
+        continue;
+      }
+
+      Set<Integer> selectedOptionIndexes = answer.selectedOptionIndexes() == null ? Set.of() : new HashSet<>(answer.selectedOptionIndexes());
+      submittedAnswers.computeIfAbsent(answer.questionIndex(), ignored -> new HashSet<>()).addAll(selectedOptionIndexes);
+    }
+    return submittedAnswers;
   }
 }

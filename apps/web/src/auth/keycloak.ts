@@ -69,10 +69,30 @@ export async function postAuthedJson<T>(path: string, body: unknown): Promise<T>
   return (await response.json()) as T;
 }
 
+export async function putAuthedJson<T>(path: string, body: unknown): Promise<T> {
+  const response = await authedFetch(path, {
+    method: "PUT",
+    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return (await response.json()) as T;
+}
+
 export async function postAuthedFormData<T>(path: string, body: FormData): Promise<T> {
   const response = await authedFetch(path, {
     method: "POST",
     body,
+  });
+
+  return (await response.json()) as T;
+}
+
+export async function deleteAuthedJson<T>(path: string): Promise<T> {
+  const response = await authedFetch(path, {
+    method: "DELETE",
   });
 
   return (await response.json()) as T;
