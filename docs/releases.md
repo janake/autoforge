@@ -829,3 +829,14 @@ Taskok
 
 Megjegyzes
 - A tananyag feltolto UI ugyanazt a Keycloak group/role jogosultsagot hasznalja, mint a backend learning jogosultsag.
+
+## 0.1.73
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-452`: Menu-driven workspace navigation with separate feature pages
+
+Megjegyzes
+- Az authenticated dashboard fokuszalt homepage-re es menubol elerheto kulon feature destinationokre valik szet.

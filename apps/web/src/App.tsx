@@ -45,14 +45,16 @@ const publicSignals = [
   },
 ];
 
-const dashboardNav = [
-  { label: "Overview", href: "#overview" },
-  { label: "Learning", href: "#learning" },
-  { label: "Jobs", href: "#jobs" },
-  { label: "Status", href: "#job-status" },
-  { label: "Jira", href: "#jira" },
-  { label: "Git", href: "#git" },
-  { label: "Runtime", href: "#runtime" },
+type DashboardNavItem = {
+  label: string;
+  pathname: string;
+};
+
+const dashboardNav: DashboardNavItem[] = [
+  { label: "Overview", pathname: "/" },
+  { label: "Learning", pathname: "/learning" },
+  { label: "Jobs", pathname: "/jobs" },
+  { label: "Info", pathname: "/info" },
 ];
 
 function isKeycloakCallback(): boolean {
@@ -120,6 +122,29 @@ function syncPathnameInUrl(pathname: string): void {
   const url = new URL(window.location.href);
   url.pathname = pathname;
   window.history.pushState({}, "", url);
+}
+
+function parseWorkspaceView(pathname: string): "overview" | "learning" | "ai" | "jobs" | "info" {
+  if (pathname.startsWith("/learning")) {
+    return "learning";
+  }
+  if (pathname.startsWith("/ai")) {
+    return "ai";
+  }
+  if (pathname.startsWith("/jobs")) {
+    return "jobs";
+  }
+  if (pathname.startsWith("/info")) {
+    return "info";
+  }
+  return "overview";
+}
+
+function isActiveNavItem(itemPathname: string, pathname: string): boolean {
+  if (itemPathname === "/") {
+    return pathname === "/";
+  }
+  return pathname === itemPathname || pathname.startsWith(`${itemPathname}/`);
 }
 
 function formatTimestamp(iso: string): string {
@@ -472,6 +497,287 @@ function normalizeAccessToken(value: string): string {
 function canAccessAiTools(profile: BackendMeResponse): boolean {
   const accessTokens = [...profile.roles, ...profile.groups].map(normalizeAccessToken);
   return accessTokens.some((token) => token === "developer" || token === "teacher" || token === "learning_teacher");
+}
+
+function WorkspaceDestinationCard({
+  title,
+  body,
+  actionLabel,
+  onOpen,
+}: {
+  title: string;
+  body: string;
+  actionLabel: string;
+  onOpen: () => void;
+}) {
+  return (
+    <article className="card dashboard-destination-card">
+      <p className="card-kicker">workspace</p>
+      <h2>{title}</h2>
+      <p>{body}</p>
+      <button className="secondary-button" type="button" onClick={onOpen}>
+        {actionLabel}
+      </button>
+    </article>
+  );
+}
+
+function WorkspaceOverviewPage({
+  profile,
+  canAccessAi,
+  onNavigate,
+}: {
+  profile: BackendMeResponse;
+  canAccessAi: boolean;
+  onNavigate: (pathname: string) => void;
+}) {
+  return (
+    <>
+      <section className="hero">
+        <div className="hero-copy">
+          <p className="eyebrow">Workspace</p>
+          <h1>One clear starting point, focused feature pages after that.</h1>
+          <p className="lead">
+            The authenticated home stays lightweight. Use the menu to move into Learning, AI,
+            Jobs, and technical platform details only when you need them.
+          </p>
+        </div>
+
+        <div className="hero-panel">
+          <div className="hero-panel-header">
+            <span className="status-dot" />
+            <span>Session</span>
+          </div>
+          <div className="hero-panel-body">
+            <div>
+              <p className="panel-label">User</p>
+              <p className="panel-value">{profile.username || profile.subject}</p>
+            </div>
+            <div>
+              <p className="panel-label">Groups</p>
+              <p className="panel-value">{profile.groups.length ? profile.groups.join(", ") : "none"}</p>
+            </div>
+            <div>
+              <p className="panel-label">Feature access</p>
+              <p className="panel-value">{canAccessAi ? "Learning + AI + jobs" : "Learning + info"}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="status-grid" aria-label="Workspace destinations">
+        <WorkspaceDestinationCard
+          title="Learning"
+          body="Open the learning workspace for material upload, shared materials, and material detail views."
+          actionLabel="Open learning"
+          onOpen={() => onNavigate("/learning")}
+        />
+        {canAccessAi && (
+          <WorkspaceDestinationCard
+            title="AI Tools"
+            body="Use prompt flow, Jira ticketing, and AI-assisted implementation features in a separate destination."
+            actionLabel="Open AI tools"
+            onOpen={() => onNavigate("/ai")}
+          />
+        )}
+        <WorkspaceDestinationCard
+          title="Jobs"
+          body="Track queued or running implementation jobs without mixing them into the homepage."
+          actionLabel="Open jobs"
+          onOpen={() => onNavigate("/jobs")}
+        />
+        <WorkspaceDestinationCard
+          title="Info"
+          body="See profile claims, API details, runtime configuration, and git-broker flow on a dedicated page."
+          actionLabel="Open info"
+          onOpen={() => onNavigate("/info")}
+        />
+      </section>
+    </>
+  );
+}
+
+function AiWorkspacePage({
+  onJobCreated,
+  onNavigate,
+}: {
+  onJobCreated: (jobId: string) => void;
+  onNavigate: (pathname: string) => void;
+}) {
+  return (
+    <section className="workspace-grid" aria-label="AI workspace">
+      <article className="workspace-panel" id="ai">
+        <div className="section-head">
+          <h2>AI menu</h2>
+          <span className="pill">ai access</span>
+        </div>
+        <p className="muted">
+          This area keeps prompt-first work separate from the main dashboard and from runtime or profile diagnostics.
+        </p>
+        <div className="status-grid">
+          <article className="card">
+            <p className="card-kicker">current</p>
+            <h3>Prompt flow</h3>
+            <p>Draft, clarify, approve, ticket, and launch implementation.</p>
+          </article>
+          <article className="card">
+            <p className="card-kicker">linked</p>
+            <h3>Job tracking</h3>
+            <p>Job status has its own destination so long-running work does not crowd this page.</p>
+          </article>
+          <article className="card">
+            <p className="card-kicker">future</p>
+            <h3>More tools</h3>
+            <p>The AI menu can grow with more backend-assisted capabilities.</p>
+          </article>
+        </div>
+      </article>
+
+      <PromptDraftPanel
+        onJobCreated={(createdJobId) => {
+          onJobCreated(createdJobId);
+          syncJobIdInUrl(createdJobId);
+          onNavigate("/jobs");
+        }}
+      />
+    </section>
+  );
+}
+
+function JobsWorkspacePage({ jobId }: { jobId: string }) {
+  return (
+    <section className="workspace-grid" aria-label="Jobs workspace">
+      <article className="workspace-panel">
+        <div className="section-head">
+          <h2>Jobs</h2>
+          <span className="pill">queue</span>
+        </div>
+        <p className="muted">
+          Follow implementation work from queue to PR publication here instead of keeping job state on the dashboard homepage.
+        </p>
+      </article>
+
+      {jobId ? (
+        <JobStatusPanel jobId={jobId} />
+      ) : (
+        <article className="workspace-panel">
+          <div className="section-head">
+            <h2>No active job selected</h2>
+            <span className="pill">idle</span>
+          </div>
+          <p className="muted">Create a job from the AI Tools page to track it here.</p>
+        </article>
+      )}
+    </section>
+  );
+}
+
+function InfoWorkspacePage({ profile, onSignOut }: { profile: BackendMeResponse; onSignOut: () => void }) {
+  const config = useMemo(() => getRuntimeConfig(), []);
+
+  return (
+    <section className="workspace-grid" aria-label="Platform info workspace">
+      <article className="workspace-panel" id="jobs">
+        <div className="section-head">
+          <h2>Profile</h2>
+          <button className="secondary-button" type="button" onClick={onSignOut}>
+            Sign out
+          </button>
+        </div>
+
+        <dl className="profile-list">
+          <div>
+            <dt>User</dt>
+            <dd>{profile.username || profile.subject}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{profile.email || "not provided"}</dd>
+          </div>
+          <div>
+            <dt>Roles</dt>
+            <dd>{profile.roles.length ? profile.roles.join(", ") : "none"}</dd>
+          </div>
+          <div>
+            <dt>Groups</dt>
+            <dd>{profile.groups.length ? profile.groups.join(", ") : "none"}</dd>
+          </div>
+          <div>
+            <dt>Issuer</dt>
+            <dd>{profile.claims.issuer}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article className="workspace-panel" id="jira">
+        <div className="section-head">
+          <h2>Current API</h2>
+          <span className="pill">private</span>
+        </div>
+        <p className="muted">
+          The frontend calls the backend through the public gateway with the Keycloak bearer token attached.
+        </p>
+        <dl className="profile-list compact">
+          <div>
+            <dt>Subject</dt>
+            <dd>{profile.subject}</dd>
+          </div>
+          <div>
+            <dt>Audience</dt>
+            <dd>{profile.claims.audience}</dd>
+          </div>
+          <div>
+            <dt>Authorized party</dt>
+            <dd>{profile.claims.authorizedParty}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article className="workspace-panel" id="runtime">
+        <div className="section-head">
+          <h2>Runtime</h2>
+          <span className="pill">docker</span>
+        </div>
+        <p className="muted">
+          Runtime config is loaded from <code>/config.js</code>. Backend issuer validation is driven by the private host environment.
+        </p>
+        <dl className="profile-list compact">
+          <div>
+            <dt>Keycloak URL</dt>
+            <dd>{config.keycloak.url}</dd>
+          </div>
+          <div>
+            <dt>API base</dt>
+            <dd>{config.apiBaseUrl}</dd>
+          </div>
+          <div>
+            <dt>Mode</dt>
+            <dd>authenticated</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article className="workspace-panel" id="git">
+        <div className="section-head">
+          <h2>Git broker</h2>
+          <span className="pill">ready</span>
+        </div>
+        <p className="muted">
+          Branch preparation, patch application, branch push, and PR publish are handled by the backend git broker pipeline.
+        </p>
+        <dl className="profile-list compact">
+          <div>
+            <dt>Branch flow</dt>
+            <dd>feature branch, commit, push, PR</dd>
+          </div>
+          <div>
+            <dt>Status flow</dt>
+            <dd>QUEUED → RUNNING → PATCH_GENERATED → PR_OPENED</dd>
+          </div>
+        </dl>
+      </article>
+    </section>
+  );
 }
 
 function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: string; onBack: () => void }) {
@@ -1761,12 +2067,16 @@ function DashboardShell({
   actionLabel,
   onAction,
   navItems = dashboardNav,
+  pathname = "/",
+  onNavigate,
   children,
 }: {
   mode: string;
   actionLabel: string;
   onAction: () => void;
-  navItems?: typeof dashboardNav;
+  navItems?: DashboardNavItem[];
+  pathname?: string;
+  onNavigate?: (pathname: string) => void;
   children: ReactNode;
 }) {
   return (
@@ -1780,7 +2090,18 @@ function DashboardShell({
 
         <nav className="dashboard-nav" aria-label="Primary navigation">
           {navItems.map((item) => (
-            <a key={item.href} href={item.href}>
+            <a
+              key={item.pathname}
+              href={item.pathname}
+              className={isActiveNavItem(item.pathname, pathname) ? "active" : undefined}
+              onClick={(event) => {
+                if (!onNavigate) {
+                  return;
+                }
+                event.preventDefault();
+                onNavigate(item.pathname);
+              }}
+            >
               {item.label}
             </a>
           ))}
@@ -1814,11 +2135,8 @@ function PrivateWorkspace({
   pathname: string;
   onNavigate: (pathname: string) => void;
 }) {
-  const config = useMemo(() => getRuntimeConfig(), []);
   const canAccessAi = canAccessAiTools(profile);
-  const navItems = canAccessAi
-    ? [dashboardNav[0], { label: "AI", href: "#ai" }, ...dashboardNav.slice(1)]
-    : dashboardNav;
+  const navItems = canAccessAi ? [...dashboardNav.slice(0, 2), { label: "AI", pathname: "/ai" }, ...dashboardNav.slice(2)] : dashboardNav;
 
   const persona = profile.roles.includes("admin")
     ? "operator"
@@ -1826,117 +2144,28 @@ function PrivateWorkspace({
       ? "builder"
       : "member";
   const learningMaterialId = parseLearningMaterialPath(pathname);
+  const workspaceView = parseWorkspaceView(pathname);
 
   return (
-    <DashboardShell mode="authenticated" actionLabel="Sign out" onAction={onSignOut} navItems={navItems}>
-      <section className="hero">
-        <div className="hero-copy">
-          <h1>Signed-in workspace for building the platform itself.</h1>
-          <p className="lead">
-            Keycloak backs the session, the backend validates tokens, and the UI adapts to the
-            user profile returned from the private API.
-          </p>
-        </div>
+    <DashboardShell mode={`authenticated ${persona}`} actionLabel="Sign out" onAction={onSignOut} navItems={navItems} pathname={pathname} onNavigate={onNavigate}>
+      {workspaceView === "overview" && (
+        <WorkspaceOverviewPage profile={profile} canAccessAi={canAccessAi} onNavigate={onNavigate} />
+      )}
 
-        <div className="hero-panel">
-          <div className="hero-panel-header">
-            <span className="status-dot" />
-            <span>Session</span>
-          </div>
-          <div className="hero-panel-body">
-            <div>
-              <p className="panel-label">Identity provider</p>
-              <p className="panel-value">{config.keycloak.url}</p>
-            </div>
-            <div>
-              <p className="panel-label">Client</p>
-              <p className="panel-value">{config.keycloak.clientId}</p>
-            </div>
-            <div>
-              <p className="panel-label">Workspace mode</p>
-              <p className="panel-value">{persona}</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {workspaceView === "learning" && (
+        <section className="workspace-grid" aria-label="Learning workspace">
+          {learningMaterialId ? (
+            <LearningMaterialDetailPanel materialId={learningMaterialId} onBack={() => onNavigate("/learning")} />
+          ) : (
+            <LearningWorkspacePanel roles={profile.roles} groups={profile.groups} onOpenMaterial={(materialId) => onNavigate(`/learning/materials/${materialId}`)} />
+          )}
+        </section>
+      )}
 
-      <section className="status-grid" aria-label="Platform signals" id="overview">
-        {publicSignals.map((signal) => (
-          <article className="card" key={signal.title}>
-            <p className="card-kicker">ready</p>
-            <h2>{signal.title}</h2>
-            <p>{signal.body}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="workspace-grid" aria-label="User workspace">
-        {learningMaterialId ? (
-          <LearningMaterialDetailPanel materialId={learningMaterialId} onBack={() => onNavigate("/")} />
-        ) : (
-          <LearningWorkspacePanel roles={profile.roles} groups={profile.groups} onOpenMaterial={(materialId) => onNavigate(`/learning/materials/${materialId}`)} />
-        )}
-
-        <article className="workspace-panel" id="jobs">
-          <div className="section-head">
-            <h2>Profile</h2>
-            <button className="secondary-button" type="button" onClick={onSignOut}>
-              Sign out
-            </button>
-          </div>
-
-          <dl className="profile-list">
-            <div>
-              <dt>User</dt>
-              <dd>{profile.username || profile.subject}</dd>
-            </div>
-            <div>
-              <dt>Email</dt>
-              <dd>{profile.email || "not provided"}</dd>
-            </div>
-            <div>
-              <dt>Roles</dt>
-              <dd>{profile.roles.length ? profile.roles.join(", ") : "none"}</dd>
-            </div>
-            <div>
-              <dt>Groups</dt>
-              <dd>{profile.groups.length ? profile.groups.join(", ") : "none"}</dd>
-            </div>
-            <div>
-              <dt>Issuer</dt>
-              <dd>{profile.claims.issuer}</dd>
-            </div>
-          </dl>
-        </article>
-
-        {canAccessAi ? (
-          <article className="workspace-panel" id="ai">
-            <div className="section-head">
-              <h2>AI menu</h2>
-              <span className="pill">ai access</span>
-            </div>
-            <p className="muted">
-              This menu groups multiple AI tools behind a single developer or teacher entrypoint.
-            </p>
-            <div className="status-grid">
-              <article className="card">
-                <p className="card-kicker">current</p>
-                <h3>Prompt flow</h3>
-                <p>Draft, clarify, approve, ticket, and launch implementation.</p>
-              </article>
-              <article className="card">
-                <p className="card-kicker">current</p>
-                <h3>Job status</h3>
-                <p>Follow AI-generated work from queue to PR publication.</p>
-              </article>
-              <article className="card">
-                <p className="card-kicker">future</p>
-                <h3>More tools</h3>
-                <p>The AI menu can grow with more backend-assisted capabilities.</p>
-              </article>
-            </div>
-          </article>
-        ) : (
+      {workspaceView === "ai" && (canAccessAi ? (
+        <AiWorkspacePage onJobCreated={onJobCreated} onNavigate={onNavigate} />
+      ) : (
+        <section className="workspace-grid" aria-label="Restricted AI workspace">
           <article className="workspace-panel" id="ai">
             <div className="section-head">
               <h2>AI menu</h2>
@@ -1945,92 +2174,12 @@ function PrivateWorkspace({
             <p className="error-title">AI tools are available only to Keycloak developer or teacher-group members.</p>
             <p className="muted">Ask an admin to add your account to the `developer`, `teacher`, or `learning_teacher` group to unlock this area.</p>
           </article>
-        )}
+        </section>
+      ))}
 
-        {canAccessAi && (
-          <>
-            <PromptDraftPanel
-              onJobCreated={(createdJobId) => {
-                onJobCreated(createdJobId);
-                syncJobIdInUrl(createdJobId);
-              }}
-            />
+      {workspaceView === "jobs" && <JobsWorkspacePage jobId={jobId} />}
 
-            {jobId && <JobStatusPanel jobId={jobId} />}
-          </>
-        )}
-
-        <article className="workspace-panel" id="jira">
-          <div className="section-head">
-            <h2>Current API</h2>
-            <span className="pill">private</span>
-          </div>
-          <p className="muted">
-            The frontend calls the backend through the public gateway with the Keycloak bearer
-            token attached.
-          </p>
-          <dl className="profile-list compact">
-            <div>
-              <dt>Subject</dt>
-              <dd>{profile.subject}</dd>
-            </div>
-            <div>
-              <dt>Audience</dt>
-              <dd>{profile.claims.audience}</dd>
-            </div>
-            <div>
-              <dt>Authorized party</dt>
-              <dd>{profile.claims.authorizedParty}</dd>
-            </div>
-          </dl>
-        </article>
-
-        <article className="workspace-panel" id="runtime">
-          <div className="section-head">
-            <h2>Runtime</h2>
-            <span className="pill">docker</span>
-          </div>
-          <p className="muted">
-            Runtime config is loaded from <code>/config.js</code>. Backend issuer validation is
-            driven by the private host environment.
-          </p>
-          <dl className="profile-list compact">
-            <div>
-              <dt>Keycloak URL</dt>
-              <dd>{config.keycloak.url}</dd>
-            </div>
-            <div>
-              <dt>API base</dt>
-              <dd>{config.apiBaseUrl}</dd>
-            </div>
-            <div>
-              <dt>Mode</dt>
-              <dd>authenticated</dd>
-            </div>
-          </dl>
-        </article>
-
-        <article className="workspace-panel" id="git">
-          <div className="section-head">
-            <h2>Git broker</h2>
-            <span className="pill">ready</span>
-          </div>
-          <p className="muted">
-            Branch preparation, patch application, branch push, and PR publish are handled by the
-            backend git broker pipeline.
-          </p>
-          <dl className="profile-list compact">
-            <div>
-              <dt>Branch flow</dt>
-              <dd>feature branch, commit, push, PR</dd>
-            </div>
-            <div>
-              <dt>Status flow</dt>
-              <dd>QUEUED → RUNNING → PATCH_GENERATED → PR_OPENED</dd>
-            </div>
-          </dl>
-        </article>
-      </section>
+      {workspaceView === "info" && <InfoWorkspacePage profile={profile} onSignOut={onSignOut} />}
     </DashboardShell>
   );
 }
