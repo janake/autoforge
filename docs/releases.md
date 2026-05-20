@@ -910,3 +910,14 @@ Taskok
 
 Megjegyzes
 - A frontend API helper a backend `ApiErrorResponse.message` mezot jeleniti meg nem-2xx valaszoknal, hogy a prompt draft AI konfiguracios hibak lathatoak legyenek.
+
+## 0.1.79
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-474`: Prompt draft flow cannot complete because AI clarification runtime is unavailable
+
+Megjegyzes
+- A private deploy a dokumentalt OpenCode/OpenRouter Vault display-name defaultokat hasznalja, hogy az AI runtime profile elinduljon explicit GitHub variable-ok nelkul is.
