@@ -20,6 +20,7 @@ public record LearningMaterialResponse(
   boolean canManageAssignments,
   List<LearningMaterialSourceResponse> sources,
   List<LearningImageAssetResponse> imageAssets,
+  List<LearningQuestionProgressResponse> progressEntries,
   Instant createdAt,
   Instant updatedAt
 ) {

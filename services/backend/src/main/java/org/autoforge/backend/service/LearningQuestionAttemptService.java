@@ -38,17 +38,23 @@ public class LearningQuestionAttemptService {
   private final LearningGeneratedContentRepository learningGeneratedContentRepository;
   private final LearningQuestionAttemptRepository learningQuestionAttemptRepository;
   private final LearningContentGenerationService learningContentGenerationService;
+  private final LearningQuestionProgressService learningQuestionProgressService;
   private final ObjectMapper objectMapper;
 
-  @Transactional(readOnly = true)
+  @Transactional
   public List<LearningContentGenerationResponse> listQuestionSets(String materialId, String subject, Collection<String> groups) {
     LearningMaterial material = loadAccessibleMaterial(materialId, subject, groups);
-    return learningGeneratedContentRepository
+    List<LearningGeneratedContent> questionSets = learningGeneratedContentRepository
       .findByMaterialIdAndOwnerSubjectAndGenerationTypeOrderByCreatedAtDesc(materialId, material.getOwnerSubject(), LearningContentGenerationType.QUESTION_SET)
       .stream()
       .filter(content -> learningContentGenerationService.isQuestionSetVisibleToViewer(content, material.getOwnerSubject(), subject))
-      .map(content -> learningContentGenerationService.toResponse(content))
       .toList();
+
+    if (!Objects.equals(material.getOwnerSubject(), subject)) {
+      questionSets.forEach(content -> learningQuestionProgressService.markStarted(materialId, content.getId(), subject, groups));
+    }
+
+    return questionSets.stream().map(learningContentGenerationService::toResponse).toList();
   }
 
   @Transactional
@@ -83,6 +89,7 @@ public class LearningQuestionAttemptService {
       questionSet.questions().size(),
       writeAnswers(answers)
     ));
+    learningQuestionProgressService.markSubmitted(materialId, generation.getId(), subject, saved.getId(), score, questionSet.questions().size());
     return toResponse(saved);
   }
 

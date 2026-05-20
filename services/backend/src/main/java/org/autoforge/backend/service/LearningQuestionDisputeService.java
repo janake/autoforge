@@ -32,6 +32,7 @@ public class LearningQuestionDisputeService {
   private final LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
   private final LearningQuestionAttemptRepository learningQuestionAttemptRepository;
   private final LearningQuestionDisputeRepository learningQuestionDisputeRepository;
+  private final LearningQuestionProgressService learningQuestionProgressService;
 
   @Transactional(readOnly = true)
   public List<LearningQuestionDisputeResponse> listDisputes(String materialId, String subject, Collection<String> groups) {
@@ -77,11 +78,20 @@ public class LearningQuestionDisputeService {
     }
 
     dispute.review(subject, request.status(), request.reviewReason(), request.overrideScore());
+    LearningQuestionAttempt attempt = learningQuestionAttemptRepository.findById(dispute.getAttemptId())
+      .orElseThrow(() -> new LearningMaterialNotFoundException(dispute.getAttemptId()));
     if (request.status() == LearningQuestionDisputeStatus.ACCEPTED && request.overrideScore() != null) {
-      LearningQuestionAttempt attempt = learningQuestionAttemptRepository.findById(dispute.getAttemptId())
-        .orElseThrow(() -> new LearningMaterialNotFoundException(dispute.getAttemptId()));
       attempt.setScore(request.overrideScore());
     }
+    learningQuestionProgressService.markReviewed(
+      materialId,
+      attempt.getGenerationId(),
+      attempt.getStudentSubject(),
+      request.status(),
+      request.overrideScore(),
+      attempt.getScore(),
+      attempt.getTotalQuestions()
+    );
     return toResponse(dispute);
   }
 

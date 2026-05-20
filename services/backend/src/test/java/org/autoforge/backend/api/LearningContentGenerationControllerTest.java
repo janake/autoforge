@@ -19,6 +19,7 @@ import org.autoforge.backend.repository.LearningMaterialAssignmentRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
 import org.autoforge.backend.repository.LearningMaterialSourceRepository;
 import org.autoforge.backend.repository.LearningQuestionAttemptRepository;
+import org.autoforge.backend.repository.LearningQuestionProgressRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +50,13 @@ class LearningContentGenerationControllerTest {
   @Autowired
   private LearningQuestionAttemptRepository learningQuestionAttemptRepository;
 
+  @Autowired
+  private LearningQuestionProgressRepository learningQuestionProgressRepository;
+
   @BeforeEach
   void cleanState() {
     learningQuestionAttemptRepository.deleteAll();
+    learningQuestionProgressRepository.deleteAll();
     learningMaterialAssignmentRepository.deleteAll();
     learningMaterialSourceRepository.deleteAll();
     learningGeneratedContentRepository.deleteAll();
