@@ -26,5 +26,5 @@ autoforge:
       server-url: http://opencode:4096
       username: opencode
       password: test-token
-      model: autoforge-openrouter/deepseek/deepseek-chat
+      model: autoforge-openrouter/deepseek/deepseek-v4-flash:free
       api-key: test-api-key
