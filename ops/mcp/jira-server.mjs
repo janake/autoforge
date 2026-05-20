@@ -33,7 +33,8 @@ const tools = [
       type: "object",
       properties: {
         issueKey: { type: "string", description: "Jira issue key, for example AUTO-5" },
-        fields: { type: "object", description: "Jira fields payload, for example { summary: 'New title' }" },
+        projectKey: { type: "string", description: "Optional Jira project key when resolving fixVersion/fixVersions names." },
+        fields: { type: "object", description: "Jira fields payload, for example { summary: 'New title', fixVersion: '0.1.66' }" },
       },
       required: ["issueKey", "fields"],
     },
@@ -85,7 +86,7 @@ const tools = [
         description: { type: "string", description: "Plain text description." },
         parentKey: { type: "string", description: "Parent issue key for subtasks or team-managed epic/story hierarchy." },
         labels: { type: "array", items: { type: "string" }, description: "Labels to apply." },
-        fields: { type: "object", description: "Additional Jira fields payload to merge into the create request." },
+        fields: { type: "object", description: "Additional Jira fields payload to merge into the create request. Supports fixVersion/fixVersions shorthand and auto-creates missing versions." },
       },
       required: ["issueType", "summary"],
     },
@@ -305,6 +306,111 @@ async function jiraRequest(method, apiPath, body = null) {
   }
 
   return data;
+}
+
+const projectCache = new Map();
+const projectVersionsCache = new Map();
+
+async function jiraProject(projectKey) {
+  if (projectCache.has(projectKey)) {
+    return projectCache.get(projectKey);
+  }
+
+  const project = await jiraRequest("GET", `/rest/api/3/project/${encodeURIComponent(projectKey)}`);
+  projectCache.set(projectKey, project);
+  return project;
+}
+
+async function jiraProjectVersions(projectKey) {
+  if (projectVersionsCache.has(projectKey)) {
+    return projectVersionsCache.get(projectKey);
+  }
+
+  const versions = await jiraRequest("GET", `/rest/api/3/project/${encodeURIComponent(projectKey)}/versions`);
+  projectVersionsCache.set(projectKey, versions || []);
+  return versions || [];
+}
+
+function requestedVersions(value) {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : [value];
+}
+
+function versionName(value) {
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  if (value && typeof value === "object" && typeof value.name === "string") {
+    return value.name.trim();
+  }
+
+  return "";
+}
+
+function versionId(value) {
+  if (value && typeof value === "object" && value.id !== undefined && value.id !== null) {
+    return String(value.id).trim();
+  }
+
+  return "";
+}
+
+async function resolveFixVersions(projectKey, fields) {
+  const requested = fields.fixVersions ?? fields.fixVersion;
+  if (requested === undefined || requested === null) {
+    return fields;
+  }
+
+  const versions = [];
+  const known = new Map();
+  const projectVersions = await jiraProjectVersions(projectKey);
+
+  for (const entry of requestedVersions(requested)) {
+    const id = versionId(entry);
+    if (id) {
+      if (!known.has(id)) {
+        known.set(id, true);
+        versions.push({ id });
+      }
+      continue;
+    }
+
+    const name = versionName(entry);
+    if (!name) {
+      continue;
+    }
+
+    const existing = projectVersions.find((candidate) => candidate.name?.toLowerCase() === name.toLowerCase());
+    if (existing) {
+      if (!known.has(String(existing.id))) {
+        known.set(String(existing.id), true);
+        versions.push({ id: existing.id });
+      }
+      continue;
+    }
+
+    const project = await jiraProject(projectKey);
+    const created = await jiraRequest("POST", "/rest/api/3/version", {
+      projectId: project.id,
+      name,
+    });
+    projectVersions.push(created);
+    projectVersionsCache.set(projectKey, projectVersions);
+
+    if (!known.has(String(created.id))) {
+      known.set(String(created.id), true);
+      versions.push({ id: created.id });
+    }
+  }
+
+  return compactObject({
+    ...Object.fromEntries(Object.entries(fields).filter(([key]) => key !== "fixVersion")),
+    fixVersions: versions,
+  });
 }
 
 function send(id, result, error = null) {
@@ -640,7 +746,13 @@ async function callTool(name, args = {}) {
   }
 
   if (name === "jira_update_issue") {
-    await jiraRequest("PUT", `/rest/api/3/issue/${encodeURIComponent(args.issueKey)}`, { fields: args.fields });
+    const projectKey = args.projectKey || args.issueKey.split("-")[0];
+    const needsVersionOverride = Boolean(args.fields && (Object.prototype.hasOwnProperty.call(args.fields, "fixVersion") || Object.prototype.hasOwnProperty.call(args.fields, "fixVersions")));
+    const fields = await resolveFixVersions(projectKey, args.fields || {});
+    const updatePath = needsVersionOverride
+      ? `/rest/api/3/issue/${encodeURIComponent(args.issueKey)}?overrideScreenSecurity=true&notifyUsers=false`
+      : `/rest/api/3/issue/${encodeURIComponent(args.issueKey)}`;
+    await jiraRequest("PUT", updatePath, { fields });
     return textResult(`Issue ${args.issueKey} updated successfully.`);
   }
 
@@ -677,14 +789,16 @@ async function callTool(name, args = {}) {
   }
 
   if (name === "jira_create_issue") {
+    const projectKey = args.projectKey || defaultProjectKey();
+    const versionedFields = await resolveFixVersions(projectKey, compactObject(args.fields || {}));
     const fields = compactObject({
-      project: { key: args.projectKey || defaultProjectKey() },
+      project: { key: projectKey },
       issuetype: { name: args.issueType },
       summary: args.summary,
       description: args.description ? adfText(args.description) : undefined,
       parent: args.parentKey ? { key: args.parentKey } : undefined,
       labels: args.labels,
-      ...(args.fields || {}),
+      ...versionedFields,
     });
     const data = await jiraRequest("POST", "/rest/api/3/issue", { fields });
     const { baseUrl } = jiraConfig();
