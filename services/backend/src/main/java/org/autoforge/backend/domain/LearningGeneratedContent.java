@@ -48,6 +48,12 @@ public class LearningGeneratedContent {
   @Column(name = "question_set_status", length = 32)
   private LearningQuestionSetStatus questionSetStatus;
 
+  @Column(name = "deadline_at")
+  private Instant deadlineAt;
+
+  @Column(name = "max_attempts")
+  private Integer maxAttempts;
+
   @Column(name = "fallback_used", nullable = false)
   private boolean fallbackUsed;
 
@@ -77,6 +83,8 @@ public class LearningGeneratedContent {
     String sourceReferences,
     String sourceVersionReferences,
     LearningQuestionSetStatus questionSetStatus,
+    Instant deadlineAt,
+    Integer maxAttempts,
     boolean fallbackUsed,
     String fallbackReason,
     LearningGenerationStatus generationStatus,
@@ -90,6 +98,8 @@ public class LearningGeneratedContent {
     this.sourceReferences = sourceReferences;
     this.sourceVersionReferences = sourceVersionReferences;
     this.questionSetStatus = questionSetStatus;
+    this.deadlineAt = deadlineAt;
+    this.maxAttempts = maxAttempts;
     this.fallbackUsed = fallbackUsed;
     this.fallbackReason = fallbackReason;
     this.generationStatus = generationStatus;
@@ -105,6 +115,8 @@ public class LearningGeneratedContent {
     String sourceReferences,
     String sourceVersionReferences,
     LearningQuestionSetStatus questionSetStatus,
+    Instant deadlineAt,
+    Integer maxAttempts,
     boolean fallbackUsed,
     String fallbackReason,
     LearningGenerationStatus generationStatus,
@@ -119,6 +131,8 @@ public class LearningGeneratedContent {
       sourceReferences,
       sourceVersionReferences,
       questionSetStatus,
+      deadlineAt,
+      maxAttempts,
       fallbackUsed,
       fallbackReason,
       generationStatus,
@@ -175,6 +189,22 @@ public class LearningGeneratedContent {
 
   public void setQuestionSetStatus(LearningQuestionSetStatus questionSetStatus) {
     this.questionSetStatus = questionSetStatus;
+  }
+
+  public Instant getDeadlineAt() {
+    return deadlineAt;
+  }
+
+  public void setDeadlineAt(Instant deadlineAt) {
+    this.deadlineAt = deadlineAt;
+  }
+
+  public Integer getMaxAttempts() {
+    return maxAttempts;
+  }
+
+  public void setMaxAttempts(Integer maxAttempts) {
+    this.maxAttempts = maxAttempts;
   }
 
   public boolean isFallbackUsed() {

@@ -14,6 +14,7 @@ import type {
   LearningQuestionDisputeResponse,
   LearningQuestionProgressResponse,
   LearningQuestionSetPayload,
+  LearningQuestionSetSettingsRequest,
   LearningMaterialAssignmentRequest,
   LearningMaterialResponse,
   LearningMaterialSourceResponse,
@@ -125,6 +126,25 @@ function formatTimestamp(iso: string): string {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(iso));
+}
+
+function formatLocalDateTime(iso: string | null): string {
+  if (!iso) {
+    return "";
+  }
+
+  const date = new Date(iso);
+  const offsetMs = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+}
+
+function parseLocalDateTime(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  return new Date(trimmed).toISOString();
 }
 
 type LearningWorkspaceItem = LearningMaterialResponse & {
@@ -373,6 +393,22 @@ function progressStatusTone(status: LearningQuestionProgressResponse["status"]):
   }
 }
 
+function questionSetAttemptCount(attempts: LearningQuestionAttemptResponse[], generationId: string): number {
+  return attempts.filter((attempt) => attempt.generationId === generationId).length;
+}
+
+function questionSetBlockedReason(deadlineAt: string | null, maxAttempts: number | null, attemptCount: number): string | null {
+  if (deadlineAt && new Date(deadlineAt).getTime() < Date.now()) {
+    return "Deadline passed.";
+  }
+
+  if (maxAttempts !== null && attemptCount >= maxAttempts) {
+    return "Maximum attempts reached.";
+  }
+
+  return null;
+}
+
 function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: string; onBack: () => void }) {
   const [refreshToken, setRefreshToken] = useState(0);
   const [sourceStatus, setSourceStatus] = useState<string | null>(null);
@@ -507,6 +543,29 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
     } catch (error) {
       setGenerationStatus(null);
       setGenerationError(error instanceof Error ? error.message : "Unable to update question set status.");
+    }
+  };
+
+  const updateQuestionSetSettings = async (event: FormEvent<HTMLFormElement>, generationId: string) => {
+    event.preventDefault();
+    setGenerationError(null);
+    setGenerationStatus("Saving question set settings...");
+
+    const formData = new FormData(event.currentTarget);
+    const deadlineAt = parseLocalDateTime(String(formData.get("deadlineAt") ?? ""));
+    const maxAttemptsText = String(formData.get("maxAttempts") ?? "").trim();
+    const maxAttempts = maxAttemptsText ? Number(maxAttemptsText) : null;
+
+    try {
+      await putAuthedJson<LearningContentGenerationResponse>(`/v1/learning/materials/${materialId}/question-sets/${generationId}/settings`, {
+        deadlineAt,
+        maxAttempts,
+      } satisfies LearningQuestionSetSettingsRequest);
+      setRefreshToken((value) => value + 1);
+      setGenerationStatus("Question set settings saved.");
+    } catch (error) {
+      setGenerationStatus(null);
+      setGenerationError(error instanceof Error ? error.message : "Unable to save question set settings.");
     }
   };
 
@@ -866,7 +925,7 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                     const structured = parseQuestionSet(generation.structuredContent);
 
                     return (
-                      <section className="learning-detail-generation-card" key={generation.id}>
+                      <section className="learning-detail-generation-card" key={`${generation.id}-${generation.deadlineAt ?? ""}-${generation.maxAttempts ?? ""}`}>
                         <div className="section-head">
                           <h4>{generation.generationType === "QUESTION_SET" ? "Questions" : "Summary"}</h4>
                           <div className="learning-generation-badges">
@@ -880,6 +939,34 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                             </span>
                           </div>
                         </div>
+                        {generation.generationType === "QUESTION_SET" && !state.material.canManageAssignments && (
+                          <dl className="profile-list compact">
+                            <div>
+                              <dt>Deadline</dt>
+                              <dd>{generation.deadlineAt ? formatTimestamp(generation.deadlineAt) : "none"}</dd>
+                            </div>
+                            <div>
+                              <dt>Max attempts</dt>
+                              <dd>{generation.maxAttempts ?? "unlimited"}</dd>
+                            </div>
+                            <div>
+                              <dt>Used attempts</dt>
+                              <dd>{questionSetAttemptCount(state.attempts, generation.id)}</dd>
+                            </div>
+                            <div>
+                              <dt>Remaining</dt>
+                              <dd>
+                                {generation.maxAttempts === null
+                                  ? "unlimited"
+                                  : Math.max(generation.maxAttempts - questionSetAttemptCount(state.attempts, generation.id), 0)}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Blocked reason</dt>
+                              <dd>{questionSetBlockedReason(generation.deadlineAt, generation.maxAttempts, questionSetAttemptCount(state.attempts, generation.id)) || "available"}</dd>
+                            </div>
+                          </dl>
+                        )}
                         <p className="muted">
                           {generation.fallbackUsed ? generation.fallbackReason || "Fallback used" : "Generated from the learning source material."}
                         </p>
@@ -894,6 +981,30 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                               <dd>{generation.sourceVersions.map((source: LearningSourceVersionReference) => source.contentHash.slice(0, 12)).join(", ")}</dd>
                             </div>
                           </dl>
+                        )}
+                        {generation.generationType === "QUESTION_SET" && state.material.canManageAssignments && (
+                          <form className="prompt-form learning-upload-form" onSubmit={(event) => void updateQuestionSetSettings(event, generation.id)}>
+                            <div className="learning-upload-grid">
+                              <label>
+                                <span>Deadline</span>
+                                <input name="deadlineAt" type="datetime-local" defaultValue={formatLocalDateTime(generation.deadlineAt)} />
+                              </label>
+                              <label>
+                                <span>Max attempts</span>
+                                <input
+                                  name="maxAttempts"
+                                  type="number"
+                                  min={1}
+                                  placeholder="unlimited"
+                                  defaultValue={generation.maxAttempts ?? ""}
+                                />
+                              </label>
+                            </div>
+                            <div className="prompt-actions">
+                              <button className="primary-button" type="submit">Save question set settings</button>
+                              <span className="muted">Leave fields blank for unlimited attempts.</span>
+                            </div>
+                          </form>
                         )}
                         <pre className="learning-detail-content">{generation.content}</pre>
                         {state.material.canManageAssignments && generation.generationType === "QUESTION_SET" && (

@@ -171,12 +171,19 @@ export type LearningContentGenerationResponse = {
   sources: LearningContentSourceReference[];
   sourceVersions: LearningSourceVersionReference[];
   questionSetStatus: LearningQuestionSetStatus | null;
+  deadlineAt: string | null;
+  maxAttempts: number | null;
   fallbackUsed: boolean;
   fallbackReason: string | null;
   generationStatus: "COMPLETED" | "FAILED";
   structuredContent: string | null;
   errorMessage: string | null;
   createdAt: string;
+};
+
+export type LearningQuestionSetSettingsRequest = {
+  deadlineAt: string | null;
+  maxAttempts: number | null;
 };
 
 export type LearningIngestionResponse = {

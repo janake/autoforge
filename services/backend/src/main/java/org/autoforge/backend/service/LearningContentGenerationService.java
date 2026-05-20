@@ -22,6 +22,7 @@ import org.autoforge.backend.domain.LearningMaterialSource;
 import org.autoforge.backend.dto.LearningContentGenerationResponse;
 import org.autoforge.backend.dto.LearningContentSourceReference;
 import org.autoforge.backend.dto.LearningQuestionOptionPayload;
+import org.autoforge.backend.dto.LearningQuestionSetSettingsRequest;
 import org.autoforge.backend.dto.LearningQuestionPayload;
 import org.autoforge.backend.dto.LearningQuestionSetPayload;
 import org.autoforge.backend.dto.LearningSourceVersionReference;
@@ -62,6 +63,8 @@ public class LearningContentGenerationService {
       generated.sourceText(),
       writeJson(sourceVersions),
       LearningQuestionSetStatus.DRAFT,
+      null,
+      null,
       true,
       FALLBACK_REASON,
       LearningGenerationStatus.COMPLETED,
@@ -83,6 +86,8 @@ public class LearningContentGenerationService {
       null,
       generated.sourceText(),
       writeJson(sourceVersions),
+      null,
+      null,
       null,
       true,
       FALLBACK_REASON,
@@ -109,6 +114,24 @@ public class LearningContentGenerationService {
   @Transactional
   public LearningContentGenerationResponse archiveQuestionSet(String materialId, String generationId, String subject) {
     return updateQuestionSetStatus(materialId, generationId, subject, LearningQuestionSetStatus.ARCHIVED);
+  }
+
+  @Transactional
+  public LearningContentGenerationResponse updateQuestionSetSettings(String materialId, String generationId, String subject, LearningQuestionSetSettingsRequest request) {
+    LearningMaterial material = loadOwnedMaterial(materialId, subject);
+    LearningGeneratedContent generation = learningGeneratedContentRepository.findById(generationId)
+      .filter(content -> Objects.equals(content.getMaterialId(), material.getId()))
+      .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
+      .filter(content -> Objects.equals(content.getOwnerSubject(), material.getOwnerSubject()))
+      .orElseThrow(() -> new LearningMaterialNotFoundException(generationId));
+
+    if (request.maxAttempts() != null && request.maxAttempts() < 1) {
+      throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "maxAttempts must be at least 1");
+    }
+
+    generation.setDeadlineAt(request.deadlineAt());
+    generation.setMaxAttempts(request.maxAttempts());
+    return toResponse(learningGeneratedContentRepository.save(generation));
   }
 
   private LearningMaterial loadOwnedMaterial(String materialId, String subject) {
@@ -406,6 +429,8 @@ public class LearningContentGenerationService {
       sources,
       parseSourceVersions(content.getSourceVersionReferences()),
       content.getGenerationType() == LearningContentGenerationType.QUESTION_SET ? effectiveQuestionSetStatus(content) : null,
+      content.getGenerationType() == LearningContentGenerationType.QUESTION_SET ? content.getDeadlineAt() : null,
+      content.getGenerationType() == LearningContentGenerationType.QUESTION_SET ? content.getMaxAttempts() : null,
       content.isFallbackUsed(),
       content.getFallbackReason(),
       content.getGenerationStatus(),

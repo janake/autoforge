@@ -730,3 +730,14 @@ Taskok
 
 Megjegyzes
 - A Learning modul külön progress entitással követi az assigned, started, submitted, reviewed és completed állapotokat, hogy később Duolingo/Anki-szerű ismétlési logika épülhessen rá.
+
+## 0.1.64
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-409`: Határidő és maximális próbálkozásszám kérdéssorhoz
+
+Megjegyzes
+- A Learning question set settings most deadline és max attempts korlátot kap, a backend pedig ezek alapján blokkolja a túl késői vagy túl sokadik beadásokat.
