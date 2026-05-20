@@ -1,18 +1,15 @@
 package org.autoforge.backend.service;
 
-import java.util.ArrayList;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 import org.autoforge.backend.domain.PromptDraft;
 import org.autoforge.backend.domain.PromptDraftMessage;
 import org.autoforge.backend.domain.PromptDraftMessageRole;
 import org.autoforge.backend.domain.PromptIntent;
 import org.autoforge.backend.domain.PromptDraftStatus;
-import org.autoforge.backend.config.BackendMvpProperties;
 import org.autoforge.backend.dto.AddPromptDraftMessageRequest;
 import org.autoforge.backend.dto.CreatePromptDraftRequest;
 import org.autoforge.backend.dto.JobResponse;
@@ -37,7 +34,7 @@ public class PromptDraftService {
   private final PromptDraftMessageRepository promptDraftMessageRepository;
   private final JiraIssueClient jiraIssueClient;
   private final JobService jobService;
-  private final BackendMvpProperties backendMvpProperties;
+  private final PromptDraftClarifier promptDraftClarifier;
 
   @Transactional
   public PromptDraftResponse createDraft(CreatePromptDraftRequest request) {
@@ -45,15 +42,15 @@ public class PromptDraftService {
     applyIntentClassification(draft, draft.getPrompt());
     promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.USER, draft.getPrompt()));
 
-    List<String> questions = clarificationQuestions(draft.getPrompt());
-    if (questions.isEmpty()) {
+    PromptDraftClarificationResult clarification = promptDraftClarifier.clarify(new PromptDraftClarificationRequest(draft.getPrompt()));
+    if (clarification.readyForApproval()) {
       draft.setStatus(PromptDraftStatus.READY_FOR_APPROVAL);
       draft.setPendingQuestions(null);
-      promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, READY_MESSAGE));
+      promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, assistantMessage(clarification)));
     } else {
       draft.setStatus(PromptDraftStatus.CLARIFYING);
-      draft.setPendingQuestions(String.join("\n", questions));
-      promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, String.join("\n", questions)));
+      draft.setPendingQuestions(String.join("\n", clarification.questions()));
+      promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, assistantMessage(clarification)));
     }
 
     return toResponse(promptDraftRepository.save(draft));
@@ -75,15 +72,15 @@ public class PromptDraftService {
     String conversationText = combinedConversationText(draft.getPrompt(), draft.getId());
     applyIntentClassification(draft, conversationText);
 
-    List<String> questions = clarificationQuestions(conversationText);
-    if (questions.isEmpty()) {
+    PromptDraftClarificationResult clarification = promptDraftClarifier.clarify(new PromptDraftClarificationRequest(conversationText));
+    if (clarification.readyForApproval()) {
       draft.setStatus(PromptDraftStatus.READY_FOR_APPROVAL);
       draft.setPendingQuestions(null);
-      promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, READY_MESSAGE));
+      promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, assistantMessage(clarification)));
     } else {
       draft.setStatus(PromptDraftStatus.CLARIFYING);
-      draft.setPendingQuestions(String.join("\n", questions));
-      promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, String.join("\n", questions)));
+      draft.setPendingQuestions(String.join("\n", clarification.questions()));
+      promptDraftMessageRepository.save(PromptDraftMessage.create(draft.getId(), PromptDraftMessageRole.ASSISTANT, assistantMessage(clarification)));
     }
 
     return toResponse(promptDraftRepository.save(draft));
@@ -165,48 +162,14 @@ public class PromptDraftService {
     return joiner.toString();
   }
 
-  private List<String> clarificationQuestions(String text) {
-    String unavailableReason = realAiUnavailableReason();
-    if (unavailableReason != null) {
-      return List.of("Real AI is unavailable because %s. Please include the repository, success criteria, and intended change in your next message.".formatted(unavailableReason));
+  private String assistantMessage(PromptDraftClarificationResult clarification) {
+    if (clarification.message() != null && !clarification.message().isBlank()) {
+      return clarification.message().trim();
     }
-
-    String normalized = Objects.requireNonNullElse(text, "").toLowerCase(Locale.ROOT);
-    List<String> questions = new ArrayList<>();
-
-    if (!normalized.matches(".*(?:\\b[a-z0-9_.-]+/[a-z0-9_.-]+\\b|\\brepository\\b|\\brepo\\b).*")) {
-      questions.add("Which repository should this apply to?");
+    if (clarification.readyForApproval()) {
+      return READY_MESSAGE;
     }
-
-    if (!normalized.matches(".*(?:\\bacceptance\\b|\\bexpected\\b|\\bdone\\b|\\bshould\\b).*")) {
-      questions.add("What does success look like, and what acceptance criteria should we use?");
-    }
-
-    if (normalized.replaceAll("\\s+", " ").trim().length() < 40) {
-      questions.add("Can you give a bit more detail about the intended change?");
-    }
-
-    return questions.stream().distinct().collect(Collectors.toList());
-  }
-
-  private String realAiUnavailableReason() {
-    BackendMvpProperties.Opencode opencode = backendMvpProperties == null ? null : backendMvpProperties.opencode();
-    if (opencode == null) {
-      return "the backend has no opencode configuration";
-    }
-    if (opencode.serverUrl() == null || opencode.serverUrl().isBlank()) {
-      return "OPENCODE_SERVER_URL is not configured";
-    }
-    if (opencode.username() == null || opencode.username().isBlank()) {
-      return "OPENCODE_SERVER_USERNAME is not configured";
-    }
-    if (opencode.password() == null || opencode.password().isBlank()) {
-      return "OPENCODE_SERVER_PASSWORD is not configured";
-    }
-    if (opencode.model() == null || opencode.model().isBlank()) {
-      return "OPENCODE_MODEL is not configured";
-    }
-    return null;
+    return String.join("\n", clarification.questions());
   }
 
   private void applyIntentClassification(PromptDraft draft, String text) {

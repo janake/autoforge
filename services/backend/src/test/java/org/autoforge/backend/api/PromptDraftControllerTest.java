@@ -2,6 +2,8 @@ package org.autoforge.backend.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -19,6 +21,9 @@ import org.autoforge.backend.repository.PromptDraftRepository;
 import org.autoforge.backend.jira.CreateJiraIssueResponse;
 import org.autoforge.backend.jira.JiraIssueClient;
 import org.autoforge.backend.domain.JobStatus;
+import org.autoforge.backend.service.PromptDraftClarificationRequest;
+import org.autoforge.backend.service.PromptDraftClarificationResult;
+import org.autoforge.backend.service.PromptDraftClarifier;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,11 +54,27 @@ class PromptDraftControllerTest {
   @org.springframework.boot.test.mock.mockito.MockBean
   private JiraIssueClient jiraIssueClient;
 
+  @org.springframework.boot.test.mock.mockito.MockBean
+  private PromptDraftClarifier promptDraftClarifier;
+
   @BeforeEach
   void cleanState() {
     promptDraftMessageRepository.deleteAll();
     promptDraftRepository.deleteAll();
     jobRepository.deleteAll();
+    doAnswer(invocation -> defaultClarification(invocation.getArgument(0))).when(promptDraftClarifier).clarify(any());
+  }
+
+  private static PromptDraftClarificationResult defaultClarification(PromptDraftClarificationRequest request) {
+    String text = request.conversationText() == null ? "" : request.conversationText().toLowerCase();
+    if (text.contains("janake/autoforge") && text.contains("acceptance")) {
+      return new PromptDraftClarificationResult(true, List.of(), "This looks ready for approval.");
+    }
+    return new PromptDraftClarificationResult(
+      false,
+      List.of("Which repository should this apply to?", "What does success look like, and what acceptance criteria should we use?"),
+      "Which repository should this apply to?\nWhat does success look like, and what acceptance criteria should we use?"
+    );
   }
 
   private static JwtRequestPostProcessor developerJwt() {
@@ -90,6 +111,28 @@ class PromptDraftControllerTest {
     assertThat(jobRepository.count()).isZero();
     assertThat(promptDraftRepository.count()).isEqualTo(1);
     assertThat(promptDraftMessageRepository.count()).isEqualTo(2);
+  }
+
+  @Test
+  void usesAiClarifierResponseWhenCreatingDraft() throws Exception {
+    doReturn(new PromptDraftClarificationResult(
+      false,
+      List.of("AI question: melyik repository?"),
+      "AI question: melyik repository?"
+    )).when(promptDraftClarifier).clarify(any());
+
+    mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(developerJwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Audit the workflow"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CLARIFYING"))
+      .andExpect(jsonPath("$.pendingQuestions[0]").value("AI question: melyik repository?"))
+      .andExpect(jsonPath("$.messages[1].content").value("AI question: melyik repository?"));
   }
 
   @Test

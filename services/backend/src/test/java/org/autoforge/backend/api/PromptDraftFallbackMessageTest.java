@@ -27,7 +27,7 @@ class PromptDraftFallbackMessageTest {
   private MockMvc mockMvc;
 
   @Test
-  void showsWhyRealAiIsUnavailableWhenOpencodePasswordIsMissing() throws Exception {
+  void returnsServiceUnavailableWhenOpencodePasswordIsMissing() throws Exception {
     mockMvc.perform(post("/api/v1/prompt-drafts")
         .with(jwt().jwt(token -> token.claim("groups", List.of("developer"))).authorities(new SimpleGrantedAuthority("ROLE_developer")))
         .contentType(MediaType.APPLICATION_JSON)
@@ -36,8 +36,7 @@ class PromptDraftFallbackMessageTest {
             "prompt": "Audit the workflow"
           }
           """))
-      .andExpect(status().isCreated())
-      .andExpect(jsonPath("$.messages[1].content").value(org.hamcrest.Matchers.containsString("Real AI is unavailable because OPENCODE_SERVER_PASSWORD is not configured")))
-      .andExpect(jsonPath("$.messages[1].content").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("Which repository should this apply to?"))));
+      .andExpect(status().isServiceUnavailable())
+      .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Prompt draft AI is unavailable because OPENCODE_SERVER_PASSWORD is not configured")));
   }
 }

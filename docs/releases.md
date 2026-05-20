@@ -887,3 +887,15 @@ Taskok
 Megjegyzes
 - Javitas a private deploy workflow `Render private runtime environment` shell blokkjaban.
 - Az OpenRouter default es allowed model feltetelek kulon zarodnak, igy nincs arva `fi` a renderelt shell scriptben.
+
+## 0.1.77
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-472`: Prompt draft clarification does not use configured AI
+
+Megjegyzes
+- A prompt draft create/add message flow az OpenCode/OpenRouter AI-t hasznalja a pontosito valaszokhoz.
+- AI konfiguracio vagy runtime hiba eseten a prompt draft endpoint `503 Service Unavailable` valaszt ad hardcoded fallback kerdesek helyett.
