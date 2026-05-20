@@ -875,3 +875,15 @@ Megjegyzes
 - Generation status (PENDING, COMPLETED, FAILED) and fallback reasons are persisted.
 - `@ConditionalOnProperty` guard: bean loads only when `autoforge.mvp.opencode.server-url` is set.
 - Tests verify fallback path with all 87 backend tests passing.
+
+## 0.1.76
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-471`: Fix deploy-private workflow shell syntax error
+
+Megjegyzes
+- Javitas a private deploy workflow `Render private runtime environment` shell blokkjaban.
+- Az OpenRouter default es allowed model feltetelek kulon zarodnak, igy nincs arva `fi` a renderelt shell scriptben.
