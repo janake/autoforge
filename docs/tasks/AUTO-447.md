@@ -1,12 +1,12 @@
 # [AUTO-447] Jira MCP times out on repeated secret resolution
 
-Statusz: In Progress
+Statusz: Under Test
 
 Verzio: 0.1.69
 
 Branch: `bug/AUTO-447-jira-mcp-secret-cache`
 
-PR: 
+PR: https://github.com/janake/autoforge/pull/179
 
 ## Cél
 
@@ -27,6 +27,7 @@ A Jira MCP ne timeoutoljon több Jira REST hívást végző műveleteknél azér
 - `node --check ops/mcp/jira-server.mjs` - szintaktikai ellenőrzés ok
 - `node ops/mcp/call-jira-tool.mjs jira_list_transitions ...` - Jira MCP validáció ok
 - sprint státusz-rendezés sikeresen lefutott a javított MCP-vel
+- `gh pr create --title "[AUTO-447] Cache Jira MCP secrets"` - PR megnyitva
 
 ## Megjegyzes
 
