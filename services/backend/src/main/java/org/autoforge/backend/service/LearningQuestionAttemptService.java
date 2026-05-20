@@ -92,7 +92,7 @@ public class LearningQuestionAttemptService {
       questionSet.questions().size(),
       writeAnswers(answers)
     ));
-    learningQuestionProgressService.markSubmitted(materialId, generation.getId(), subject, saved.getId(), score, questionSet.questions().size());
+    learningQuestionProgressService.markSubmitted(materialId, generation.getId(), subject, groups, saved.getId(), score, questionSet.questions().size());
     return toResponse(saved);
   }
 

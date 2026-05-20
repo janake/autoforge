@@ -1,6 +1,7 @@
 package org.autoforge.backend.service;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -40,13 +41,15 @@ public class LearningQuestionProgressService {
   public void markStarted(String materialId, String generationId, String subject, Collection<String> groups) {
     loadAccessibleMaterial(materialId, subject, groups);
     LearningQuestionProgress progress = loadOrCreate(materialId, generationId, subject);
+    progress.setStudentGroups(normalizeGroups(groups));
     progress.start();
     learningQuestionProgressRepository.save(progress);
   }
 
   @Transactional
-  public void markSubmitted(String materialId, String generationId, String subject, String attemptId, int score, int totalQuestions) {
+  public void markSubmitted(String materialId, String generationId, String subject, Collection<String> groups, String attemptId, int score, int totalQuestions) {
     LearningQuestionProgress progress = loadOrCreate(materialId, generationId, subject);
+    progress.setStudentGroups(normalizeGroups(groups));
     progress.submit(attemptId, score, totalQuestions);
     learningQuestionProgressRepository.save(progress);
   }
@@ -61,6 +64,14 @@ public class LearningQuestionProgressService {
   private LearningQuestionProgress loadOrCreate(String materialId, String generationId, String subject) {
     return learningQuestionProgressRepository.findByMaterialIdAndGenerationIdAndStudentSubject(materialId, generationId, subject)
       .orElseGet(() -> LearningQuestionProgress.create(materialId, generationId, subject));
+  }
+
+  private List<String> parseGroups(String groups) {
+    if (groups == null || groups.isBlank()) {
+      return List.of();
+    }
+
+    return List.of(groups.split(","));
   }
 
   private LearningMaterial loadAccessibleMaterial(String materialId, String subject, Collection<String> groups) {
@@ -87,7 +98,7 @@ public class LearningQuestionProgressService {
       .filter(value -> !value.isBlank())
       .map(value -> value.startsWith("/") ? value.substring(1) : value)
       .map(value -> value.contains("/") ? value.substring(value.lastIndexOf('/') + 1) : value)
-      .collect(Collectors.toSet());
+      .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   private LearningQuestionProgressResponse toResponse(LearningQuestionProgress progress) {
@@ -96,6 +107,7 @@ public class LearningQuestionProgressService {
       progress.getMaterialId(),
       progress.getGenerationId(),
       progress.getStudentSubject(),
+      parseGroups(progress.getStudentGroups()),
       progress.getStatus(),
       progress.getAttemptId(),
       progress.getAttemptCount(),

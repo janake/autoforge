@@ -1,6 +1,9 @@
 package org.autoforge.backend.domain;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,6 +31,9 @@ public class LearningQuestionProgress {
 
   @Column(name = "student_subject", nullable = false, length = 128)
   private String studentSubject;
+
+  @Column(name = "student_groups", length = 1000)
+  private String studentGroups;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false, length = 32)
@@ -100,6 +106,10 @@ public class LearningQuestionProgress {
 
   public String getStudentSubject() {
     return studentSubject;
+  }
+
+  public String getStudentGroups() {
+    return studentGroups;
   }
 
   public LearningQuestionProgressStatus getStatus() {
@@ -181,5 +191,47 @@ public class LearningQuestionProgress {
     } else {
       this.status = LearningQuestionProgressStatus.REVIEWED;
     }
+  }
+
+  public void setStudentGroups(Collection<String> groups) {
+    if (groups == null) {
+      return;
+    }
+
+    LinkedHashSet<String> normalized = new LinkedHashSet<>();
+    for (String group : groups) {
+      if (group == null) {
+        continue;
+      }
+      String value = group.trim();
+      if (value.isBlank()) {
+        continue;
+      }
+      if (value.startsWith("/")) {
+        value = value.substring(1);
+      }
+      if (value.contains("/")) {
+        value = value.substring(value.lastIndexOf('/') + 1);
+      }
+      if (!value.isBlank()) {
+        normalized.add(value);
+      }
+    }
+
+    if (!normalized.isEmpty()) {
+      this.studentGroups = String.join(",", normalized);
+    }
+  }
+
+  public boolean hasStudentGroup(String group) {
+    if (studentGroups == null || group == null) {
+      return false;
+    }
+    for (String value : studentGroups.split(",")) {
+      if (Objects.equals(value, group)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

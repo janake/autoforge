@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.autoforge.backend.domain.LearningMaterialAssignment;
 import org.autoforge.backend.domain.LearningAssignmentTargetType;
 import org.autoforge.backend.domain.LearningGeneratedContent;
@@ -86,17 +87,18 @@ class LearningQuestionDisputeControllerTest {
       .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
 
     mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
-        .with(jwt().jwt(token -> token.subject("student-1"))))
+        .with(jwt().jwt(token -> token.subject("student-1").claim("groups", List.of("/group-a", "/group-b")))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$[0].id").value(questionSet.getId()));
 
     mockMvc.perform(get("/api/v1/learning/materials/{materialId}", material.getId())
-        .with(jwt().jwt(token -> token.subject("student-1"))))
+        .with(jwt().jwt(token -> token.subject("student-1").claim("groups", List.of("/group-a", "/group-b")))))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.progressEntries[0].status").value("STARTED"));
+      .andExpect(jsonPath("$.progressEntries[0].status").value("STARTED"))
+      .andExpect(jsonPath("$.progressEntries[0].studentGroups[0]").value("group-a"));
 
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
-        .with(jwt().jwt(token -> token.subject("student-1")))
+        .with(jwt().jwt(token -> token.subject("student-1").claim("groups", List.of("/group-a", "/group-b"))))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -110,7 +112,7 @@ class LearningQuestionDisputeControllerTest {
     String attemptId = learningQuestionAttemptRepository.findAll().get(0).getId();
 
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts/{attemptId}/disputes", material.getId(), attemptId)
-        .with(jwt().jwt(token -> token.subject("student-1")))
+        .with(jwt().jwt(token -> token.subject("student-1").claim("groups", List.of("/group-a", "/group-b"))))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
           {
@@ -129,7 +131,7 @@ class LearningQuestionDisputeControllerTest {
       .andExpect(jsonPath("$[0].status").value("OPEN"));
 
     mockMvc.perform(get("/api/v1/learning/materials/{materialId}", material.getId())
-        .with(jwt().jwt(token -> token.subject("student-1"))))
+        .with(jwt().jwt(token -> token.subject("student-1").claim("groups", List.of("/group-a", "/group-b")))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.progressEntries[0].status").value("SUBMITTED"));
 
@@ -150,7 +152,7 @@ class LearningQuestionDisputeControllerTest {
       .andExpect(jsonPath("$.overrideScore").value(2));
 
     mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
-        .with(jwt().jwt(token -> token.subject("student-1"))))
+        .with(jwt().jwt(token -> token.subject("student-1").claim("groups", List.of("/group-a", "/group-b")))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$[0].score").value(2));
 
