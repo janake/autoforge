@@ -25,6 +25,8 @@ Classify every new request before making changes.
 
 For any non-trivial code, infra, workflow, or documentation task, do the following:
 
+- Treat Jira as the single source of truth for task scope, status, and execution order.
+
 1. Identify or create a Jira issue.
 2. Assign the task to a target version in Jira.
 3. Create a dedicated branch from the current `origin/main` unless the user explicitly asks to continue an existing branch.
