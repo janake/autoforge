@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.autoforge.backend.domain.LearningAssignmentTargetType;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.domain.LearningMaterialAssignment;
 import org.autoforge.backend.domain.LearningMaterialSource;
@@ -36,9 +38,14 @@ public class LearningMaterialService {
     "application/pdf",
     "text/plain",
     "text/markdown",
-    "application/markdown"
+    "application/markdown",
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/bmp"
   );
-  private static final Set<String> SUPPORTED_EXTENSIONS = Set.of("pdf", "txt", "md", "markdown");
+  private static final Set<String> SUPPORTED_EXTENSIONS = Set.of("pdf", "txt", "md", "markdown", "jpg", "jpeg", "png", "gif", "webp", "bmp");
 
   private final LearningMaterialRepository learningMaterialRepository;
   private final LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
@@ -47,6 +54,7 @@ public class LearningMaterialService {
   private final LearningMaterialObjectStorageService learningMaterialObjectStorageService;
   private final LearningQuestionProgressService learningQuestionProgressService;
   private final LearningAssignmentAuditService learningAssignmentAuditService;
+  private final LearningImageProcessingService learningImageProcessingService;
 
   @Transactional
   public LearningMaterialResponse uploadMaterial(String subject, boolean canCreateLearningContent, MultipartFile file, String title, String description) {
@@ -65,12 +73,13 @@ public class LearningMaterialService {
       throw new IllegalStateException("Failed to read uploaded file", exception);
     }
 
+    String contentType = normalizeTitle(file.getContentType());
     LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
       subject,
       resolvedTitle,
       description,
       originalFilename,
-      normalizeTitle(file.getContentType()),
+      contentType,
       file.getSize(),
       storagePlan.objectKey(),
       storagePlan.objectUri(),
@@ -79,6 +88,19 @@ public class LearningMaterialService {
       content
     ));
     saveSource(material.getId(), subject, "PRIMARY_UPLOAD", resolvedTitle, file, storagePlan, content);
+
+    String extension = extractExtension(originalFilename);
+    LearningImageProcessingService.ImageProcessResult processed = learningImageProcessingService.process(content, contentType, extension);
+    if (processed.optimized() && processed.optimizedContent() != null) {
+      material.withOptimizedImage(
+        processed.optimizedContent(),
+        processed.optimizedContentType(),
+        processed.optimizedFileSize(),
+        processed.optimizedContentHash()
+      );
+      learningMaterialRepository.save(material);
+    }
+
     return toResponse(material, subject, Set.of(), canCreateLearningContent);
   }
 
@@ -181,6 +203,25 @@ public class LearningMaterialService {
     return learningMaterialRepository.save(LearningMaterial.create(ownerSubject, title, description));
   }
 
+  @Transactional(readOnly = true)
+  public ResponseEntity<byte[]> serveOptimizedImage(String materialId, String subject, Collection<String> groups) {
+    LearningMaterial material = loadMaterial(materialId);
+    Set<String> normalizedGroups = normalizeGroups(groups);
+
+    if (!canAccess(material, subject, normalizedGroups)) {
+      throw new LearningMaterialAccessDeniedException(materialId);
+    }
+
+    if (material.getOptimizedContent() == null) {
+      return ResponseEntity.notFound().build();
+    }
+
+    String contentType = material.getOptimizedContentType() != null ? material.getOptimizedContentType() : "image/jpeg";
+    return ResponseEntity.ok()
+      .header(HttpHeaders.CONTENT_TYPE, contentType)
+      .body(material.getOptimizedContent());
+  }
+
   private LearningMaterial loadMaterial(String materialId) {
     return learningMaterialRepository.findById(materialId).orElseThrow(() -> new LearningMaterialNotFoundException(materialId));
   }
@@ -247,6 +288,10 @@ public class LearningMaterialService {
       .sorted()
       .toList();
 
+    String optimizedImageUrl = material.getOptimizedContent() != null
+      ? "/api/v1/learning/materials/%s/optimized-image".formatted(material.getId())
+      : null;
+
     return new LearningMaterialResponse(
       material.getId(),
       material.getTitle(),
@@ -265,6 +310,9 @@ public class LearningMaterialService {
       sources,
       imageAssets,
       progressEntries,
+      optimizedImageUrl,
+      material.getOptimizedFileSize(),
+      material.getOptimizedContentHash(),
       material.getCreatedAt(),
       material.getUpdatedAt()
     );

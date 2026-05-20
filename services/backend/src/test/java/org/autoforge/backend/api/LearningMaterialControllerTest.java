@@ -6,12 +6,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import javax.imageio.ImageIO;
 import org.autoforge.backend.domain.LearningAssignmentTargetType;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.domain.LearningMaterialAssignment;
@@ -281,5 +285,138 @@ class LearningMaterialControllerTest {
     mockMvc.perform(get("/api/v1/learning/materials/{materialId}", material.getId())
         .with(jwt().jwt(token -> token.subject("teacher-2"))))
       .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void teacherCanUploadImageMaterial() throws Exception {
+    byte[] imageBytes = createTestImage(4000, 3000);
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "diagram.png",
+      "image/png",
+      imageBytes
+    );
+
+    mockMvc.perform(multipart("/api/v1/learning/materials")
+        .file(file)
+        .param("title", "Teszt diagram")
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.title").value("Teszt diagram"))
+      .andExpect(jsonPath("$.contentType").value("image/png"))
+      .andExpect(jsonPath("$.optimizedImageUrl").value(org.hamcrest.Matchers.endsWith("/optimized-image")))
+      .andExpect(jsonPath("$.optimizedFileSize").isNumber())
+      .andExpect(jsonPath("$.optimizedContentHash").isString());
+
+    LearningMaterial stored = learningMaterialRepository.findAll().get(0);
+    assertThat(stored.getOptimizedContent()).isNotNull();
+    assertThat(stored.getOptimizedContentType()).isEqualTo("image/jpeg");
+    assertThat(stored.getOptimizedFileSize()).isPositive();
+    assertThat(stored.getContent()).isEqualTo(imageBytes);
+    assertThat(stored.getContentHash()).matches("[0-9a-f]{64}");
+    assertThat(stored.getOptimizedContentHash()).matches("[0-9a-f]{64}");
+  }
+
+  @Test
+  void teacherCanUploadSmallImageWithoutResize() throws Exception {
+    byte[] imageBytes = createTestImage(100, 80);
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "icon.png",
+      "image/png",
+      imageBytes
+    );
+
+    mockMvc.perform(multipart("/api/v1/learning/materials")
+        .file(file)
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.optimizedImageUrl").exists());
+  }
+
+  @Test
+  void uploadRejectsUnsupportedImageFormat() throws Exception {
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "notes.exe",
+      "application/octet-stream",
+      "binary".getBytes(StandardCharsets.UTF_8)
+    );
+
+    mockMvc.perform(multipart("/api/v1/learning/materials")
+        .file(file)
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
+      .andExpect(status().isBadRequest());
+
+    assertThat(learningMaterialRepository.findAll()).isEmpty();
+  }
+
+  @Test
+  void optimizedImageIsAccessibleAfterImageUpload() throws Exception {
+    byte[] imageBytes = createTestImage(200, 200);
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "chart.png",
+      "image/png",
+      imageBytes
+    );
+
+    String createResponse = mockMvc.perform(multipart("/api/v1/learning/materials")
+        .file(file)
+        .param("title", "Chart")
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
+      .andExpect(status().isCreated())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    String materialId = com.jayway.jsonpath.JsonPath.read(createResponse, "$.id");
+
+    byte[] fetchedBytes = mockMvc.perform(get("/api/v1/learning/materials/{materialId}/optimized-image", materialId)
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(content().contentType("image/jpeg"))
+      .andReturn()
+      .getResponse()
+      .getContentAsByteArray();
+    assertThat(fetchedBytes).isNotEmpty();
+  }
+
+  @Test
+  void optimizedImageReturns404ForTextUpload() throws Exception {
+    MockMultipartFile file = new MockMultipartFile(
+      "file",
+      "notes.pdf",
+      "application/pdf",
+      "%PDF-1.4 content".getBytes(StandardCharsets.UTF_8)
+    );
+
+    String createResponse = mockMvc.perform(multipart("/api/v1/learning/materials")
+        .file(file)
+        .with(jwt().jwt(token -> token.subject("teacher-1").claim("realm_access", Map.of("roles", List.of("teacher"))))))
+      .andExpect(status().isCreated())
+      .andReturn()
+      .getResponse()
+      .getContentAsString();
+
+    String materialId = com.jayway.jsonpath.JsonPath.read(createResponse, "$.id");
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/optimized-image", materialId)
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isNotFound());
+  }
+
+  private static byte[] createTestImage(int width, int height) throws Exception {
+    BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+    java.awt.Graphics2D g2d = image.createGraphics();
+    g2d.setColor(java.awt.Color.WHITE);
+    g2d.fillRect(0, 0, width, height);
+    g2d.setColor(java.awt.Color.BLACK);
+    g2d.drawString("Test Image", 10, 30);
+    g2d.dispose();
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ImageIO.write(image, "png", baos);
+    return baos.toByteArray();
   }
 }

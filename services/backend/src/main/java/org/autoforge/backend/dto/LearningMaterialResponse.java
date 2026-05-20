@@ -21,6 +21,9 @@ public record LearningMaterialResponse(
   List<LearningMaterialSourceResponse> sources,
   List<LearningImageAssetResponse> imageAssets,
   List<LearningQuestionProgressResponse> progressEntries,
+  String optimizedImageUrl,
+  Long optimizedFileSize,
+  String optimizedContentHash,
   Instant createdAt,
   Instant updatedAt
 ) {

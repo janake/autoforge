@@ -840,3 +840,16 @@ Taskok
 
 Megjegyzes
 - Az authenticated dashboard fokuszalt homepage-re es menubol elerheto kulon feature destinationokre valik szet.
+
+## 0.1.74
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-458`: Image upload preprocessing for AI-readable learning materials
+
+Megjegyzes
+- Spring backend automatikusan atmeretezi es JPEG-ge konvertalja a feltoltott kepeket (max 2048px, 85% quality).
+- Az optimalizalt valtozat kulon vegeponton (/optimized-image) es a generalt kerdesekben is elerheto.
+- Nem kepes feltoltesek (PDF/TXT/MD) viselkedese nem valtozik.

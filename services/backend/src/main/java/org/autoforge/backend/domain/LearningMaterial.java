@@ -53,6 +53,19 @@ public class LearningMaterial {
   @Column(name = "content")
   private byte[] content;
 
+  @Lob
+  @Column(name = "optimized_content")
+  private byte[] optimizedContent;
+
+  @Column(name = "optimized_content_type", length = 128)
+  private String optimizedContentType;
+
+  @Column(name = "optimized_file_size")
+  private Long optimizedFileSize;
+
+  @Column(name = "optimized_content_hash", length = 128)
+  private String optimizedContentHash;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;
@@ -197,6 +210,30 @@ public class LearningMaterial {
 
   public byte[] getContent() {
     return content;
+  }
+
+  public byte[] getOptimizedContent() {
+    return optimizedContent;
+  }
+
+  public String getOptimizedContentType() {
+    return optimizedContentType;
+  }
+
+  public Long getOptimizedFileSize() {
+    return optimizedFileSize;
+  }
+
+  public String getOptimizedContentHash() {
+    return optimizedContentHash;
+  }
+
+  public LearningMaterial withOptimizedImage(byte[] optimizedContent, String optimizedContentType, Long optimizedFileSize, String optimizedContentHash) {
+    this.optimizedContent = optimizedContent;
+    this.optimizedContentType = optimizedContentType;
+    this.optimizedFileSize = optimizedFileSize;
+    this.optimizedContentHash = optimizedContentHash;
+    return this;
   }
 
   public Instant getCreatedAt() {
