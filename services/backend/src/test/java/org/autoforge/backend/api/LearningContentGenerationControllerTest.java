@@ -266,7 +266,7 @@ class LearningContentGenerationControllerTest {
         .with(jwt().jwt(token -> token.subject("student-1")))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
-          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndex": 0}]}
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndexes": [0]}]}
           """.formatted(questionSet.getId())))
       .andExpect(status().isForbidden());
   }

@@ -475,7 +475,6 @@ public class LearningContentGenerationService {
       .map(value -> value.contains("/") ? value.substring(value.lastIndexOf('/') + 1) : value)
       .collect(Collectors.toSet());
   }
-
   private List<LearningContentSourceReference> parseSources(String sourceReferences) {
     if (sourceReferences == null || sourceReferences.isBlank()) {
       return List.of();
