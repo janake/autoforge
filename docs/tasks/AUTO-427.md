@@ -1,12 +1,12 @@
 # [AUTO-427] Learning assignment audit log
 
-Statusz: In Progress
+Statusz: Under review
 
 Verzio: 0.1.68
 
 Branch: `feature/AUTO-427-assignment-audit-log`
 
-PR: 
+PR: https://github.com/janake/autoforge/pull/178
 
 ## Cél
 
@@ -25,6 +25,7 @@ A tananyag-hozzárendelések create/update/delete változásaihoz audit trail k�
 - `jira_transition_issue(AUTO-427, In Progress)` - sprint ticket indítva
 - `git worktree add -b feature/AUTO-427-assignment-audit-log ... origin/main` - dedikalt worktree letrehozva
 - `services/backend/.../LearningAssignmentAudit*` - audit modell és service elkezdve
+- `gh pr create --title "[AUTO-427] Add assignment audit log"` - PR megnyitva, Jira `Under review`
 
 ## Megjegyzes
 
