@@ -189,21 +189,25 @@ public class LearningContentGenerationService {
   private GeneratedContent generateFromMaterial(LearningMaterial material, String subject, LearningContentGenerationType generationType) {
     List<LearningContentSourceReference> sources = buildSources(material);
     String retrievalContext = learningLearnerProfileService.buildRetrievalContext(subject);
+    String optimizedImageUrl = material.getOptimizedContent() != null
+      ? "/api/v1/learning/materials/%s/optimized-image".formatted(material.getId())
+      : null;
     if (generationType == LearningContentGenerationType.SUMMARY) {
     return new GeneratedContent(summaryContent(material, sources, retrievalContext), null, sourceText(sources), sources);
   }
-    LearningQuestionSetPayload payload = questionSetPayload(material, sources, retrievalContext);
+    LearningQuestionSetPayload payload = questionSetPayload(material, sources, retrievalContext, optimizedImageUrl);
     return new GeneratedContent(questionSetContent(payload), writeJson(payload), sourceText(sources), sources);
   }
 
-  private LearningQuestionSetPayload questionSetPayload(LearningMaterial material, List<LearningContentSourceReference> sources, String retrievalContext) {
+  private LearningQuestionSetPayload questionSetPayload(LearningMaterial material, List<LearningContentSourceReference> sources, String retrievalContext, String optimizedImageUrl) {
     List<LearningQuestionPayload> questions = new ArrayList<>();
     questions.add(singleCorrectQuestion(
       "Mi a legfontosabb üzenete a tananyagnak?",
       standardOptions("A tananyag fő üzenete", "Egy mellékes részlet", "Egy nem kapcsolódó példa", "Egy későbbi fejezet"),
       0,
       "A fő üzenet a tananyag címéhez és a tanulói profilhoz igazodik.",
-      sources.isEmpty() ? List.of() : List.of(sources.get(0))
+      sources.isEmpty() ? List.of() : List.of(sources.get(0)),
+      optimizedImageUrl
     ));
 
     if (!sources.isEmpty()) {
@@ -212,7 +216,8 @@ public class LearningContentGenerationService {
         standardOptions("A fő témát támogatja", "Eltér a témától", "A kulcsfogalmak gyakorlását segíti", "Teljesen üres"),
         List.of(0, 2),
         "Az első chunk egyszerre támogatja a fő témát és a gyakorlási fókuszt.",
-        List.of(sources.get(0))
+        List.of(sources.get(0)),
+        optimizedImageUrl
       ));
     }
 
@@ -222,7 +227,8 @@ public class LearningContentGenerationService {
         standardOptions("A kulcsfogalmak gyakorlását", "Csak a fájlnevet", "A tananyag törlését", "A hitelesítő adatokat"),
         0,
         "A második chunk kifejezetten a gyakorlásra érdemes kulcsfogalmakat emeli ki.",
-        List.of(sources.get(1))
+        List.of(sources.get(1)),
+        optimizedImageUrl
       ));
     }
 
@@ -231,7 +237,8 @@ public class LearningContentGenerationService {
       standardOptions("A definíciókat és összefüggéseket", "A képernyő színét", "A feltöltés időpontját", "A JWT kódolását"),
       0,
       "A visszanézendő fogalmak a tartalom megértését támogatják, nem a technikai metaadatokat.",
-      sources.stream().limit(2).toList()
+      sources.stream().limit(2).toList(),
+      optimizedImageUrl
     ));
 
     return new LearningQuestionSetPayload(material.getId(), material.getTitle(), retrievalContext, questions);
@@ -271,6 +278,9 @@ public class LearningContentGenerationService {
     lines.add("- A tananyag címe: %s".formatted(material.getTitle()));
     if (material.getDescription() != null && !material.getDescription().isBlank()) {
       lines.add("- Leírás: %s".formatted(material.getDescription().trim()));
+    }
+    if (material.getOptimizedContent() != null) {
+      lines.add("- Kép: /api/v1/learning/materials/%s/optimized-image".formatted(material.getId()));
     }
     sources.stream().limit(3).forEach(source -> lines.add("- Chunk %d: %s".formatted(source.chunkIndex() + 1, source.excerpt())));
     return String.join("\n", lines);
@@ -364,7 +374,8 @@ public class LearningContentGenerationService {
     List<LearningQuestionOptionPayload> options,
     int correctOptionIndex,
     String explanation,
-    List<LearningContentSourceReference> sources
+    List<LearningContentSourceReference> sources,
+    String optimizedImageUrl
   ) {
     return new LearningQuestionPayload(
       prompt,
@@ -374,7 +385,7 @@ public class LearningContentGenerationService {
       List.of(correctOptionIndex),
       explanation,
       sources,
-      null
+      optimizedImageUrl
     );
   }
 
@@ -383,7 +394,8 @@ public class LearningContentGenerationService {
     List<LearningQuestionOptionPayload> options,
     List<Integer> correctOptionIndexes,
     String explanation,
-    List<LearningContentSourceReference> sources
+    List<LearningContentSourceReference> sources,
+    String optimizedImageUrl
   ) {
     return new LearningQuestionPayload(
       prompt,
@@ -393,7 +405,7 @@ public class LearningContentGenerationService {
       correctOptionIndexes,
       explanation,
       sources,
-      null
+      optimizedImageUrl
     );
   }
 

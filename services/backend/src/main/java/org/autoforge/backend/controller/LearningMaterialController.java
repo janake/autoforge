@@ -24,6 +24,7 @@ import org.autoforge.backend.service.LearningQuestionDisputeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -113,6 +114,12 @@ public class LearningMaterialController {
   public LearningMaterialResponse getMaterial(@PathVariable String materialId, Authentication authentication) {
     UserContext context = currentUser(authentication);
     return learningMaterialService.getMaterial(materialId, context.subject(), context.groups(), context.canManageAssignments());
+  }
+
+  @GetMapping("/{materialId}/optimized-image")
+  public ResponseEntity<byte[]> getOptimizedImage(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningMaterialService.serveOptimizedImage(materialId, context.subject(), context.groups());
   }
 
   @PostMapping("/{materialId}/questions")
