@@ -346,6 +346,14 @@ fi
 : "${DB_USERNAME_SECRET_NAME:=autoforge-db-username}"
 : "${DB_SERVICE_ALIAS_SECRET_NAME:=autoforge-db-service-alias}"
 
+if [ -z "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] && [ -z "$OPENCODE_SERVER_PASSWORD_SECRET_NAME" ] && [ -z "$OPENCODE_SERVER_PASSWORD_ENV" ]; then
+  OPENCODE_SERVER_PASSWORD_SECRET_NAME="autoforge-opencode-server-password"
+fi
+
+if [ -z "$OPENROUTER_API_KEY_SECRET_OCID" ] && [ -z "$OPENROUTER_API_KEY_SECRET_NAME" ] && [ -z "$OPENROUTER_API_KEY_ENV" ]; then
+  OPENROUTER_API_KEY_SECRET_NAME="autoforge-openrouter-api-key"
+fi
+
 NEEDS_OCI=true
 
 if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] \

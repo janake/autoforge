@@ -45,6 +45,8 @@ jobs:
           OPENROUTER_API_KEY_SECRET_NAME: ${{ vars.OCI_OPENROUTER_API_KEY_SECRET_NAME }}
         run: |
           IMAGE_TAG="${IMAGE_TAG:?IMAGE_TAG is required}"
+          OPENCODE_SERVER_PASSWORD_SECRET_NAME="${OPENCODE_SERVER_PASSWORD_SECRET_NAME:-autoforge-opencode-server-password}"
+          OPENROUTER_API_KEY_SECRET_NAME="${OPENROUTER_API_KEY_SECRET_NAME:-autoforge-openrouter-api-key}"
           echo "$GHCR_DEPLOY_TOKEN" | docker login ghcr.io -u "$GHCR_DEPLOY_USERNAME" --password-stdin
           for attempt in $(seq 1 20); do
             if docker pull "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG"; then
@@ -183,6 +185,8 @@ jobs:
           IMAGE_TAG="${IMAGE_TAG:?IMAGE_TAG is required}"
           KEYCLOAK_URL="${KEYCLOAK_URL:-https://kc.prodet.org}"
           KEYCLOAK_REALM="${KEYCLOAK_REALM:-autoforge}"
+          OPENCODE_SERVER_PASSWORD_SECRET_NAME="${OPENCODE_SERVER_PASSWORD_SECRET_NAME:-autoforge-opencode-server-password}"
+          OPENROUTER_API_KEY_SECRET_NAME="${OPENROUTER_API_KEY_SECRET_NAME:-autoforge-openrouter-api-key}"
           {
             echo "BACKEND_IMAGE=ghcr.io/${{ github.repository_owner }}/autoforge/backend"
             echo "BACKEND_IMAGE_TAG=$IMAGE_TAG"
@@ -219,15 +223,11 @@ jobs:
             if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ]; then
               echo "OPENCODE_SERVER_PASSWORD_SECRET_OCID=$OPENCODE_SERVER_PASSWORD_SECRET_OCID"
             fi
-            if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_NAME:-}" ]; then
-              echo "OPENCODE_SERVER_PASSWORD_SECRET_NAME=$OPENCODE_SERVER_PASSWORD_SECRET_NAME"
-            fi
+            echo "OPENCODE_SERVER_PASSWORD_SECRET_NAME=$OPENCODE_SERVER_PASSWORD_SECRET_NAME"
             if [ -n "${OPENROUTER_API_KEY_SECRET_OCID:-}" ]; then
               echo "OPENROUTER_API_KEY_SECRET_OCID=$OPENROUTER_API_KEY_SECRET_OCID"
             fi
-            if [ -n "${OPENROUTER_API_KEY_SECRET_NAME:-}" ]; then
-              echo "OPENROUTER_API_KEY_SECRET_NAME=$OPENROUTER_API_KEY_SECRET_NAME"
-            fi
+            echo "OPENROUTER_API_KEY_SECRET_NAME=$OPENROUTER_API_KEY_SECRET_NAME"
             if [ -n "${AUTOFORGE_DB_URL:-}" ]; then
               echo "AUTOFORGE_DB_URL=$AUTOFORGE_DB_URL"
             fi
