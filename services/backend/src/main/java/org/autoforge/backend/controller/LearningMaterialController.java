@@ -11,11 +11,13 @@ import org.autoforge.backend.dto.LearningQuestionAttemptResponse;
 import org.autoforge.backend.dto.LearningQuestionDisputeRequest;
 import org.autoforge.backend.dto.LearningQuestionDisputeResponse;
 import org.autoforge.backend.dto.LearningQuestionDisputeReviewRequest;
+import org.autoforge.backend.dto.LearningAssignmentAuditResponse;
 import org.autoforge.backend.dto.LearningQuestionSetSettingsRequest;
 import org.autoforge.backend.service.LearningContentGenerationService;
 import org.autoforge.backend.dto.LearningIngestionResponse;
 import org.autoforge.backend.dto.LearningMaterialResponse;
 import org.autoforge.backend.service.LearningMaterialService;
+import org.autoforge.backend.service.LearningAssignmentAuditService;
 import org.autoforge.backend.service.LearningIngestionService;
 import org.autoforge.backend.service.LearningQuestionAttemptService;
 import org.autoforge.backend.service.LearningQuestionDisputeService;
@@ -47,6 +49,7 @@ public class LearningMaterialController {
   private final LearningIngestionService learningIngestionService;
   private final LearningQuestionAttemptService learningQuestionAttemptService;
   private final LearningQuestionDisputeService learningQuestionDisputeService;
+  private final LearningAssignmentAuditService learningAssignmentAuditService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
@@ -223,6 +226,12 @@ public class LearningMaterialController {
   ) {
     UserContext context = currentUser(authentication);
     return learningMaterialService.replaceAssignments(materialId, context.subject(), context.canManageAssignments(), request);
+  }
+
+  @GetMapping("/{materialId}/assignment-audit")
+  public List<LearningAssignmentAuditResponse> listAssignmentAudit(@PathVariable String materialId, Authentication authentication) {
+    UserContext context = currentUser(authentication);
+    return learningAssignmentAuditService.listMaterialAudits(materialId, context.subject(), context.canManageAssignments());
   }
 
   private UserContext currentUser(Authentication authentication) {

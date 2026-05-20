@@ -763,3 +763,14 @@ Taskok
 
 Megjegyzes
 - A Jira MCP szerver most tudja a `fixVersion`/`fixVersions` shorthandot normalizalni, es a hianyzo Jira verziokat on-demand letrehozza.
+
+## 0.1.68
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-427`: Learning assignment audit log
+
+Megjegyzes
+- A Learning modul assignment módosításaihoz audit trail kerül, a tanár pedig a material detail oldalon látja a saját assignment eseményeit.

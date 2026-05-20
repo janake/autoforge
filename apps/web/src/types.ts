@@ -121,6 +121,21 @@ export type LearningMaterialAssignmentRequest = {
   groupNames: string[];
 };
 
+export type LearningAssignmentAuditTargetType = "MATERIAL" | "STUDENT" | "GROUP";
+
+export type LearningAssignmentAuditAction = "CREATE" | "UPDATE" | "DELETE";
+
+export type LearningAssignmentAuditResponse = {
+  id: string;
+  materialId: string;
+  actorSubject: string;
+  targetType: LearningAssignmentAuditTargetType;
+  targetIdentifier: string;
+  action: LearningAssignmentAuditAction;
+  detailsJson: string;
+  createdAt: string;
+};
+
 export type LearningContentGenerationType = "QUESTION_SET" | "SUMMARY";
 
 export type LearningQuestionSetStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
