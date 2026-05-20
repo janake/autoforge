@@ -102,6 +102,7 @@ export type LearningQuestionProgressResponse = {
   materialId: string;
   generationId: string;
   studentSubject: string;
+  studentGroups: string[];
   status: LearningQuestionProgressStatus;
   attemptId: string | null;
   attemptCount: number;

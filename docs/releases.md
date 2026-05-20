@@ -741,3 +741,14 @@ Taskok
 
 Megjegyzes
 - A Learning question set settings most deadline és max attempts korlátot kap, a backend pedig ezek alapján blokkolja a túl késői vagy túl sokadik beadásokat.
+
+## 0.1.65
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-415`: Tanulasi eredmeny dashboard tananyaghoz es csoporthoz
+
+Megjegyzes
+- A Learning modul teacher dashboard slice-a progress sorokhoz csoportmetadata-t kot, es a material detail oldalon aggregalt progress listat ad filterezessel.

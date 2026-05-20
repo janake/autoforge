@@ -56,7 +56,7 @@ public class LearningImageAssetController {
       .map(String.class::cast)
       .map(LearningImageAssetController::normalizeGroupName)
       .filter(group -> !group.isBlank())
-      .collect(Collectors.toSet());
+      .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
   }
 
   private static String normalizeGroupName(String group) {

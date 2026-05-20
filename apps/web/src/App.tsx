@@ -151,6 +151,13 @@ type LearningWorkspaceItem = LearningMaterialResponse & {
   generations: LearningContentGenerationResponse[];
 };
 
+type TeacherProgressRow = {
+  progress: LearningQuestionProgressResponse;
+  generation: LearningContentGenerationResponse | null;
+  latestAttempt: LearningQuestionAttemptResponse | null;
+  openDisputeCount: number;
+};
+
 type LearningWorkspaceState =
   | { status: "loading" }
   | { status: "ready"; materials: LearningWorkspaceItem[] }
@@ -409,6 +416,10 @@ function questionSetBlockedReason(deadlineAt: string | null, maxAttempts: number
   return null;
 }
 
+function normalizeGroupFilter(value: string): string {
+  return value.trim().replace(/^\//, "");
+}
+
 function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: string; onBack: () => void }) {
   const [refreshToken, setRefreshToken] = useState(0);
   const [sourceStatus, setSourceStatus] = useState<string | null>(null);
@@ -421,6 +432,7 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
   const [groupNamesText, setGroupNamesText] = useState("");
   const [disputeStatus, setDisputeStatus] = useState<string | null>(null);
   const [disputeError, setDisputeError] = useState<string | null>(null);
+  const [progressGroupFilter, setProgressGroupFilter] = useState("all");
   const [state, setState] = useState<
     | { status: "loading" }
     | {
@@ -480,6 +492,43 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
       cancelled = true;
     };
   }, [materialId, refreshToken]);
+
+  const progressGroupOptions = useMemo(() => {
+    if (state.status !== "ready") {
+      return ["all"];
+    }
+
+    const groups = new Set<string>();
+    state.material.groupNames.map(normalizeGroupFilter).filter(Boolean).forEach((group) => groups.add(group));
+    state.material.progressEntries.forEach((progress) => {
+      progress.studentGroups.map(normalizeGroupFilter).filter(Boolean).forEach((group) => groups.add(group));
+    });
+    return ["all", ...Array.from(groups).sort((left, right) => left.localeCompare(right))];
+  }, [state]);
+
+  const teacherProgressRows = useMemo<TeacherProgressRow[]>(() => {
+    if (state.status !== "ready") {
+      return [];
+    }
+
+    return state.material.progressEntries
+      .filter((progress) => progressGroupFilter === "all" || progress.studentGroups.some((group) => normalizeGroupFilter(group) === progressGroupFilter))
+      .map((progress) => {
+        const generation = state.generations.find((item) => item.id === progress.generationId) ?? null;
+        const matchingAttempts = state.attempts.filter((attempt) => attempt.generationId === progress.generationId && attempt.studentSubject === progress.studentSubject);
+        const openDisputeCount = state.disputes.filter(
+          (dispute) => matchingAttempts.some((attempt) => attempt.id === dispute.attemptId) && dispute.status === "OPEN"
+        ).length;
+
+        return {
+          progress,
+          generation,
+          latestAttempt: matchingAttempts[0] ?? null,
+          openDisputeCount,
+        };
+      })
+      .sort((left, right) => new Date(right.progress.updatedAt).getTime() - new Date(left.progress.updatedAt).getTime());
+  }, [progressGroupFilter, state]);
 
   const uploadSource = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -712,7 +761,71 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
               </article>
             )}
 
-            {state.material.progressEntries.length > 0 && (
+            {state.material.canManageAssignments ? (
+              <article className="card learning-detail-card">
+                <p className="card-kicker">dashboard</p>
+                <div className="section-head">
+                  <h3>Teacher progress dashboard</h3>
+                  <span className="pill">{teacherProgressRows.length}</span>
+                </div>
+                <div className="prompt-actions">
+                  <label>
+                    <span>Group filter</span>
+                    <select value={progressGroupFilter} onChange={(event) => setProgressGroupFilter(event.target.value)}>
+                      {progressGroupOptions.map((group) => (
+                        <option key={group} value={group}>
+                          {group === "all" ? "All groups" : group}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <span className="muted">Filtered by {progressGroupFilter === "all" ? "all assigned groups" : progressGroupFilter}.</span>
+                </div>
+                {teacherProgressRows.length === 0 ? (
+                  <p className="muted">No matching progress rows yet.</p>
+                ) : (
+                  <div className="learning-detail-generation-list">
+                    {teacherProgressRows.map(({ progress, generation, latestAttempt, openDisputeCount }) => (
+                      <section className="learning-detail-generation-card" key={progress.id}>
+                        <div className="section-head">
+                          <h4>{progress.studentSubject}</h4>
+                          <div className="learning-generation-badges">
+                            <span className={`pill status-pill ${progressStatusTone(progress.status)}`}>{progress.status}</span>
+                            <span className="pill status-pill">{generation ? generation.generationType : "Generation"}</span>
+                          </div>
+                        </div>
+                        <dl className="profile-list compact">
+                          <div>
+                            <dt>Groups</dt>
+                            <dd>{progress.studentGroups.length ? progress.studentGroups.join(", ") : "none"}</dd>
+                          </div>
+                          <div>
+                            <dt>Score</dt>
+                            <dd>{progress.score === null ? "n/a" : `${progress.score}/${progress.totalQuestions ?? 0}`}</dd>
+                          </div>
+                          <div>
+                            <dt>Attempts</dt>
+                            <dd>{progress.attemptCount}</dd>
+                          </div>
+                          <div>
+                            <dt>Submitted</dt>
+                            <dd>{progress.submittedAt ? formatTimestamp(progress.submittedAt) : latestAttempt ? formatTimestamp(latestAttempt.submittedAt) : "not submitted"}</dd>
+                          </div>
+                          <div>
+                            <dt>Open disputes</dt>
+                            <dd>{openDisputeCount}</dd>
+                          </div>
+                          <div>
+                            <dt>Reviewed</dt>
+                            <dd>{progress.reviewedAt ? formatTimestamp(progress.reviewedAt) : "not reviewed"}</dd>
+                          </div>
+                        </dl>
+                      </section>
+                    ))}
+                  </div>
+                )}
+              </article>
+            ) : state.material.progressEntries.length > 0 && (
               <article className="card learning-detail-card">
                 <p className="card-kicker">progress</p>
                 <div className="section-head">
