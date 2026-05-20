@@ -38,8 +38,8 @@ test("forwards allowed chat completion requests with the proxy-held API key", as
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
     OPENROUTER_BASE_URL: `http://127.0.0.1:${upstreamPort}/v1`,
-    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-chat",
-    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-chat",
+    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-v4-flash:free",
+    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-v4-flash:free",
   }));
   const proxyPort = await listen(proxy);
 
@@ -55,7 +55,7 @@ test("forwards allowed chat completion requests with the proxy-held API key", as
 
     assert.equal(response.status, 200);
     assert.equal(upstreamAuthorization, "Bearer real-openrouter-key");
-    assert.equal(upstreamBody.model, "deepseek/deepseek-chat");
+    assert.equal(upstreamBody.model, "deepseek/deepseek-v4-flash:free");
     assert.equal(upstreamBody.max_tokens, 2048);
   } finally {
     await close(proxy);
@@ -65,8 +65,8 @@ test("forwards allowed chat completion requests with the proxy-held API key", as
 test("reports non-secret health and guardrail configuration", async () => {
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
-    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-chat",
-    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-chat",
+    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-v4-flash:free",
+    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-v4-flash:free",
     OPENROUTER_MAX_COMPLETION_TOKENS: "512",
     OPENROUTER_MAX_REQUEST_BYTES: "4096",
   }));
@@ -79,7 +79,7 @@ test("reports non-secret health and guardrail configuration", async () => {
     assert.equal(response.status, 200);
     assert.equal(body.healthy, true);
     assert.equal(body.apiKeyConfigured, true);
-    assert.deepEqual(body.allowedModels, ["deepseek/deepseek-chat"]);
+    assert.deepEqual(body.allowedModels, ["deepseek/deepseek-v4-flash:free"]);
     assert.equal(body.maxCompletionTokens, 512);
     assert.equal(body.maxRequestBytes, 4096);
   } finally {
@@ -91,8 +91,8 @@ test("rejects models outside the allowlist", async () => {
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
     OPENROUTER_BASE_URL: `http://127.0.0.1:${upstreamPort}/v1`,
-    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-chat",
-    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-chat",
+    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-v4-flash:free",
+    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-v4-flash:free",
   }));
   const proxyPort = await listen(proxy);
 
@@ -115,8 +115,8 @@ test("rejects requests above the max token limit", async () => {
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
     OPENROUTER_BASE_URL: `http://127.0.0.1:${upstreamPort}/v1`,
-    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-chat",
-    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-chat",
+    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-v4-flash:free",
+    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-v4-flash:free",
     OPENROUTER_MAX_COMPLETION_TOKENS: "128",
   }));
   const proxyPort = await listen(proxy);
@@ -140,8 +140,8 @@ test("rejects invalid max token values", async () => {
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
     OPENROUTER_BASE_URL: `http://127.0.0.1:${upstreamPort}/v1`,
-    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-chat",
-    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-chat",
+    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-v4-flash:free",
+    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-v4-flash:free",
   }));
   const proxyPort = await listen(proxy);
 
@@ -164,8 +164,8 @@ test("rejects request bodies above the byte limit", async () => {
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
     OPENROUTER_BASE_URL: `http://127.0.0.1:${upstreamPort}/v1`,
-    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-chat",
-    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-chat",
+    OPENROUTER_DEFAULT_MODEL: "deepseek/deepseek-v4-flash:free",
+    OPENROUTER_ALLOWED_MODELS: "deepseek/deepseek-v4-flash:free",
     OPENROUTER_MAX_REQUEST_BYTES: "32",
   }));
   const proxyPort = await listen(proxy);

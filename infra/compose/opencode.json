@@ -10,8 +10,8 @@
         "apiKey": "proxy-auth-placeholder"
       },
       "models": {
-        "deepseek/deepseek-chat": {
-          "name": "DeepSeek Chat via OpenRouter Proxy"
+        "deepseek/deepseek-v4-flash:free": {
+          "name": "DeepSeek V4 Flash Free via OpenRouter Proxy"
         }
       }
     }

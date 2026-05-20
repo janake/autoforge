@@ -397,6 +397,11 @@ if [ -z "$OPENROUTER_API_KEY_VALUE" ]; then
   append_secret_env "OPENROUTER_API_KEY" "disabled-until-vault-secrets-are-configured"
 fi
 
+# OPENCODE_API_KEY uses the same OpenRouter key from Vault
+if [ -n "$OPENROUTER_API_KEY_VALUE" ]; then
+  append_secret_env "OPENCODE_API_KEY" "$OPENROUTER_API_KEY_VALUE"
+fi
+
 if [ -n "$OPENCODE_SERVER_PASSWORD_VALUE" ] && [ -n "$OPENROUTER_API_KEY_VALUE" ]; then
   COMPOSE_ARGS+=(--profile opencode)
   OPENCODE_PROFILE_ENABLED=true

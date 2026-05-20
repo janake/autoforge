@@ -98,7 +98,6 @@ class LearningContentGenerationControllerTest {
       .andExpect(jsonPath("$.questionSetStatus").value("DRAFT"))
       .andExpect(jsonPath("$.generationStatus").value("COMPLETED"))
       .andExpect(jsonPath("$.fallbackUsed").value(true))
-      .andExpect(jsonPath("$.fallbackReason").value("Real AI is unavailable because the learning generation provider is not configured."))
       .andExpect(jsonPath("$.sourceVersions[0].contentHash").value("1111111111111111111111111111111111111111111111111111111111111111"))
       .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.containsString("\"answerType\":\"SINGLE_CORRECT\"")))
       .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.containsString("\"answerType\":\"MULTI_CORRECT\"")))

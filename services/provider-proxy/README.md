@@ -12,7 +12,7 @@ Optional runtime env:
 
 - `PROVIDER_PROXY_PORT`: listen port, default `8080`.
 - `OPENROUTER_BASE_URL`: upstream base URL, default `https://openrouter.ai/api/v1`.
-- `OPENROUTER_DEFAULT_MODEL`: default model when the client omits one, default `deepseek/deepseek-chat`.
+- `OPENROUTER_DEFAULT_MODEL`: default model when the client omits one, default `deepseek/deepseek-v4-flash:free`.
 - `OPENROUTER_ALLOWED_MODELS`: comma-separated allowlist, default to the default model.
 - `OPENROUTER_MAX_COMPLETION_TOKENS`: maximum `max_tokens` accepted and the default applied when omitted, default `2048`.
 - `OPENROUTER_MAX_REQUEST_BYTES`: maximum JSON request body size, default `262144`.

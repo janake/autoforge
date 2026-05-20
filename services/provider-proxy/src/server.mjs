@@ -2,7 +2,7 @@ import http from "node:http";
 
 const DEFAULT_PORT = 8080;
 const DEFAULT_UPSTREAM = "https://openrouter.ai/api/v1";
-const DEFAULT_MODEL = "deepseek/deepseek-chat";
+const DEFAULT_MODEL = "deepseek/deepseek-v4-flash:free";
 const DEFAULT_MAX_COMPLETION_TOKENS = 2048;
 const DEFAULT_MAX_REQUEST_BYTES = 262144;
 
