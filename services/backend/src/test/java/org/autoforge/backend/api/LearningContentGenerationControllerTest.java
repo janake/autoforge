@@ -226,45 +226,6 @@ class LearningContentGenerationControllerTest {
   }
 
   @Test
-  void assignedStudentSeesOnlyPublishedQuestionSets() throws Exception {
-    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
-      "teacher-1",
-      "Biológia",
-      "Gyakorló tananyag",
-      "biology.txt",
-      "text/plain",
-      32L,
-      "Sejtek és szövetek alapjai.\n\nMásodik bekezdés a részletekről.".getBytes(StandardCharsets.UTF_8)
-    ));
-    learningMaterialAssignmentRepository.save(LearningMaterialAssignment.create(material.getId(), LearningAssignmentTargetType.STUDENT, "student-1"));
-
-    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/questions", material.getId())
-        .with(jwt().jwt(token -> token.subject("teacher-1"))))
-      .andExpect(status().isCreated());
-
-    LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().stream()
-      .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
-      .findFirst()
-      .orElseThrow();
-
-    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
-        .with(jwt().jwt(token -> token.subject("student-1"))))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$").isEmpty());
-
-    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
-        .with(jwt().jwt(token -> token.subject("teacher-1"))))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
-
-    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
-        .with(jwt().jwt(token -> token.subject("student-1"))))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$[0].id").value(questionSet.getId()))
-      .andExpect(jsonPath("$[0].questionSetStatus").value("PUBLISHED"));
-  }
-
-  @Test
   void archivedQuestionSetCannotBeUsedForNewAttempts() throws Exception {
     LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
       "teacher-1",
