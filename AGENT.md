@@ -111,6 +111,24 @@ Required Jira behavior:
 - Commit messages must start with the task ID, for example `[AUTO-15] Remove public entry panel`.
 - PR titles must start with the task ID, for example `[AUTO-15] Landing page cleanup`.
 - PR bodies must include a `Version` section with the target version.
+- PR bodies must use this format unless the task explicitly requires a different structure:
+
+```md
+## Version
+<target version>
+
+## Summary
+<what changed>
+
+## Verification
+- <command 1>
+- <command 2>
+
+## Notes
+<optional, only if needed>
+```
+
+- Keep `Version` and `Verification` visible at the top of every PR body.
 - For non-major tasks, the target version should be the next automatic `PATCH` or `MINOR` version.
 - Do not use generic-only titles like `fix:` or `docs:` without the task ID.
 - Keep commits focused and do not include unrelated cleanup.

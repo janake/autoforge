@@ -796,3 +796,14 @@ Taskok
 
 Megjegyzes
 - A Jira MCP processzen belül cache-eli a Jira secret és auth konfigurációt, hogy a sprint audit és transition műveletek ne timeoutoljanak ismételt OCI Vault feloldás miatt.
+
+## 0.1.71
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-450`: Document PR body format in global agent rules
+
+Megjegyzes
+- A repository-wide agent rules most explicit PR body template-et adnak, hogy minden session ugyanazt a formát lassa.
