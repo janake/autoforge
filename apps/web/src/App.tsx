@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { getRuntimeConfig } from "./runtime-config";
-import { deleteAuthedJson, initializeKeycloak, loadAuthedJson, postAuthedFormData, postAuthedJson, signIn, signOut } from "./auth/keycloak";
+import { deleteAuthedJson, initializeKeycloak, loadAuthedJson, postAuthedFormData, postAuthedJson, putAuthedJson, signIn, signOut } from "./auth/keycloak";
 import type {
   BackendMeResponse,
   CreateJobResponse,
@@ -8,8 +8,12 @@ import type {
   LearningIngestionResponse,
   LearningImageAssetResponse,
   LearningSourceVersionReference,
+  LearningQuestionAttemptAnswerPayload,
+  LearningQuestionAttemptResponse,
   LearningQuestionPayload,
+  LearningQuestionDisputeResponse,
   LearningQuestionSetPayload,
+  LearningMaterialAssignmentRequest,
   LearningMaterialResponse,
   LearningMaterialSourceResponse,
   JobResponse,
@@ -147,6 +151,14 @@ function questionSetStatusTone(status: LearningContentGenerationResponse["questi
     default:
       return "pending";
   }
+}
+
+function parseAssignmentList(value: string): string[] {
+  return value
+    .split(/[\n,]/)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0)
+    .filter((entry, index, entries) => entries.indexOf(entry) === index);
 }
 
 function canCreateLearningContent(roles: string[]): boolean {
@@ -314,12 +326,54 @@ function parseQuestionSet(structuredContent: string | null): LearningQuestionSet
   }
 }
 
+function resolveQuestionCorrectOptionIndexes(question: LearningQuestionPayload): number[] {
+  if (question.correctOptionIndexes && question.correctOptionIndexes.length > 0) {
+    return question.correctOptionIndexes;
+  }
+
+  return question.correctOptionIndex == null ? [] : [question.correctOptionIndex];
+}
+
+function resolveQuestionAnswerType(question: LearningQuestionPayload): LearningQuestionPayload["answerType"] {
+  if (question.answerType) {
+    return question.answerType;
+  }
+
+  return resolveQuestionCorrectOptionIndexes(question).length > 1 ? "MULTI_CORRECT" : "SINGLE_CORRECT";
+}
+
+function parseAttemptAnswers(rawAnswers: string): LearningQuestionAttemptAnswerPayload[] | null {
+  try {
+    const parsed = JSON.parse(rawAnswers) as LearningQuestionAttemptAnswerPayload[];
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function disputeStatusTone(status: LearningQuestionDisputeResponse["status"]): string {
+  switch (status) {
+    case "ACCEPTED":
+      return "done";
+    case "REJECTED":
+      return "failed";
+    default:
+      return "pending";
+  }
+}
+
 function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: string; onBack: () => void }) {
   const [refreshToken, setRefreshToken] = useState(0);
   const [sourceStatus, setSourceStatus] = useState<string | null>(null);
   const [sourceError, setSourceError] = useState<string | null>(null);
   const [generationStatus, setGenerationStatus] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [assignmentStatus, setAssignmentStatus] = useState<string | null>(null);
+  const [assignmentError, setAssignmentError] = useState<string | null>(null);
+  const [studentSubjectsText, setStudentSubjectsText] = useState("");
+  const [groupNamesText, setGroupNamesText] = useState("");
+  const [disputeStatus, setDisputeStatus] = useState<string | null>(null);
+  const [disputeError, setDisputeError] = useState<string | null>(null);
   const [state, setState] = useState<
     | { status: "loading" }
     | {
@@ -327,23 +381,41 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
         material: LearningMaterialResponse;
         ingestion: LearningIngestionResponse;
         generations: LearningContentGenerationResponse[];
+        attempts: LearningQuestionAttemptResponse[];
+        disputes: LearningQuestionDisputeResponse[];
       }
     | { status: "error"; message: string }
   >({ status: "loading" });
+
+  useEffect(() => {
+    if (state.status !== "ready") {
+      return;
+    }
+
+    setStudentSubjectsText(state.material.studentSubjects.join(", "));
+    setGroupNamesText(state.material.groupNames.join(", "));
+  }, [
+    refreshToken,
+    state.status,
+    state.status === "ready" ? state.material.studentSubjects.join("\u0000") : null,
+    state.status === "ready" ? state.material.groupNames.join("\u0000") : null,
+  ]);
 
   useEffect(() => {
     let cancelled = false;
 
     const loadDetail = async () => {
       try {
-        const [material, ingestion, generations] = await Promise.all([
+        const [material, ingestion, generations, attempts, disputes] = await Promise.all([
           loadAuthedJson<LearningMaterialResponse>(`/v1/learning/materials/${materialId}`),
           loadAuthedJson<LearningIngestionResponse>(`/v1/learning/materials/${materialId}/ingestion`),
           loadAuthedJson<LearningContentGenerationResponse[]>(`/v1/learning/materials/${materialId}/generations`),
+          loadAuthedJson<LearningQuestionAttemptResponse[]>(`/v1/learning/materials/${materialId}/question-attempts`),
+          loadAuthedJson<LearningQuestionDisputeResponse[]>(`/v1/learning/materials/${materialId}/question-disputes`),
         ]);
 
         if (!cancelled) {
-          setState({ status: "ready", material, ingestion, generations });
+          setState({ status: "ready", material, ingestion, generations, attempts, disputes });
         }
       } catch (error) {
         if (!cancelled) {
@@ -395,6 +467,24 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
     }
   };
 
+  const replaceAssignments = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAssignmentError(null);
+    setAssignmentStatus("Saving assignments...");
+
+    try {
+      await putAuthedJson<LearningMaterialResponse>(`/v1/learning/materials/${materialId}/assignments`, {
+        studentSubjects: parseAssignmentList(studentSubjectsText),
+        groupNames: parseAssignmentList(groupNamesText),
+      } satisfies LearningMaterialAssignmentRequest);
+      setRefreshToken((value) => value + 1);
+      setAssignmentStatus("Assignments saved.");
+    } catch (error) {
+      setAssignmentStatus(null);
+      setAssignmentError(error instanceof Error ? error.message : "Unable to save assignments.");
+    }
+  };
+
   const updateQuestionSetStatus = async (generationId: string, action: "publish" | "archive") => {
     setGenerationError(null);
     setGenerationStatus(action === "publish" ? "Publishing question set..." : "Archiving question set...");
@@ -406,6 +496,31 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
     } catch (error) {
       setGenerationStatus(null);
       setGenerationError(error instanceof Error ? error.message : "Unable to update question set status.");
+    }
+  };
+
+  const submitDispute = async (event: FormEvent<HTMLFormElement>, attemptId: string) => {
+    event.preventDefault();
+    setDisputeError(null);
+    setDisputeStatus("Submitting dispute...");
+
+    const formData = new FormData(event.currentTarget);
+    const questionIndex = Number(formData.get("questionIndex"));
+    const selectedOptionIndex = Number(formData.get("selectedOptionIndex"));
+    const reason = String(formData.get("reason") ?? "").trim();
+
+    try {
+      await postAuthedJson(`/v1/learning/materials/${materialId}/question-attempts/${attemptId}/disputes`, {
+        questionIndex,
+        selectedOptionIndex,
+        reason,
+      });
+      event.currentTarget.reset();
+      setRefreshToken((value) => value + 1);
+      setDisputeStatus("Dispute submitted.");
+    } catch (error) {
+      setDisputeStatus(null);
+      setDisputeError(error instanceof Error ? error.message : "Unable to submit dispute.");
     }
   };
 
@@ -460,6 +575,36 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
               <article className="card learning-detail-card">
                 <p className="card-kicker">owner</p>
                 <h3>Assignments and admin view</h3>
+                <form className="prompt-form" onSubmit={replaceAssignments}>
+                  <div className="learning-upload-grid">
+                    <label>
+                      <span>Student subjects</span>
+                      <textarea
+                        name="studentSubjects"
+                        rows={4}
+                        placeholder="student-1, student-2"
+                        value={studentSubjectsText}
+                        onChange={(event) => setStudentSubjectsText(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      <span>Group names</span>
+                      <textarea
+                        name="groupNames"
+                        rows={4}
+                        placeholder="group-a, group-b"
+                        value={groupNamesText}
+                        onChange={(event) => setGroupNamesText(event.target.value)}
+                      />
+                    </label>
+                  </div>
+                  <div className="prompt-actions">
+                    <button className="primary-button" type="submit">Save assignments</button>
+                    <span className="muted">Comma or newline separated values.</span>
+                  </div>
+                </form>
+                {assignmentStatus && <p className="success-title">{assignmentStatus}</p>}
+                {assignmentError && <p className="error-title">{assignmentError}</p>}
                 <dl className="profile-list compact">
                   <div>
                     <dt>Students</dt>
@@ -494,6 +639,104 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                     <dd>{state.ingestion.retryCount}</dd>
                   </div>
                 </dl>
+              </article>
+            )}
+
+            {!state.material.canManageAssignments && (
+              <article className="card learning-detail-card">
+                <p className="card-kicker">practice</p>
+                <div className="section-head">
+                  <h3>Question attempts and disputes</h3>
+                  <span className="pill">{state.attempts.length}</span>
+                </div>
+                <p className="muted">Review prior attempts and file a dispute for a specific question and option index.</p>
+                {disputeStatus && <p className="success-title">{disputeStatus}</p>}
+                {disputeError && <p className="error-title">{disputeError}</p>}
+                {state.attempts.length === 0 ? (
+                  <p className="muted">No attempts have been submitted yet.</p>
+                ) : (
+                  <div className="learning-detail-generation-list">
+                    {state.attempts.map((attempt) => {
+                      const generation = state.generations.find((item) => item.id === attempt.generationId);
+                      const parsedQuestionSet = generation ? parseQuestionSet(generation.structuredContent) : null;
+                      const parsedAnswers = parseAttemptAnswers(attempt.answers);
+                      const attemptDisputes = state.disputes.filter((dispute) => dispute.attemptId === attempt.id);
+
+                      return (
+                        <section className="learning-detail-generation-card" key={attempt.id}>
+                          <div className="section-head">
+                            <h4>{generation ? generation.generationType : "Question attempt"}</h4>
+                            <div className="learning-generation-badges">
+                              <span className="pill status-pill done">
+                                {attempt.score}/{attempt.totalQuestions}
+                              </span>
+                              <span className="pill status-pill">{formatTimestamp(attempt.submittedAt)}</span>
+                            </div>
+                          </div>
+                          <p className="muted">Generation: {attempt.generationId}</p>
+                          {parsedQuestionSet && parsedAnswers && (
+                            <div className="learning-question-set">
+                              {parsedAnswers.map((answer) => {
+                                const question = parsedQuestionSet.questions[answer.questionIndex];
+                                return (
+                                  <article className="learning-question-card" key={`${attempt.id}-${answer.questionIndex}`}>
+                                    <div className="section-head">
+                                      <p className="card-kicker">Question {answer.questionIndex + 1}</p>
+                                      <span className="pill status-pill">Selected {answer.selectedOptionIndexes.join(", ") || "none"}</span>
+                                    </div>
+                                    <h5>{question ? question.prompt : `Question ${answer.questionIndex + 1}`}</h5>
+                                    <p className="muted">
+                                      {question
+                                        ? answer.selectedOptionIndexes.map((optionIndex) => question.options[optionIndex]?.text ?? `#${optionIndex}`).join(", ") || "No option selected"
+                                        : JSON.stringify(answer)}
+                                    </p>
+                                  </article>
+                                );
+                              })}
+                            </div>
+                          )}
+                          {!parsedQuestionSet && <pre className="learning-detail-content">{attempt.answers}</pre>}
+
+                          <form className="prompt-form learning-upload-form" onSubmit={(event) => void submitDispute(event, attempt.id)}>
+                            <div className="learning-upload-grid">
+                              <label>
+                                <span>Question index</span>
+                                <input name="questionIndex" type="number" min={0} max={Math.max(attempt.totalQuestions - 1, 0)} placeholder="0" required />
+                              </label>
+                              <label>
+                                <span>Selected option index</span>
+                                <input name="selectedOptionIndex" type="number" min={0} placeholder="0" required />
+                              </label>
+                            </div>
+                            <label>
+                              <span>Reason</span>
+                              <textarea name="reason" rows={3} placeholder="Explain why this answer should be reviewed" required />
+                            </label>
+                            <div className="prompt-actions">
+                              <button className="primary-button" type="submit">Submit dispute</button>
+                              <span className="muted">Indexes are zero-based, matching the backend.</span>
+                            </div>
+                          </form>
+
+                          {attemptDisputes.length > 0 && (
+                            <div className="learning-generation-list">
+                              {attemptDisputes.map((dispute) => (
+                                <article className="learning-detail-generation-card" key={dispute.id}>
+                                  <div className="section-head">
+                                    <h5>Dispute #{dispute.id.slice(0, 8)}</h5>
+                                    <span className={`pill status-pill ${disputeStatusTone(dispute.status)}`}>{dispute.status}</span>
+                                  </div>
+                                  <p className="muted">Question {dispute.questionIndex + 1}, option {dispute.selectedOptionIndex}</p>
+                                  <p>{dispute.reason}</p>
+                                </article>
+                              ))}
+                            </div>
+                          )}
+                        </section>
+                      );
+                    })}
+                  </div>
+                )}
               </article>
             )}
 
@@ -618,11 +861,18 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                           <div className="learning-question-set">
                             {structured.questions.map((question: LearningQuestionPayload, index: number) => (
                               <article className="learning-question-card" key={`${generation.id}-${index}`}>
-                                <p className="card-kicker">Question {index + 1}</p>
+                                <div className="section-head">
+                                  <p className="card-kicker">Question {index + 1}</p>
+                                  <span className="pill status-pill">
+                                    {resolveQuestionAnswerType(question) === "MULTI_CORRECT"
+                                      ? `Válassz ${resolveQuestionCorrectOptionIndexes(question).length} választ`
+                                      : "Válassz 1 választ"}
+                                  </span>
+                                </div>
                                 <h5>{question.prompt}</h5>
                                 <ul className="learning-option-list">
-                                  {question.options.map((option) => (
-                                    <li key={option.key} className={option.key === question.options[question.correctOptionIndex]?.key ? "correct" : ""}>
+                                  {question.options.map((option, optionIndex) => (
+                                    <li key={option.key} className={resolveQuestionCorrectOptionIndexes(question).includes(optionIndex) ? "correct" : ""}>
                                       <strong>{option.key}.</strong> {option.text}
                                     </li>
                                   ))}

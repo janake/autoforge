@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.autoforge.backend.domain.LearningContentGenerationType;
 import org.autoforge.backend.domain.LearningGenerationStatus;
 import org.autoforge.backend.domain.LearningGeneratedContent;
+import org.autoforge.backend.domain.LearningQuestionAnswerType;
 import org.autoforge.backend.domain.LearningQuestionSetStatus;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.domain.LearningAssignmentTargetType;
@@ -174,44 +175,40 @@ public class LearningContentGenerationService {
 
   private LearningQuestionSetPayload questionSetPayload(LearningMaterial material, List<LearningContentSourceReference> sources, String retrievalContext) {
     List<LearningQuestionPayload> questions = new ArrayList<>();
-    questions.add(new LearningQuestionPayload(
+    questions.add(singleCorrectQuestion(
       "Mi a legfontosabb üzenete a tananyagnak?",
       standardOptions("A tananyag fő üzenete", "Egy mellékes részlet", "Egy nem kapcsolódó példa", "Egy későbbi fejezet"),
       0,
       "A fő üzenet a tananyag címéhez és a tanulói profilhoz igazodik.",
-      sources.isEmpty() ? List.of() : List.of(sources.get(0)),
-      null
+      sources.isEmpty() ? List.of() : List.of(sources.get(0))
     ));
 
     if (!sources.isEmpty()) {
-      questions.add(new LearningQuestionPayload(
-        "Hogyan kapcsolódik a(z) %s. chunk a fő témához?".formatted(sources.get(0).chunkIndex() + 1),
-        standardOptions("A fő témát támogatja", "Eltér a témától", "Csak adminisztratív metaadat", "Teljesen üres"),
-        0,
-        "Az első chunk a forrás összefoglalóját és a tananyag fő gondolatát hordozza.",
-        List.of(sources.get(0)),
-        null
+      questions.add(multiCorrectQuestion(
+        "Melyik 2 állítás igaz a(z) %s. chunk alapján?".formatted(sources.get(0).chunkIndex() + 1),
+        standardOptions("A fő témát támogatja", "Eltér a témától", "A kulcsfogalmak gyakorlását segíti", "Teljesen üres"),
+        List.of(0, 2),
+        "Az első chunk egyszerre támogatja a fő témát és a gyakorlási fókuszt.",
+        List.of(sources.get(0))
       ));
     }
 
     if (sources.size() > 1) {
-      questions.add(new LearningQuestionPayload(
+      questions.add(singleCorrectQuestion(
         "Melyik részletet kellene tovább gyakorolni a(z) %s. chunk alapján?".formatted(sources.get(1).chunkIndex() + 1),
         standardOptions("A kulcsfogalmak gyakorlását", "Csak a fájlnevet", "A tananyag törlését", "A hitelesítő adatokat"),
         0,
         "A második chunk kifejezetten a gyakorlásra érdemes kulcsfogalmakat emeli ki.",
-        List.of(sources.get(1)),
-        null
+        List.of(sources.get(1))
       ));
     }
 
-    questions.add(new LearningQuestionPayload(
+    questions.add(singleCorrectQuestion(
       "Milyen kulcsfogalmakat érdemes visszanézni a %s tananyagból?".formatted(material.getTitle()),
       standardOptions("A definíciókat és összefüggéseket", "A képernyő színét", "A feltöltés időpontját", "A JWT kódolását"),
       0,
       "A visszanézendő fogalmak a tartalom megértését támogatják, nem a technikai metaadatokat.",
-      sources.stream().limit(2).toList(),
-      null
+      sources.stream().limit(2).toList()
     ));
 
     return new LearningQuestionSetPayload(material.getId(), material.getTitle(), retrievalContext, questions);
@@ -228,7 +225,9 @@ public class LearningContentGenerationService {
       for (LearningQuestionOptionPayload option : question.options()) {
         lines.add("   " + option.key() + ") " + option.text());
       }
-      lines.add("   Helyes válasz: " + question.options().get(question.correctOptionIndex()).key());
+      String correctLabel = question.resolvedAnswerType() == LearningQuestionAnswerType.MULTI_CORRECT ? "Helyes válaszok" : "Helyes válasz";
+      lines.add("   " + correctLabel + ": " + correctOptionKeys(question));
+      lines.add("   Válassz " + question.resolvedCorrectOptionIndexes().size() + " választ");
       lines.add("   Magyarázat: " + question.explanation());
       if (!question.sources().isEmpty()) {
         lines.add("   Forrás chunkok: " + question.sources().stream().map(source -> Integer.toString(source.chunkIndex() + 1)).collect(Collectors.joining(", ")));
@@ -335,6 +334,51 @@ public class LearningContentGenerationService {
       new LearningQuestionOptionPayload("C", distractorTwo),
       new LearningQuestionOptionPayload("D", distractorThree)
     );
+  }
+
+  private LearningQuestionPayload singleCorrectQuestion(
+    String prompt,
+    List<LearningQuestionOptionPayload> options,
+    int correctOptionIndex,
+    String explanation,
+    List<LearningContentSourceReference> sources
+  ) {
+    return new LearningQuestionPayload(
+      prompt,
+      options,
+      correctOptionIndex,
+      LearningQuestionAnswerType.SINGLE_CORRECT,
+      List.of(correctOptionIndex),
+      explanation,
+      sources,
+      null
+    );
+  }
+
+  private LearningQuestionPayload multiCorrectQuestion(
+    String prompt,
+    List<LearningQuestionOptionPayload> options,
+    List<Integer> correctOptionIndexes,
+    String explanation,
+    List<LearningContentSourceReference> sources
+  ) {
+    return new LearningQuestionPayload(
+      prompt,
+      options,
+      correctOptionIndexes.isEmpty() ? null : correctOptionIndexes.get(0),
+      LearningQuestionAnswerType.MULTI_CORRECT,
+      correctOptionIndexes,
+      explanation,
+      sources,
+      null
+    );
+  }
+
+  private String correctOptionKeys(LearningQuestionPayload question) {
+    return question.resolvedCorrectOptionIndexes().stream()
+      .filter(index -> index >= 0 && index < question.options().size())
+      .map(index -> question.options().get(index).key())
+      .collect(Collectors.joining(", "));
   }
 
   private String writeJson(LearningQuestionSetPayload payload) {
