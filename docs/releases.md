@@ -653,3 +653,14 @@ Taskok
 
 Megjegyzes
 - A student saját question attempthez dispute-ot nyithat, a teacher review-zhatja és score override-ot menthet.
+
+## 0.1.57
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-397`: Teacher hibabejelentés review és pontszám felülbírálás
+
+Megjegyzes
+- A dispute review flow külön storyként követi a student/teacher hibakezelést és a score override-ot.
