@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -266,6 +267,111 @@ class LearningContentGenerationControllerTest {
         .with(jwt().jwt(token -> token.subject("student-1"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$").isEmpty());
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndexes": [0]}]}
+          """.formatted(questionSet.getId())))
+      .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void questionSetSettingsPersistAndLimitAttempts() throws Exception {
+    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
+      "teacher-1",
+      "Biológia",
+      "Gyakorló tananyag",
+      "biology.txt",
+      "text/plain",
+      32L,
+      "Sejtek és szövetek alapjai.".getBytes(StandardCharsets.UTF_8)
+    ));
+    learningMaterialAssignmentRepository.save(LearningMaterialAssignment.create(material.getId(), LearningAssignmentTargetType.STUDENT, "student-1"));
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/questions", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isCreated());
+
+    LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().stream()
+      .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
+      .findFirst()
+      .orElseThrow();
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
+
+    mockMvc.perform(put("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/settings", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {"deadlineAt": "2026-05-21T12:00:00Z", "maxAttempts": 1}
+          """))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.deadlineAt").value("2026-05-21T12:00:00Z"))
+      .andExpect(jsonPath("$.maxAttempts").value(1));
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$[0].deadlineAt").value("2026-05-21T12:00:00Z"))
+      .andExpect(jsonPath("$[0].maxAttempts").value(1));
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndexes": [0]}]}
+          """.formatted(questionSet.getId())))
+      .andExpect(status().isCreated());
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {"generationId": "%s", "answers": [{"questionIndex": 0, "selectedOptionIndexes": [0]}]}
+          """.formatted(questionSet.getId())))
+      .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void pastDeadlineBlocksNewAttempts() throws Exception {
+    LearningMaterial material = learningMaterialRepository.save(LearningMaterial.createUploaded(
+      "teacher-1",
+      "Kémia",
+      "Gyakorló tananyag",
+      "chemistry.txt",
+      "text/plain",
+      28L,
+      "Atomok és molekulák.".getBytes(StandardCharsets.UTF_8)
+    ));
+    learningMaterialAssignmentRepository.save(LearningMaterialAssignment.create(material.getId(), LearningAssignmentTargetType.STUDENT, "student-1"));
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/questions", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isCreated());
+
+    LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().stream()
+      .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
+      .findFirst()
+      .orElseThrow();
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/publish", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
+
+    mockMvc.perform(put("/api/v1/learning/materials/{materialId}/question-sets/{generationId}/settings", material.getId(), questionSet.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1")))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {"deadlineAt": "2026-01-01T00:00:00Z", "maxAttempts": null}
+          """))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.deadlineAt").value("2026-01-01T00:00:00Z"));
 
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
         .with(jwt().jwt(token -> token.subject("student-1")))

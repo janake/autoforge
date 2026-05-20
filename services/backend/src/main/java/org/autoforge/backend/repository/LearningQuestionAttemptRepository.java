@@ -9,4 +9,6 @@ public interface LearningQuestionAttemptRepository extends JpaRepository<Learnin
   List<LearningQuestionAttempt> findByMaterialIdOrderBySubmittedAtDesc(String materialId);
 
   List<LearningQuestionAttempt> findByMaterialIdAndStudentSubjectOrderBySubmittedAtDesc(String materialId, String studentSubject);
+
+  long countByMaterialIdAndGenerationIdAndStudentSubject(String materialId, String generationId, String studentSubject);
 }

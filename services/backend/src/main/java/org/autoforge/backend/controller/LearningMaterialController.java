@@ -11,6 +11,7 @@ import org.autoforge.backend.dto.LearningQuestionAttemptResponse;
 import org.autoforge.backend.dto.LearningQuestionDisputeRequest;
 import org.autoforge.backend.dto.LearningQuestionDisputeResponse;
 import org.autoforge.backend.dto.LearningQuestionDisputeReviewRequest;
+import org.autoforge.backend.dto.LearningQuestionSetSettingsRequest;
 import org.autoforge.backend.service.LearningContentGenerationService;
 import org.autoforge.backend.dto.LearningIngestionResponse;
 import org.autoforge.backend.dto.LearningMaterialResponse;
@@ -155,6 +156,17 @@ public class LearningMaterialController {
   ) {
     UserContext context = currentUser(authentication);
     return learningContentGenerationService.archiveQuestionSet(materialId, generationId, context.subject());
+  }
+
+  @PutMapping("/{materialId}/question-sets/{generationId}/settings")
+  public LearningContentGenerationResponse updateQuestionSetSettings(
+    @PathVariable String materialId,
+    @PathVariable String generationId,
+    @RequestBody LearningQuestionSetSettingsRequest request,
+    Authentication authentication
+  ) {
+    UserContext context = currentUser(authentication);
+    return learningContentGenerationService.updateQuestionSetSettings(materialId, generationId, context.subject(), request);
   }
 
   @PostMapping("/{materialId}/question-attempts")

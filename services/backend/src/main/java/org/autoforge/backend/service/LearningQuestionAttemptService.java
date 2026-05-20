@@ -1,5 +1,6 @@
 package org.autoforge.backend.service;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -68,6 +69,8 @@ public class LearningQuestionAttemptService {
     if (!learningContentGenerationService.canAttemptQuestionSet(generation, material.getOwnerSubject(), subject)) {
       throw new LearningMaterialAccessDeniedException(materialId);
     }
+
+    enforceAttemptLimits(generation, material.getOwnerSubject(), subject);
 
     LearningQuestionSetPayload questionSet = readQuestionSet(generation.getStructuredContent());
     List<LearningQuestionAnswerRequest> answers = request.answers() == null ? List.of() : request.answers();
@@ -169,5 +172,30 @@ public class LearningQuestionAttemptService {
       submittedAnswers.computeIfAbsent(answer.questionIndex(), ignored -> new HashSet<>()).addAll(selectedOptionIndexes);
     }
     return submittedAnswers;
+  }
+
+  private void enforceAttemptLimits(LearningGeneratedContent generation, String ownerSubject, String subject) {
+    if (Objects.equals(ownerSubject, subject)) {
+      return;
+    }
+
+    Instant deadlineAt = generation.getDeadlineAt();
+    if (deadlineAt != null && Instant.now().isAfter(deadlineAt)) {
+      throw new LearningMaterialAccessDeniedException(generation.getMaterialId());
+    }
+
+    Integer maxAttempts = generation.getMaxAttempts();
+    if (maxAttempts == null) {
+      return;
+    }
+
+    long attemptCount = learningQuestionAttemptRepository.countByMaterialIdAndGenerationIdAndStudentSubject(
+      generation.getMaterialId(),
+      generation.getId(),
+      subject
+    );
+    if (attemptCount >= maxAttempts) {
+      throw new LearningMaterialAccessDeniedException(generation.getMaterialId());
+    }
   }
 }

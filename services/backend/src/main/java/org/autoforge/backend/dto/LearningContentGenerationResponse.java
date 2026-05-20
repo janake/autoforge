@@ -14,6 +14,8 @@ public record LearningContentGenerationResponse(
   List<LearningContentSourceReference> sources,
   List<LearningSourceVersionReference> sourceVersions,
   LearningQuestionSetStatus questionSetStatus,
+  Instant deadlineAt,
+  Integer maxAttempts,
   boolean fallbackUsed,
   String fallbackReason,
   LearningGenerationStatus generationStatus,
