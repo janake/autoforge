@@ -62,6 +62,12 @@ class PromptDraftControllerTest {
       .authorities(new SimpleGrantedAuthority("ROLE_developer"));
   }
 
+  private static JwtRequestPostProcessor teacherJwt() {
+    return jwt()
+      .jwt(token -> token.claim("groups", List.of("teacher")))
+      .authorities(new SimpleGrantedAuthority("ROLE_teacher"));
+  }
+
   @Test
   void createsClarifyingDraftWithoutJobs() throws Exception {
     mockMvc.perform(post("/api/v1/prompt-drafts")
@@ -97,6 +103,20 @@ class PromptDraftControllerTest {
           }
           """))
       .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void allowsPromptDraftAccessForTeacherGroupMembers() throws Exception {
+    mockMvc.perform(post("/api/v1/prompt-drafts")
+        .with(teacherJwt())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("""
+          {
+            "prompt": "Audit the workflow"
+          }
+          """))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.status").value("CLARIFYING"));
   }
 
   @Test

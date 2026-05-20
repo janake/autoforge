@@ -465,6 +465,15 @@ function normalizeGroupFilter(value: string): string {
   return value.trim().replace(/^\//, "");
 }
 
+function normalizeAccessToken(value: string): string {
+  return value.trim().toLowerCase().replace(/-/g, "_");
+}
+
+function canAccessAiTools(profile: BackendMeResponse): boolean {
+  const accessTokens = [...profile.roles, ...profile.groups].map(normalizeAccessToken);
+  return accessTokens.some((token) => token === "developer" || token === "teacher" || token === "learning_teacher");
+}
+
 function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: string; onBack: () => void }) {
   const [refreshToken, setRefreshToken] = useState(0);
   const [sourceStatus, setSourceStatus] = useState<string | null>(null);
@@ -1806,8 +1815,8 @@ function PrivateWorkspace({
   onNavigate: (pathname: string) => void;
 }) {
   const config = useMemo(() => getRuntimeConfig(), []);
-  const isDeveloper = profile.groups.includes("developer");
-  const navItems = isDeveloper
+  const canAccessAi = canAccessAiTools(profile);
+  const navItems = canAccessAi
     ? [dashboardNav[0], { label: "AI", href: "#ai" }, ...dashboardNav.slice(1)]
     : dashboardNav;
 
@@ -1900,14 +1909,14 @@ function PrivateWorkspace({
           </dl>
         </article>
 
-        {isDeveloper ? (
+        {canAccessAi ? (
           <article className="workspace-panel" id="ai">
             <div className="section-head">
               <h2>AI menu</h2>
-              <span className="pill">developer</span>
+              <span className="pill">ai access</span>
             </div>
             <p className="muted">
-              This menu groups multiple AI tools behind a single developer-only entrypoint.
+              This menu groups multiple AI tools behind a single developer or teacher entrypoint.
             </p>
             <div className="status-grid">
               <article className="card">
@@ -1933,12 +1942,12 @@ function PrivateWorkspace({
               <h2>AI menu</h2>
               <span className="pill">restricted</span>
             </div>
-            <p className="error-title">AI tools are available only to Keycloak developer-group members.</p>
-            <p className="muted">Ask an admin to add your account to the `developer` group to unlock this area.</p>
+            <p className="error-title">AI tools are available only to Keycloak developer or teacher-group members.</p>
+            <p className="muted">Ask an admin to add your account to the `developer`, `teacher`, or `learning_teacher` group to unlock this area.</p>
           </article>
         )}
 
-        {isDeveloper && (
+        {canAccessAi && (
           <>
             <PromptDraftPanel
               onJobCreated={(createdJobId) => {
