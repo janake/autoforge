@@ -41,60 +41,62 @@ public class LearningContentGenerationService {
   private static final Pattern PARAGRAPH_SPLIT = Pattern.compile("\\R\\s*\\R+");
   private static final int MAX_CHUNK_LENGTH = 450;
   private static final String FALLBACK_REASON = "Real AI is unavailable because the learning generation provider is not configured.";
+  private static final String AI_DISABLED_REASON = "AI engine call disabled after previous failure — fallback used.";
 
   private final LearningMaterialRepository learningMaterialRepository;
   private final LearningGeneratedContentRepository learningGeneratedContentRepository;
   private final LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
   private final LearningMaterialSourceRepository learningMaterialSourceRepository;
   private final LearningLearnerProfileService learningLearnerProfileService;
+  private final LearningAiEngineProvider learningAiEngineProvider;
   private final ObjectMapper objectMapper;
 
   @Transactional
   public LearningContentGenerationResponse generateQuestions(String materialId, String subject) {
     LearningMaterial material = loadOwnedMaterial(materialId, subject);
-    GeneratedContent generated = generateFromMaterial(material, subject, LearningContentGenerationType.QUESTION_SET);
     List<LearningSourceVersionReference> sourceVersions = captureSourceVersions(material.getId());
+    LearningAiEngineProvider.LearningGenerationResult aiResult = generateWithAiEngine(material, subject, LearningContentGenerationType.QUESTION_SET);
     LearningGeneratedContent saved = learningGeneratedContentRepository.save(LearningGeneratedContent.create(
       material.getId(),
       subject,
       LearningContentGenerationType.QUESTION_SET,
-      generated.content(),
-      generated.structuredContent(),
-      generated.sourceText(),
+      aiResult.content(),
+      aiResult.structuredContent(),
+      sourceText(aiResult.sources()),
       writeJson(sourceVersions),
       LearningQuestionSetStatus.DRAFT,
       null,
       null,
-      true,
-      FALLBACK_REASON,
+      aiResult.fallbackUsed(),
+      aiResult.fallbackReason(),
       LearningGenerationStatus.COMPLETED,
       null
     ));
-    return toResponse(saved, generated.sources());
+    return toResponse(saved, aiResult.sources());
   }
 
   @Transactional
   public LearningContentGenerationResponse generateSummary(String materialId, String subject) {
     LearningMaterial material = loadOwnedMaterial(materialId, subject);
-    GeneratedContent generated = generateFromMaterial(material, subject, LearningContentGenerationType.SUMMARY);
     List<LearningSourceVersionReference> sourceVersions = captureSourceVersions(material.getId());
+    LearningAiEngineProvider.LearningGenerationResult aiResult = generateWithAiEngine(material, subject, LearningContentGenerationType.SUMMARY);
     LearningGeneratedContent saved = learningGeneratedContentRepository.save(LearningGeneratedContent.create(
       material.getId(),
       subject,
       LearningContentGenerationType.SUMMARY,
-      generated.content(),
-      null,
-      generated.sourceText(),
+      aiResult.content(),
+      aiResult.structuredContent(),
+      sourceText(aiResult.sources()),
       writeJson(sourceVersions),
       null,
       null,
       null,
-      true,
-      FALLBACK_REASON,
+      aiResult.fallbackUsed(),
+      aiResult.fallbackReason(),
       LearningGenerationStatus.COMPLETED,
       null
     ));
-    return toResponse(saved, generated.sources());
+    return toResponse(saved, aiResult.sources());
   }
 
   @Transactional(readOnly = true)
@@ -184,6 +186,50 @@ public class LearningContentGenerationService {
     }
 
     return Objects.equals(ownerSubject, viewerSubject) || status == LearningQuestionSetStatus.PUBLISHED;
+  }
+
+  private LearningAiEngineProvider.LearningGenerationResult generateWithAiEngine(LearningMaterial material, String subject, LearningContentGenerationType generationType) {
+    String materialText = materialText(material);
+    String retrievalContext = learningLearnerProfileService.buildRetrievalContext(subject);
+    String optimizedImageUrl = material.getOptimizedContent() != null
+      ? "/api/v1/learning/materials/%s/optimized-image".formatted(material.getId())
+      : null;
+
+    try {
+      LearningAiEngineProvider.GenerationContext context = new LearningAiEngineProvider.GenerationContext(
+        material.getId(),
+        material.getTitle(),
+        material.getDescription(),
+        materialText,
+        optimizedImageUrl,
+        retrievalContext,
+        generationType
+      );
+      LearningAiEngineProvider.LearningGenerationResult result = learningAiEngineProvider.generate(context);
+      if (result.fallbackUsed()) {
+        return fallbackGenerationResult(material, subject, result.fallbackReason(), generationType, retrievalContext, optimizedImageUrl);
+      }
+      return result;
+    } catch (Exception exception) {
+      String reason = exception.getMessage() != null ? exception.getMessage() : exception.getClass().getSimpleName();
+      return fallbackGenerationResult(material, subject, reason, generationType, retrievalContext, optimizedImageUrl);
+    }
+  }
+
+  private LearningAiEngineProvider.LearningGenerationResult fallbackGenerationResult(
+    LearningMaterial material,
+    String subject,
+    String fallbackReason,
+    LearningContentGenerationType generationType,
+    String retrievalContext,
+    String optimizedImageUrl
+  ) {
+    List<LearningContentSourceReference> sources = buildSources(material);
+    if (generationType == LearningContentGenerationType.SUMMARY) {
+      return new LearningAiEngineProvider.LearningGenerationResult(summaryContent(material, sources, retrievalContext), null, sources, true, fallbackReason);
+    }
+    LearningQuestionSetPayload payload = questionSetPayload(material, sources, retrievalContext, optimizedImageUrl);
+    return new LearningAiEngineProvider.LearningGenerationResult(questionSetContent(payload), writeJson(payload), sources, true, fallbackReason);
   }
 
   private GeneratedContent generateFromMaterial(LearningMaterial material, String subject, LearningContentGenerationType generationType) {

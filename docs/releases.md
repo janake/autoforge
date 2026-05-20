@@ -853,3 +853,25 @@ Megjegyzes
 - Spring backend automatikusan atmeretezi es JPEG-ge konvertalja a feltoltott kepeket (max 2048px, 85% quality).
 - Az optimalizalt valtozat kulon vegeponton (/optimized-image) es a generalt kerdesekben is elerheto.
 - Nem kepes feltoltesek (PDF/TXT/MD) viselkedese nem valtozik.
+
+## 0.1.75
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-464`: Activate AI engine - backend learning content generation
+- `AUTO-465`: Define AI engine contract and provider configuration
+- `AUTO-466`: Implement AI request payload assembly
+- `AUTO-467`: Wire backend to configured AI provider
+- `AUTO-468`: Persist AI generation status and errors
+- `AUTO-469`: Add tests for AI engine activation flow
+
+Megjegyzes
+- `LearningAiEngineProvider` interface defines the contract for AI generation.
+- `HttpLearningAiEngineProvider` implements the provider over OpenCode HTTP API.
+- Full JSON-RPC session (create -> send prompt -> parse response).
+- Fallback: when AI engine is not configured or fails, content is still generated via the existing stub path.
+- Generation status (PENDING, COMPLETED, FAILED) and fallback reasons are persisted.
+- `@ConditionalOnProperty` guard: bean loads only when `autoforge.mvp.opencode.server-url` is set.
+- Tests verify fallback path with all 87 backend tests passing.
