@@ -719,3 +719,14 @@ Taskok
 
 Megjegyzes
 - A Learning detail oldalon az owner most közvetlenül szerkesztheti a student és group assignment listát, a backend pedig a meglévő assignment replace API-t használja.
+
+## 0.1.63
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-403`: Assignment és próbálkozás státuszok
+
+Megjegyzes
+- A Learning modul külön progress entitással követi az assigned, started, submitted, reviewed és completed állapotokat, hogy később Duolingo/Anki-szerű ismétlési logika épülhessen rá.

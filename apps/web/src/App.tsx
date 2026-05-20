@@ -12,6 +12,7 @@ import type {
   LearningQuestionAttemptResponse,
   LearningQuestionPayload,
   LearningQuestionDisputeResponse,
+  LearningQuestionProgressResponse,
   LearningQuestionSetPayload,
   LearningMaterialAssignmentRequest,
   LearningMaterialResponse,
@@ -362,6 +363,16 @@ function disputeStatusTone(status: LearningQuestionDisputeResponse["status"]): s
   }
 }
 
+function progressStatusTone(status: LearningQuestionProgressResponse["status"]): string {
+  switch (status) {
+    case "REVIEWED":
+    case "COMPLETED":
+      return "done";
+    default:
+      return "pending";
+  }
+}
+
 function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: string; onBack: () => void }) {
   const [refreshToken, setRefreshToken] = useState(0);
   const [sourceStatus, setSourceStatus] = useState<string | null>(null);
@@ -639,6 +650,48 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                     <dd>{state.ingestion.retryCount}</dd>
                   </div>
                 </dl>
+              </article>
+            )}
+
+            {state.material.progressEntries.length > 0 && (
+              <article className="card learning-detail-card">
+                <p className="card-kicker">progress</p>
+                <div className="section-head">
+                  <h3>Learning progress</h3>
+                  <span className="pill">{state.material.progressEntries.length}</span>
+                </div>
+                <div className="learning-detail-generation-list">
+                  {state.material.progressEntries.map((progress) => (
+                    <section className="learning-detail-generation-card" key={progress.id}>
+                      <div className="section-head">
+                        <h4>{progress.generationId.slice(0, 8)}</h4>
+                        <span className={`pill status-pill ${progressStatusTone(progress.status)}`}>{progress.status}</span>
+                      </div>
+                      <dl className="profile-list compact">
+                        <div>
+                          <dt>Score</dt>
+                          <dd>{progress.score === null ? "n/a" : `${progress.score}/${progress.totalQuestions ?? 0}`}</dd>
+                        </div>
+                        <div>
+                          <dt>Attempts</dt>
+                          <dd>{progress.attemptCount}</dd>
+                        </div>
+                        <div>
+                          <dt>Started</dt>
+                          <dd>{progress.startedAt ? formatTimestamp(progress.startedAt) : "not started"}</dd>
+                        </div>
+                        <div>
+                          <dt>Submitted</dt>
+                          <dd>{progress.submittedAt ? formatTimestamp(progress.submittedAt) : "not submitted"}</dd>
+                        </div>
+                        <div>
+                          <dt>Reviewed</dt>
+                          <dd>{progress.reviewedAt ? formatTimestamp(progress.reviewedAt) : "not reviewed"}</dd>
+                        </div>
+                      </dl>
+                    </section>
+                  ))}
+                </div>
               </article>
             )}
 

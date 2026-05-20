@@ -17,6 +17,7 @@ import org.autoforge.backend.repository.LearningMaterialAssignmentRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
 import org.autoforge.backend.repository.LearningQuestionAttemptRepository;
 import org.autoforge.backend.repository.LearningQuestionDisputeRepository;
+import org.autoforge.backend.repository.LearningQuestionProgressRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +48,14 @@ class LearningQuestionDisputeControllerTest {
   @Autowired
   private LearningQuestionDisputeRepository learningQuestionDisputeRepository;
 
+  @Autowired
+  private LearningQuestionProgressRepository learningQuestionProgressRepository;
+
   @BeforeEach
   void cleanState() {
     learningQuestionDisputeRepository.deleteAll();
     learningQuestionAttemptRepository.deleteAll();
+    learningQuestionProgressRepository.deleteAll();
     learningGeneratedContentRepository.deleteAll();
     learningMaterialAssignmentRepository.deleteAll();
     learningMaterialRepository.deleteAll();
@@ -79,6 +84,16 @@ class LearningQuestionDisputeControllerTest {
         .with(jwt().jwt(token -> token.subject("teacher-1"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.questionSetStatus").value("PUBLISHED"));
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$[0].id").value(questionSet.getId()));
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.progressEntries[0].status").value("STARTED"));
 
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())
         .with(jwt().jwt(token -> token.subject("student-1")))
@@ -113,6 +128,11 @@ class LearningQuestionDisputeControllerTest {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$[0].status").value("OPEN"));
 
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.progressEntries[0].status").value("SUBMITTED"));
+
     String disputeId = learningQuestionDisputeRepository.findAll().get(0).getId();
 
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-disputes/{disputeId}/review", material.getId(), disputeId)
@@ -133,6 +153,12 @@ class LearningQuestionDisputeControllerTest {
         .with(jwt().jwt(token -> token.subject("student-1"))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$[0].score").value(2));
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.progressEntries[0].status").value("COMPLETED"))
+      .andExpect(jsonPath("$.progressEntries[0].score").value(2));
   }
 
   @Test

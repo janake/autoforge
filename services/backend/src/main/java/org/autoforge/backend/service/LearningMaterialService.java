@@ -17,6 +17,7 @@ import org.autoforge.backend.dto.LearningMaterialAssignmentRequest;
 import org.autoforge.backend.dto.LearningImageAssetResponse;
 import org.autoforge.backend.dto.LearningMaterialResponse;
 import org.autoforge.backend.dto.LearningMaterialSourceResponse;
+import org.autoforge.backend.dto.LearningQuestionProgressResponse;
 import org.autoforge.backend.repository.LearningImageAssetRepository;
 import org.autoforge.backend.repository.LearningMaterialAssignmentRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
@@ -44,6 +45,7 @@ public class LearningMaterialService {
   private final LearningMaterialSourceRepository learningMaterialSourceRepository;
   private final LearningImageAssetRepository learningImageAssetRepository;
   private final LearningMaterialObjectStorageService learningMaterialObjectStorageService;
+  private final LearningQuestionProgressService learningQuestionProgressService;
 
   @Transactional
   public LearningMaterialResponse uploadMaterial(String subject, boolean canCreateLearningContent, MultipartFile file, String title, String description) {
@@ -76,7 +78,7 @@ public class LearningMaterialService {
       content
     ));
     saveSource(material.getId(), subject, "PRIMARY_UPLOAD", resolvedTitle, file, storagePlan, content);
-    return toResponse(material, subject, canCreateLearningContent);
+    return toResponse(material, subject, Set.of(), canCreateLearningContent);
   }
 
   @Transactional
@@ -91,7 +93,7 @@ public class LearningMaterialService {
     LearningMaterialObjectStorageService.OriginalFileStoragePlan storagePlan = learningMaterialObjectStorageService.prepareOriginalFile(subject, file);
     byte[] content = readBytes(file);
     saveSource(material.getId(), subject, "ADDITIONAL_UPLOAD", resolvedSourceName, file, storagePlan, content);
-    return toResponse(material, subject, true);
+    return toResponse(material, subject, Set.of(), true);
   }
 
   @Transactional
@@ -109,7 +111,7 @@ public class LearningMaterialService {
 
     source.markDeleted();
     learningMaterialSourceRepository.save(source);
-    return toResponse(material, subject, true);
+    return toResponse(material, subject, Set.of(), true);
   }
 
   @Transactional(readOnly = true)
@@ -135,7 +137,7 @@ public class LearningMaterialService {
 
     return learningMaterialRepository.findAllById(materialIds).stream()
       .sorted(Comparator.comparing(LearningMaterial::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
-      .map(material -> toResponse(material, subject, canManageAssignments))
+      .map(material -> toResponse(material, subject, groups, canManageAssignments))
       .toList();
   }
 
@@ -148,7 +150,7 @@ public class LearningMaterialService {
       throw new LearningMaterialAccessDeniedException(materialId);
     }
 
-    return toResponse(material, subject, canManageAssignments);
+    return toResponse(material, subject, Set.of(), canManageAssignments);
   }
 
   @Transactional
@@ -168,7 +170,7 @@ public class LearningMaterialService {
     groupNames.forEach(group -> assignments.add(LearningMaterialAssignment.create(materialId, LearningAssignmentTargetType.GROUP, group)));
     learningMaterialAssignmentRepository.saveAll(assignments);
 
-    return toResponse(material, subject, canManageAssignments);
+    return toResponse(material, subject, Set.of(), canManageAssignments);
   }
 
   @Transactional
@@ -198,7 +200,7 @@ public class LearningMaterialService {
     return false;
   }
 
-  private LearningMaterialResponse toResponse(LearningMaterial material, String subject, boolean canManageAssignments) {
+  private LearningMaterialResponse toResponse(LearningMaterial material, String subject, Collection<String> groups, boolean canManageAssignments) {
     List<LearningMaterialAssignment> assignments = learningMaterialAssignmentRepository.findByMaterialId(material.getId());
     List<LearningMaterialSourceResponse> sources = learningMaterialSourceRepository.findByMaterialIdAndDeletedAtIsNullOrderByCreatedAtAsc(material.getId()).stream()
       .map(source -> new LearningMaterialSourceResponse(
@@ -230,6 +232,7 @@ public class LearningMaterialService {
         asset.getCreatedAt()
       ))
       .toList();
+    List<LearningQuestionProgressResponse> progressEntries = learningQuestionProgressService.listProgress(material.getId(), subject, groups, canManageAssignments);
     List<String> studentSubjects = assignments.stream()
       .filter(assignment -> assignment.getTargetType() == LearningAssignmentTargetType.STUDENT)
       .map(LearningMaterialAssignment::getTargetIdentifier)
@@ -258,6 +261,7 @@ public class LearningMaterialService {
       Objects.equals(material.getOwnerSubject(), subject) || canManageAssignments,
       sources,
       imageAssets,
+      progressEntries,
       material.getCreatedAt(),
       material.getUpdatedAt()
     );

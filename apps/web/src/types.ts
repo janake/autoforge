@@ -28,6 +28,7 @@ export type LearningMaterialResponse = {
   canManageAssignments: boolean;
   sources: LearningMaterialSourceResponse[];
   imageAssets: LearningImageAssetResponse[];
+  progressEntries: LearningQuestionProgressResponse[];
   createdAt: string;
   updatedAt: string;
 };
@@ -92,6 +93,26 @@ export type LearningQuestionDisputeResponse = {
   overrideScore: number | null;
   createdAt: string;
   reviewedAt: string | null;
+};
+
+export type LearningQuestionProgressStatus = "ASSIGNED" | "STARTED" | "SUBMITTED" | "REVIEWED" | "COMPLETED";
+
+export type LearningQuestionProgressResponse = {
+  id: string;
+  materialId: string;
+  generationId: string;
+  studentSubject: string;
+  status: LearningQuestionProgressStatus;
+  attemptId: string | null;
+  attemptCount: number;
+  score: number | null;
+  totalQuestions: number | null;
+  createdAt: string;
+  updatedAt: string;
+  startedAt: string | null;
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  completedAt: string | null;
 };
 
 export type LearningMaterialAssignmentRequest = {
