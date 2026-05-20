@@ -84,6 +84,11 @@ code {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.dashboard-nav a.active {
+  border-color: rgba(255, 184, 133, 0.45);
+  background: rgba(255, 184, 133, 0.16);
+}
+
 .dashboard-shell-actions {
   display: flex;
   align-items: center;
@@ -199,6 +204,16 @@ code {
 .workspace-grid {
   margin-top: 18px;
   align-items: start;
+}
+
+.dashboard-destination-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dashboard-destination-card button {
+  align-self: flex-start;
 }
 
 .job-status-panel {
