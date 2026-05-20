@@ -47,12 +47,16 @@ The repository has a Jira stdio MCP. Before claiming Jira is unavailable, every 
 - Jira MCP server: `ops/mcp/jira-server.mjs`
 - Jira usage docs: `ops/jira/README.md`
 - Local launcher path: `ops/mcp/jira-local.sh`
+- Local launcher template: `ops/mcp/jira-local.example.sh`
+- Direct fallback CLI: `ops/mcp/call-jira-tool.mjs`
 
 Important details:
 
 - `ops/mcp/jira-local.sh` is intentionally gitignored because it is local wiring. Its absence from git does not mean Jira MCP does not exist.
+- If `ops/mcp/jira-local.sh` is missing, copy `ops/mcp/jira-local.example.sh` to that path or use `ops/mcp/call-jira-tool.mjs` directly.
 - The actual stdio server is `node ops/mcp/jira-server.mjs`.
 - The launcher, when present, should start that server from the repo root.
+- The fallback CLI calls the same stdio MCP server and can be used when the AI tool UI does not expose Jira MCP directly.
 - The MCP exposes Jira tools named `jira_search`, `jira_get_issue`, `jira_update_issue`, `jira_list_transitions`, `jira_transition_issue`, `jira_add_comment`, `jira_create_issue`, sprint tools, and export tools.
 - Credential resolution is implemented in `ops/mcp/jira-server.mjs` and documented in `ops/jira/README.md`.
 
@@ -69,6 +73,15 @@ If the launcher file is missing but credentials are available, use the server di
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 exec node ops/mcp/jira-server.mjs
+```
+
+Fallback CLI examples:
+
+```bash
+node ops/mcp/call-jira-tool.mjs --list
+node ops/mcp/call-jira-tool.mjs jira_get_issue '{"issueKey":"AUTO-415"}'
+node ops/mcp/call-jira-tool.mjs jira_transition_issue '{"issueKey":"AUTO-415","transitionName":"Under Test"}'
+node ops/mcp/call-jira-tool.mjs jira_add_comment '{"issueKey":"AUTO-415","body":"PR opened and verification passed."}'
 ```
 
 Required Jira behavior:
