@@ -309,6 +309,7 @@ function LearningWorkspacePanel({ roles, onOpenMaterial }: { roles: string[]; on
           {state.materials.map((material) => {
             const latestQuestions = latestByType(material.generations, "QUESTION_SET");
             const latestSummary = latestByType(material.generations, "SUMMARY");
+            const latestProgress = material.progressEntries[0] ?? null;
 
             return (
               <article className="learning-material-card" key={material.id}>
@@ -331,6 +332,41 @@ function LearningWorkspacePanel({ roles, onOpenMaterial }: { roles: string[]; on
                   <section>
                     <h4>Summary</h4>
                     <p>{latestSummary ? latestSummary.content : "No summary generated yet."}</p>
+                  </section>
+                </div>
+
+                <div className="learning-detail-generation-list">
+                  <section className="learning-detail-generation-card">
+                    <div className="section-head">
+                      <h4>Your progress</h4>
+                      <span className="pill">{material.progressEntries.length}</span>
+                    </div>
+                    {latestProgress ? (
+                      <dl className="profile-list compact">
+                        <div>
+                          <dt>Status</dt>
+                          <dd>
+                            <span className={`pill status-pill ${progressStatusTone(latestProgress.status)}`}>
+                              {latestProgress.status}
+                            </span>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Latest score</dt>
+                          <dd>{formatProgressScore(latestProgress.score, latestProgress.totalQuestions)}</dd>
+                        </div>
+                        <div>
+                          <dt>Attempts</dt>
+                          <dd>{latestProgress.attemptCount}</dd>
+                        </div>
+                        <div>
+                          <dt>Updated</dt>
+                          <dd>{formatTimestamp(latestProgress.updatedAt)}</dd>
+                        </div>
+                      </dl>
+                    ) : (
+                      <p className="muted">No progress yet. Open the material detail and start a question set.</p>
+                    )}
                   </section>
                 </div>
               </article>
@@ -398,6 +434,14 @@ function progressStatusTone(status: LearningQuestionProgressResponse["status"]):
     default:
       return "pending";
   }
+}
+
+function formatProgressScore(score: number | null, totalQuestions: number | null): string {
+  if (score === null) {
+    return "n/a";
+  }
+
+  return totalQuestions === null ? `${score}` : `${score}/${totalQuestions}`;
 }
 
 function questionSetAttemptCount(attempts: LearningQuestionAttemptResponse[], generationId: string): number {
@@ -750,12 +794,16 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                 <p className="muted">This page shows the material, your generated content, and your own learning status only.</p>
                 <dl className="profile-list compact">
                   <div>
-                    <dt>Current ingestion status</dt>
-                    <dd>{state.ingestion.status}</dd>
+                    <dt>Progress rows</dt>
+                    <dd>{state.material.progressEntries.length}</dd>
                   </div>
                   <div>
-                    <dt>Retry count</dt>
-                    <dd>{state.ingestion.retryCount}</dd>
+                    <dt>Open disputes</dt>
+                    <dd>{state.disputes.filter((dispute) => dispute.status === "OPEN").length}</dd>
+                  </div>
+                  <div>
+                    <dt>Latest score</dt>
+                    <dd>{state.material.progressEntries[0] ? formatProgressScore(state.material.progressEntries[0].score, state.material.progressEntries[0].totalQuestions) : "n/a"}</dd>
                   </div>
                 </dl>
               </article>
