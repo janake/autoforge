@@ -807,3 +807,14 @@ Taskok
 
 Megjegyzes
 - A prompt draft flow, job endpointok es az AI menu Keycloak teacher csoporttagoknak is elerhetove valik.
+
+## 0.1.71
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-450`: Document PR body format in global agent rules
+
+Megjegyzes
+- A repository-wide agent rules most explicit PR body template-et adnak, hogy minden session ugyanazt a formát lassa.
