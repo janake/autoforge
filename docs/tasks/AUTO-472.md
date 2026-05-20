@@ -16,6 +16,7 @@ A prompt draft clarification ne hardcoded kerdeseket adjon vissza, hanem a konfi
 
 - AI-alapu prompt draft clarification backend service
 - explicit `503 Service Unavailable`, ha az AI nincs konfigurálva vagy nem elerheto
+- frontend hibauzenet megjelenites a backend `message` mezobol
 - controller es HTTP clarifier tesztek az AI-val es unavailable AI allapotra
 - release manifest frissites
 
@@ -27,3 +28,7 @@ A prompt draft clarification ne hardcoded kerdeseket adjon vissza, hanem a konfi
 - `npm run build:backend` - ok
 - `gh pr create` - PR megnyitva
 - `jira_transition_issue(AUTO-472, Under test)` - review/verifikacios statusz beallitva
+- `npm ci` - frontend dependency install a worktree-ben verifikaciohoz
+- `npm run typecheck:web` - ok
+- `npm run test:backend` - ok
+- `npm run build:web` - ok
