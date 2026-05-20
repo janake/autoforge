@@ -10,6 +10,7 @@ import org.autoforge.backend.service.LearningIngestionAccessDeniedException;
 import org.autoforge.backend.service.LearningIngestionNotFoundException;
 import org.autoforge.backend.service.LearningQuestionDisputeNotFoundException;
 import org.autoforge.backend.service.PromptDraftApprovalException;
+import org.autoforge.backend.service.PromptDraftAiUnavailableException;
 import org.autoforge.backend.service.PromptDraftNotFoundException;
 import org.autoforge.backend.service.PromptDraftTicketException;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,11 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(PromptDraftTicketException.class)
   public ResponseEntity<ApiErrorResponse> handleDraftTicket(PromptDraftTicketException ex, HttpServletRequest request) {
     return build(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(PromptDraftAiUnavailableException.class)
+  public ResponseEntity<ApiErrorResponse> handleDraftAiUnavailable(PromptDraftAiUnavailableException ex, HttpServletRequest request) {
+    return build(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage(), request.getRequestURI());
   }
 
   @ExceptionHandler(LearningMaterialNotFoundException.class)
