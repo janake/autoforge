@@ -818,3 +818,14 @@ Taskok
 
 Megjegyzes
 - A repository-wide agent rules most explicit PR body template-et adnak, hogy minden session ugyanazt a formát lassa.
+
+## 0.1.72
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-451`: Teacher group cannot see learning material creation UI
+
+Megjegyzes
+- A tananyag feltolto UI ugyanazt a Keycloak group/role jogosultsagot hasznalja, mint a backend learning jogosultsag.

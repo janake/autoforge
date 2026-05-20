@@ -190,18 +190,18 @@ function parseAssignmentList(value: string): string[] {
     .filter((entry, index, entries) => entries.indexOf(entry) === index);
 }
 
-function canCreateLearningContent(roles: string[]): boolean {
-  return roles
-    .map((role) => role.trim().toLowerCase().replace(/-/g, "_"))
-    .some((role) => role === "admin" || role === "teacher" || role === "learning_teacher");
+function canCreateLearningContent(roles: string[], groups: string[]): boolean {
+  return [...roles, ...groups]
+    .map(normalizeAccessToken)
+    .some((token) => token === "admin" || token === "teacher" || token === "teachers" || token === "learning_teacher");
 }
 
-function LearningWorkspacePanel({ roles, onOpenMaterial }: { roles: string[]; onOpenMaterial: (materialId: string) => void }) {
+function LearningWorkspacePanel({ roles, groups, onOpenMaterial }: { roles: string[]; groups: string[]; onOpenMaterial: (materialId: string) => void }) {
   const [state, setState] = useState<LearningWorkspaceState>({ status: "loading" });
   const [refreshToken, setRefreshToken] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const canUploadMaterials = canCreateLearningContent(roles);
+  const canUploadMaterials = canCreateLearningContent(roles, groups);
 
   useEffect(() => {
     let cancelled = false;
@@ -1874,7 +1874,7 @@ function PrivateWorkspace({
         {learningMaterialId ? (
           <LearningMaterialDetailPanel materialId={learningMaterialId} onBack={() => onNavigate("/")} />
         ) : (
-          <LearningWorkspacePanel roles={profile.roles} onOpenMaterial={(materialId) => onNavigate(`/learning/materials/${materialId}`)} />
+          <LearningWorkspacePanel roles={profile.roles} groups={profile.groups} onOpenMaterial={(materialId) => onNavigate(`/learning/materials/${materialId}`)} />
         )}
 
         <article className="workspace-panel" id="jobs">
