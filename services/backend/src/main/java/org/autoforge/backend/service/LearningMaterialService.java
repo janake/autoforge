@@ -46,6 +46,7 @@ public class LearningMaterialService {
   private final LearningImageAssetRepository learningImageAssetRepository;
   private final LearningMaterialObjectStorageService learningMaterialObjectStorageService;
   private final LearningQuestionProgressService learningQuestionProgressService;
+  private final LearningAssignmentAuditService learningAssignmentAuditService;
 
   @Transactional
   public LearningMaterialResponse uploadMaterial(String subject, boolean canCreateLearningContent, MultipartFile file, String title, String description) {
@@ -160,6 +161,7 @@ public class LearningMaterialService {
       throw new LearningMaterialAccessDeniedException(materialId);
     }
 
+    List<LearningMaterialAssignment> previousAssignments = learningMaterialAssignmentRepository.findByMaterialId(materialId);
     learningMaterialAssignmentRepository.deleteByMaterialId(materialId);
 
     List<String> studentSubjects = normalizedDistinctSubjects(request.studentSubjects());
@@ -169,6 +171,7 @@ public class LearningMaterialService {
     studentSubjects.forEach(student -> assignments.add(LearningMaterialAssignment.create(materialId, LearningAssignmentTargetType.STUDENT, student)));
     groupNames.forEach(group -> assignments.add(LearningMaterialAssignment.create(materialId, LearningAssignmentTargetType.GROUP, group)));
     learningMaterialAssignmentRepository.saveAll(assignments);
+    learningAssignmentAuditService.recordAssignmentChanges(materialId, subject, previousAssignments, assignments);
 
     return toResponse(material, subject, Set.of(), canManageAssignments);
   }

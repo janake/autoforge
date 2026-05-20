@@ -1,6 +1,7 @@
 package org.autoforge.backend.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -15,6 +16,7 @@ import org.autoforge.backend.domain.LearningAssignmentTargetType;
 import org.autoforge.backend.domain.LearningMaterial;
 import org.autoforge.backend.domain.LearningMaterialAssignment;
 import org.autoforge.backend.domain.LearningMaterialSource;
+import org.autoforge.backend.repository.LearningAssignmentAuditRepository;
 import org.autoforge.backend.repository.LearningMaterialAssignmentRepository;
 import org.autoforge.backend.repository.LearningMaterialRepository;
 import org.autoforge.backend.repository.LearningMaterialSourceRepository;
@@ -42,6 +44,9 @@ class LearningMaterialControllerTest {
   private LearningMaterialAssignmentRepository learningMaterialAssignmentRepository;
 
   @Autowired
+  private LearningAssignmentAuditRepository learningAssignmentAuditRepository;
+
+  @Autowired
   private LearningMaterialSourceRepository learningMaterialSourceRepository;
 
   @Autowired
@@ -49,6 +54,7 @@ class LearningMaterialControllerTest {
 
   @BeforeEach
   void cleanState() {
+    learningAssignmentAuditRepository.deleteAll();
     learningQuestionProgressRepository.deleteAll();
     learningMaterialSourceRepository.deleteAll();
     learningMaterialAssignmentRepository.deleteAll();
@@ -77,12 +83,23 @@ class LearningMaterialControllerTest {
       .andExpect(jsonPath("$.groupNames[0]").value("group-a"))
       .andExpect(jsonPath("$.groupNames[1]").value("group-b"));
 
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/assignment-audit", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.length()").value(5))
+      .andExpect(jsonPath("$[*].action", containsInAnyOrder("UPDATE", "CREATE", "CREATE", "CREATE", "CREATE")))
+      .andExpect(jsonPath("$[*].targetType", containsInAnyOrder("MATERIAL", "STUDENT", "STUDENT", "GROUP", "GROUP")));
+
     mockMvc.perform(get("/api/v1/learning/materials/{materialId}", material.getId())
         .with(jwt().jwt(token -> token.subject("student-1").claim("groups", List.of("/group-b")))))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.canManageAssignments").value(false))
       .andExpect(jsonPath("$.studentSubjects[0]").value("student-1"))
       .andExpect(jsonPath("$.groupNames[1]").value("group-b"));
+
+    mockMvc.perform(get("/api/v1/learning/materials/{materialId}/assignment-audit", material.getId())
+        .with(jwt().jwt(token -> token.subject("student-1").claim("groups", List.of("/group-b")))))
+      .andExpect(status().isForbidden());
   }
 
   @Test

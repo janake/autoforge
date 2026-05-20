@@ -11,6 +11,7 @@ import type {
   LearningQuestionAttemptAnswerPayload,
   LearningQuestionAttemptResponse,
   LearningQuestionPayload,
+  LearningAssignmentAuditResponse,
   LearningQuestionDisputeResponse,
   LearningQuestionProgressResponse,
   LearningQuestionSetPayload,
@@ -486,6 +487,7 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
         generations: LearningContentGenerationResponse[];
         attempts: LearningQuestionAttemptResponse[];
         disputes: LearningQuestionDisputeResponse[];
+        assignmentAudits: LearningAssignmentAuditResponse[];
       }
     | { status: "error"; message: string }
   >({ status: "loading" });
@@ -509,16 +511,19 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
 
     const loadDetail = async () => {
       try {
-        const [material, ingestion, generations, attempts, disputes] = await Promise.all([
-          loadAuthedJson<LearningMaterialResponse>(`/v1/learning/materials/${materialId}`),
+        const material = await loadAuthedJson<LearningMaterialResponse>(`/v1/learning/materials/${materialId}`);
+        const [ingestion, generations, attempts, disputes, assignmentAudits] = await Promise.all([
           loadAuthedJson<LearningIngestionResponse>(`/v1/learning/materials/${materialId}/ingestion`),
           loadAuthedJson<LearningContentGenerationResponse[]>(`/v1/learning/materials/${materialId}/generations`),
           loadAuthedJson<LearningQuestionAttemptResponse[]>(`/v1/learning/materials/${materialId}/question-attempts`),
           loadAuthedJson<LearningQuestionDisputeResponse[]>(`/v1/learning/materials/${materialId}/question-disputes`),
+          material.canManageAssignments
+            ? loadAuthedJson<LearningAssignmentAuditResponse[]>(`/v1/learning/materials/${materialId}/assignment-audit`)
+            : Promise.resolve([]),
         ]);
 
         if (!cancelled) {
-          setState({ status: "ready", material, ingestion, generations, attempts, disputes });
+          setState({ status: "ready", material, ingestion, generations, attempts, disputes, assignmentAudits });
         }
       } catch (error) {
         if (!cancelled) {
@@ -912,6 +917,47 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                     </section>
                   ))}
                 </div>
+              </article>
+            )}
+
+            {state.material.canManageAssignments && (
+              <article className="card learning-detail-card">
+                <p className="card-kicker">audit</p>
+                <div className="section-head">
+                  <h3>Assignment audit trail</h3>
+                  <span className="pill">{state.assignmentAudits.length}</span>
+                </div>
+                {state.assignmentAudits.length === 0 ? (
+                  <p className="muted">No assignment changes recorded yet.</p>
+                ) : (
+                  <div className="learning-detail-generation-list">
+                    {state.assignmentAudits.map((audit) => (
+                      <section className="learning-detail-generation-card" key={audit.id}>
+                        <div className="section-head">
+                          <h4>{audit.action}</h4>
+                          <div className="learning-generation-badges">
+                            <span className="pill status-pill">{audit.targetType}</span>
+                            <span className="pill status-pill">{formatTimestamp(audit.createdAt)}</span>
+                          </div>
+                        </div>
+                        <dl className="profile-list compact">
+                          <div>
+                            <dt>Target</dt>
+                            <dd>{audit.targetIdentifier}</dd>
+                          </div>
+                          <div>
+                            <dt>Actor</dt>
+                            <dd>{audit.actorSubject}</dd>
+                          </div>
+                          <div>
+                            <dt>Material</dt>
+                            <dd>{audit.materialId}</dd>
+                          </div>
+                        </dl>
+                      </section>
+                    ))}
+                  </div>
+                )}
               </article>
             )}
 
