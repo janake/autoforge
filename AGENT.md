@@ -39,6 +39,45 @@ For any non-trivial code, infra, workflow, or documentation task, do the followi
 10.Do not continue unrelated work on a branch that was created for a different Jira task; move the task to its own dedicated branch before finishing it.
 11.The task is not completed until all of the subtasks are completed.
 
+## Jira MCP Location And Use
+
+The repository has a Jira stdio MCP. Before claiming Jira is unavailable, every agent must check these exact files:
+
+- MCP catalog: `ops/ai/mcps.yaml`
+- Jira MCP server: `ops/mcp/jira-server.mjs`
+- Jira usage docs: `ops/jira/README.md`
+- Local launcher path: `ops/mcp/jira-local.sh`
+
+Important details:
+
+- `ops/mcp/jira-local.sh` is intentionally gitignored because it is local wiring. Its absence from git does not mean Jira MCP does not exist.
+- The actual stdio server is `node ops/mcp/jira-server.mjs`.
+- The launcher, when present, should start that server from the repo root.
+- The MCP exposes Jira tools named `jira_search`, `jira_get_issue`, `jira_update_issue`, `jira_list_transitions`, `jira_transition_issue`, `jira_add_comment`, `jira_create_issue`, sprint tools, and export tools.
+- Credential resolution is implemented in `ops/mcp/jira-server.mjs` and documented in `ops/jira/README.md`.
+
+Credential resolution order:
+
+1. Direct env vars: `JIRA_BASE_URL`, `JIRA_PROJECT_KEY`, `JIRA_EMAIL`, `JIRA_API_TOKEN`.
+2. Explicit OCI Vault secret OCID env vars: `OCI_<SECRET_NAME>_SECRET_OCID`.
+3. OCI Vault display-name lookup using the same secret names.
+
+If the launcher file is missing but credentials are available, use the server directly through stdio or create a local, uncommitted `ops/mcp/jira-local.sh` launcher. Do not commit the launcher. A minimal local launcher is:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+exec node ops/mcp/jira-server.mjs
+```
+
+Required Jira behavior:
+
+- Use Jira MCP for issue lookup, status transition, version updates, and comments whenever the task requires Jira state changes.
+- Before opening a PR, ensure the Jira issue has a target version.
+- After opening a PR for a story, transition the issue to `Under Test` and add a comment with the PR, branch, version, and verification commands.
+- Do not say Jira MCP is unavailable merely because no dedicated tool appears in the UI; first check the repo MCP server and launcher paths above.
+
 ## Versioning
 
 - Every `AUTO-*` and `BUG-*` Jira issue must have a target version assigned.
