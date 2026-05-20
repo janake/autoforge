@@ -111,25 +111,30 @@ Required Jira behavior:
 - Commit messages must start with the task ID, for example `[AUTO-15] Remove public entry panel`.
 - PR titles must start with the task ID, for example `[AUTO-15] Landing page cleanup`.
 - PR bodies must include a `Version` section with the target version.
-- PR bodies must use this format unless the task explicitly requires a different structure:
+- PR bodies must use this exact format unless the task explicitly requires a different structure:
 
 ```md
 ## Version
 <target version>
 
 ## Summary
-<what changed>
+- <what changed>
+- <second concrete change, if useful>
 
 ## Verification
-- <command 1>
-- <command 2>
+- `<command>`
+- `<command>`
 
-## Notes
-<optional, only if needed>
+## Jira
+- `<TASK-ID>`
 ```
 
-- Keep `Version` and `Verification` visible at the top of every PR body.
-- When using GitHub CLI or API, write PR bodies from a real Markdown file or a true multiline string. Never pass escaped `\n` sequences or a literal `@file` value that renders poorly in GitHub.
+- Keep `Version`, `Summary`, `Verification`, and `Jira` as top-level `##` headings.
+- Put commands in backticks.
+- Use real Markdown newlines. Never pass escaped `\n` text to `gh pr create`, `gh pr edit`, or `gh api`.
+- When using GitHub CLI/API, write the body from a real Markdown file or from a shell variable containing true multiline content.
+- With `gh api`, do not use `-f body=@file`; that can upload the literal `@file` string. Use `body=$(< /path/body.md); gh api -X PATCH repos/<owner>/<repo>/pulls/<number> -f body="$body"`.
+- After creating or editing a PR, verify the rendered body with `gh pr view <number> --web` when browser access is appropriate, or `gh pr view <number> --json body --jq .body` for raw Markdown.
 - For non-major tasks, the target version should be the next automatic `PATCH` or `MINOR` version.
 - Do not use generic-only titles like `fix:` or `docs:` without the task ID.
 - Keep commits focused and do not include unrelated cleanup.
