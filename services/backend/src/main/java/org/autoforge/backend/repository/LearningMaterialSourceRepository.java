@@ -9,5 +9,7 @@ public interface LearningMaterialSourceRepository extends JpaRepository<Learning
 
   List<LearningMaterialSource> findByMaterialIdAndDeletedAtIsNullOrderByCreatedAtAsc(String materialId);
 
+  List<LearningMaterialSource> findByMaterialIdOrderByCreatedAtAsc(String materialId);
+
   Optional<LearningMaterialSource> findByIdAndDeletedAtIsNull(String id);
 }

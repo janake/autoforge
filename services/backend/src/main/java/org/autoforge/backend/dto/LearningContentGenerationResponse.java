@@ -12,6 +12,7 @@ public record LearningContentGenerationResponse(
   LearningContentGenerationType generationType,
   String content,
   List<LearningContentSourceReference> sources,
+  List<LearningSourceVersionReference> sourceVersions,
   LearningQuestionSetStatus questionSetStatus,
   boolean fallbackUsed,
   String fallbackReason,

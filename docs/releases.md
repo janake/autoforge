@@ -686,3 +686,36 @@ Taskok
 
 Megjegyzes
 - A Learning question set generálás draft státuszban indul, a teacher publish/archive műveletekkel kezeli a láthatóságot, a student pedig csak a publikált kérdéssorokat éri el.
+
+## 0.1.60
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-433`: Tananyag forrásverziózás és generált tartalom eredete
+
+Megjegyzes
+- A generált tartalom most a forrás snapshotját is tárolja, így a régi generálások visszakövethetők maradnak még forrás törlése után is.
+
+## 0.1.61
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-374`: Egy- és többhelyes válaszos kérdések AI promptban és pontozásban
+
+Megjegyzes
+- A learning kérdéspayload most single- és multi-correct módot is hordoz, a generálás kevert kérdéstípusokat ad, a pontozás pedig halmazegyezést vár multi-correct esetben.
+
+## 0.1.62
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-391`: Teacher tananyag hozzárendelés diákhoz és csoporthoz
+
+Megjegyzes
+- A Learning detail oldalon az owner most közvetlenül szerkesztheti a student és group assignment listát, a backend pedig a meglévő assignment replace API-t használja.
