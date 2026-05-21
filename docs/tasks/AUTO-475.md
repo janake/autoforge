@@ -1,12 +1,12 @@
 # [AUTO-475] Replace SCP image preload with direct docker pull on private host
 
-Statusz: In progress
+Statusz: Under test
 
 Verzio: 0.1.80
 
 Branch: `feature/AUTO-475-direct-pull`
 
-PR: https://github.com/janake/autoforge/pull/194
+PR: https://github.com/janake/autoforge/pull/195
 
 ## Cel
 
@@ -16,8 +16,8 @@ A private host kozvetlenul pullolja a Docker imageket a GHCR-bol `docker compose
 
 - `deploy-private.yml`: remove `Prepare private images` and `Upload private images` steps
 - `deploy-private.yml`: change `Upload registry credentials` to write `GHCR_USERNAME`/`GHCR_TOKEN`
-- `deploy.sh`: source `RUNTIME_ENV` at script start so GHCR creds are shell variables
-- `deploy.sh`: remove redundant RUNTIME_ENV sourcing before smoke test
+- `deploy.sh`: add safe `export_env_file()` helper for `RUNTIME_ENV` values
+- `deploy.sh`: export runtime env safely before compose/pull/smoke test
 - release manifest es task doc frissites
 
 ## Lepesnaplo
@@ -31,10 +31,11 @@ A private host kozvetlenul pullolja a Docker imageket a GHCR-bol `docker compose
 - `deploy-private.yml` - removed `Prepare private images` step (55 lines)
 - `deploy-private.yml` - removed `Upload private images` step (SCP of tar.gz)
 - `deploy-private.yml` - changed `Upload registry credentials` to write GHCR_USERNAME/GHCR_TOKEN
-- `deploy.sh` - added `set -a; . "$RUNTIME_ENV"; set +a` right after RUNTIME_ENV creation
-- `deploy.sh` - removed redundant `set -a; . "$RUNTIME_ENV"; set +a` before smoke test
+- `deploy.sh` - added safe `export_env_file()` helper for env-file parsing
+- `deploy.sh` - exported runtime env safely before compose/pull/smoke test
+- `deploy.sh` - removed unsafe `source` of `RUNTIME_ENV` (broke on `JAVA_TOOL_OPTIONS` with spaces)
 - `python3 -c "import yaml; yaml.safe_load(...)"` - valid YAML
 - `bash -n infra/deploy/private/deploy.sh` - ok
 - `git diff --check` - ok
 - `git commit` - `[AUTO-475] Replace SCP image preload with direct docker pull on private host`
-- `gh pr create #194` - https://github.com/janake/autoforge/pull/194
+- `gh pr create #195` - https://github.com/janake/autoforge/pull/195
