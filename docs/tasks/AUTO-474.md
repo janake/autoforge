@@ -4,7 +4,7 @@ Statusz: In progress
 
 Verzio: 0.1.79
 
-Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`, `bug/AUTO-474-ssh-keepalive`
+Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`, `bug/AUTO-474-ssh-keepalive`, `bug/AUTO-474-opencode-message-model`
 
 PR: https://github.com/janake/autoforge/pull/190, https://github.com/janake/autoforge/pull/191, https://github.com/janake/autoforge/pull/192, https://github.com/janake/autoforge/pull/193
 
@@ -41,4 +41,11 @@ A prompt draft flow vegig tudjon menni a draft/clarify lepestol az approval es J
 - Root cause: SSH connection has no keepalive; OCI Vault lookups take 4+ minutes without output, connection drops
 - Fix: add `ServerAliveInterval 60` and `ServerAliveCountMax 5` to SSH config for `autoforge-private` host
 - `bash -n .github/workflows/deploy-private.yml` - ok
+- `git diff --check` - ok
+- `gh run view 26249778790 --job 77259980085 --log-failed` - private deploy starts containers, then `opencode-smoke.sh` fails on `/session/$session_id/message` with HTTP 400
+- `context7 /anomalyco/opencode` - current `/session/:id/message` API expects `model` as `{ providerID, modelID }`
+- Root cause: current OpenCode REST API expects `model` as `{ providerID, modelID }`, but the smoke script sent `OPENCODE_MODEL` as a single string
+- Fix: split `OPENCODE_MODEL` at the first `/` for the smoke message payload and print the OpenCode HTTP response body on non-2xx message responses
+- Direct OpenRouter probe: current `deepseek/deepseek-v4-flash:free` returned upstream 429 during investigation; if this remains, deploy will surface a provider rate-limit body instead of a bare curl 400
+- `bash -n infra/deploy/private/opencode-smoke.sh` - ok
 - `git diff --check` - ok

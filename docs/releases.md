@@ -921,6 +921,7 @@ Taskok
 
 Megjegyzes
 - A private deploy a dokumentalt OpenCode Vault display-name defaultot es a meglevo `openrouter-api-key` Vault secretet hasznalja, hogy az AI runtime profile elinduljon explicit GitHub variable-ok nelkul is.
+- Az OpenCode smoke teszt a friss REST API szerinti `providerID`/`modelID` model payloadot kuldi, igy az `anomalyco/opencode:latest` valtozasai nem okoznak 400-as validacios hibat.
 
 ## 0.1.80
 

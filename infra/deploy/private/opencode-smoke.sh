@@ -19,6 +19,17 @@ docker_curl() {
 
 basic_auth_args=(--user "$OPENCODE_SERVER_USERNAME:$OPENCODE_SERVER_PASSWORD")
 
+if [[ "$OPENCODE_MODEL" != */* ]]; then
+  echo "OPENCODE_MODEL must use provider/model format: $OPENCODE_MODEL" >&2
+  exit 1
+fi
+opencode_provider_id="${OPENCODE_MODEL%%/*}"
+opencode_model_id="${OPENCODE_MODEL#*/}"
+if [ -z "$opencode_provider_id" ] || [ -z "$opencode_model_id" ]; then
+  echo "OPENCODE_MODEL must include both provider and model id: $OPENCODE_MODEL" >&2
+  exit 1
+fi
+
 proxy_health_response="$(docker_curl -fsS "$OPENROUTER_PROXY_BASE_URL/health")"
 if [[ "$proxy_health_response" != *'"healthy":true'* ]] || [[ "$proxy_health_response" != *'"apiKeyConfigured":true'* ]]; then
   echo "OpenRouter proxy health check did not report healthy configured state: $proxy_health_response" >&2
@@ -44,8 +55,14 @@ if [[ ! "$session_response" =~ \"id\":\"([^\"]+)\" ]]; then
 fi
 session_id="${BASH_REMATCH[1]}"
 
-message_payload="$(printf '%s' "{\"model\":\"$OPENCODE_MODEL\",\"parts\":[{\"type\":\"text\",\"text\":\"Reply with the exact token smoke-ok and nothing else.\"}]}" )"
-message_response="$(docker_curl -fsS "${basic_auth_args[@]}" -H 'Content-Type: application/json' -X POST -d "$message_payload" "$OPENCODE_BASE_URL/session/$session_id/message")"
+message_payload="$(printf '{"model":{"providerID":"%s","modelID":"%s"},"parts":[{"type":"text","text":"Reply with the exact token smoke-ok and nothing else."}]}' "$opencode_provider_id" "$opencode_model_id")"
+message_result="$(docker_curl -sS -w '\n%{http_code}' "${basic_auth_args[@]}" -H 'Content-Type: application/json' -X POST -d "$message_payload" "$OPENCODE_BASE_URL/session/$session_id/message")"
+message_status="${message_result##*$'\n'}"
+message_response="${message_result%$'\n'*}"
+if [[ "$message_status" != 2* ]]; then
+  echo "OpenCode smoke prompt returned HTTP $message_status: $message_response" >&2
+  exit 1
+fi
 
 if [[ "$message_response" != *smoke-ok* ]]; then
   echo "OpenCode smoke prompt did not complete successfully: $message_response" >&2
