@@ -929,6 +929,8 @@ Statusz
 
 Taskok
 - `AUTO-475`: Replace SCP image preload with direct docker pull on private host
+- `AUTO-476`: Limit memory usage of private compose services
 
 Megjegyzes
 - A private host (10.42.1.144) kozvetlenul pullolja a Docker imaget a GHCR-bol a `docker compose pull` segitsegevel, ahelyett hogy a GitHub runner toltené le, tar.gz-be mentené, SCP-vel feltöltené, majd a private host docker load-olná. Ezzel ~5-10 perc SSH/SCP forgalom esik ki.
+- A private compose stack szolgaltatasai konzervativ memory cap-eket kapnak, hogy az 1 GB-os hoston egyik kontener se tudjon elszabadulni startup vagy smoke teszt kozben.

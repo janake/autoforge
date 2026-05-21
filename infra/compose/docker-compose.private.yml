@@ -4,6 +4,7 @@ services:
   backend:
     image: ${BACKEND_IMAGE:?BACKEND_IMAGE is required}:${BACKEND_IMAGE_TAG:-main}
     restart: unless-stopped
+    mem_limit: "${BACKEND_MEMORY_LIMIT:-384M}"
     environment:
       SERVER_PORT: ${BACKEND_CONTAINER_PORT:-8080}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
@@ -30,6 +31,7 @@ services:
   opencode:
     image: ${OPENCODE_IMAGE:?OPENCODE_IMAGE is required}:${OPENCODE_IMAGE_TAG:-latest}
     restart: unless-stopped
+    mem_limit: "${OPENCODE_MEMORY_LIMIT:-256M}"
     profiles:
       - opencode
     depends_on:
@@ -55,6 +57,7 @@ services:
   openrouter-proxy:
     image: ${OPENROUTER_PROXY_IMAGE:?OPENROUTER_PROXY_IMAGE is required}:${OPENROUTER_PROXY_IMAGE_TAG:-main}
     restart: unless-stopped
+    mem_limit: "${OPENROUTER_PROXY_MEMORY_LIMIT:-128M}"
     profiles:
       - opencode
     environment:

@@ -46,6 +46,7 @@ Privat host:
 - fajl: `infra/compose/docker-compose.private.yml`
 - szolgaltatasok: `backend`, `opencode`, `openrouter-proxy`
 - host port: `8080`
+- memoriakorlatozas: konzervativ `mem_limit` cap-ek a backendhez, az OpenCode szerverhez es az OpenRouter proxyhoz; a limitek `BACKEND_MEMORY_LIMIT`, `OPENCODE_MEMORY_LIMIT` es `OPENROUTER_PROXY_MEMORY_LIMIT` env varokkal felulirhatok
 - plusz config: `infra/compose/opencode.json`
 - opencode server: belso REST endpoint a backendhez, auth-vedett
 - opencode image: `ghcr.io/anomalyco/opencode`
