@@ -1,6 +1,6 @@
 # [AUTO-475] Replace SCP image preload with direct docker pull on private host
 
-Statusz: In progress
+Statusz: Under test
 
 Verzio: 0.1.80
 
