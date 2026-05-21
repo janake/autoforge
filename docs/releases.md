@@ -921,3 +921,14 @@ Taskok
 
 Megjegyzes
 - A private deploy a dokumentalt OpenCode Vault display-name defaultot es a meglevo `openrouter-api-key` Vault secretet hasznalja, hogy az AI runtime profile elinduljon explicit GitHub variable-ok nelkul is.
+
+## 0.1.80
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-475`: Replace SCP image preload with direct docker pull on private host
+
+Megjegyzes
+- A private host (10.42.1.144) kozvetlenul pullolja a Docker imaget a GHCR-bol a `docker compose pull` segitsegevel, ahelyett hogy a GitHub runner toltené le, tar.gz-be mentené, SCP-vel feltöltené, majd a private host docker load-olná. Ezzel ~5-10 perc SSH/SCP forgalom esik ki.
