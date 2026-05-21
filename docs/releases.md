@@ -920,4 +920,4 @@ Taskok
 - `AUTO-474`: Prompt draft flow cannot complete because AI clarification runtime is unavailable
 
 Megjegyzes
-- A private deploy a dokumentalt OpenCode/OpenRouter Vault display-name defaultokat hasznalja, hogy az AI runtime profile elinduljon explicit GitHub variable-ok nelkul is.
+- A private deploy a dokumentalt OpenCode Vault display-name defaultot es a meglevo `openrouter-api-key` Vault secretet hasznalja, hogy az AI runtime profile elinduljon explicit GitHub variable-ok nelkul is.
