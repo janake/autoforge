@@ -35,52 +35,6 @@ jobs:
           echo "PROJECT_VERSION=$PROJECT_VERSION" >> "$GITHUB_ENV"
           echo "IMAGE_TAG=sha-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
 
-      - name: Prepare private images
-        env:
-          GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
-          GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
-          OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
-          OPENROUTER_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENROUTER_API_KEY_SECRET_OCID }}
-          OPENCODE_SERVER_PASSWORD_SECRET_NAME: ${{ vars.OCI_OPENCODE_SERVER_PASSWORD_SECRET_NAME }}
-          OPENROUTER_API_KEY_SECRET_NAME: ${{ vars.OCI_OPENROUTER_API_KEY_SECRET_NAME }}
-        run: |
-          IMAGE_TAG="${IMAGE_TAG:?IMAGE_TAG is required}"
-          OPENCODE_SERVER_PASSWORD_SECRET_NAME="${OPENCODE_SERVER_PASSWORD_SECRET_NAME:-autoforge-opencode-server-password}"
-          OPENROUTER_API_KEY_SECRET_NAME="${OPENROUTER_API_KEY_SECRET_NAME:-openrouter-api-key}"
-          echo "$GHCR_DEPLOY_TOKEN" | docker login ghcr.io -u "$GHCR_DEPLOY_USERNAME" --password-stdin
-          for attempt in $(seq 1 20); do
-            if docker pull "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG"; then
-              break
-            fi
-            if [ "$attempt" -eq 20 ]; then
-              echo "Current backend image is not available: $IMAGE_TAG" >&2
-              exit 1
-            fi
-            sleep 15
-          done
-          docker save "ghcr.io/${{ github.repository_owner }}/autoforge/backend:$IMAGE_TAG" | gzip -1 > /tmp/autoforge-backend-image.tar.gz
-          docker pull ghcr.io/oracle/oci-cli:latest
-          docker save ghcr.io/oracle/oci-cli:latest | gzip -1 > /tmp/autoforge-oci-cli-image.tar.gz
-          if { [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ] || [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_NAME:-}" ]; } \
-            && { [ -n "${OPENROUTER_API_KEY_SECRET_OCID:-}" ] || [ -n "${OPENROUTER_API_KEY_SECRET_NAME:-}" ]; }; then
-            for attempt in $(seq 1 20); do
-              if docker pull "ghcr.io/${{ github.repository_owner }}/autoforge/openrouter-proxy:$IMAGE_TAG"; then
-                break
-              fi
-              if [ "$attempt" -eq 20 ]; then
-                echo "Current OpenRouter proxy image is not available: $IMAGE_TAG" >&2
-                exit 1
-              fi
-              sleep 15
-            done
-            docker save "ghcr.io/${{ github.repository_owner }}/autoforge/openrouter-proxy:$IMAGE_TAG" | gzip -1 > /tmp/autoforge-openrouter-proxy-image.tar.gz
-            docker pull ghcr.io/anomalyco/opencode:latest
-            docker save ghcr.io/anomalyco/opencode:latest | gzip -1 > /tmp/autoforge-opencode-image.tar.gz
-          else
-            rm -f /tmp/autoforge-openrouter-proxy-image.tar.gz
-            rm -f /tmp/autoforge-opencode-image.tar.gz
-          fi
-
       - name: Prepare SSH client
         env:
           SSH_KEY: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
@@ -135,17 +89,6 @@ jobs:
           scp -F ~/.ssh/config infra/deploy/private/opencode-smoke.sh autoforge-private:"$DEPLOY_PATH/opencode-smoke.sh"
           scp -F ~/.ssh/config infra/deploy/private/deploy.sh autoforge-private:"$DEPLOY_PATH/deploy.sh"
           ssh -F ~/.ssh/config autoforge-private "chmod +x '$DEPLOY_PATH/deploy.sh' '$DEPLOY_PATH/opencode-smoke.sh'"
-
-      - name: Upload private images
-        run: |
-          scp -F ~/.ssh/config /tmp/autoforge-backend-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-backend-image.tar.gz"
-          scp -F ~/.ssh/config /tmp/autoforge-oci-cli-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-oci-cli-image.tar.gz"
-          if [ -f /tmp/autoforge-openrouter-proxy-image.tar.gz ]; then
-            scp -F ~/.ssh/config /tmp/autoforge-openrouter-proxy-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-openrouter-proxy-image.tar.gz"
-          fi
-          if [ -f /tmp/autoforge-opencode-image.tar.gz ]; then
-            scp -F ~/.ssh/config /tmp/autoforge-opencode-image.tar.gz autoforge-private:"$DEPLOY_PATH/autoforge-opencode-image.tar.gz"
-          fi
 
       - name: Render private runtime environment
         env:
@@ -306,7 +249,8 @@ jobs:
           GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
         run: |
           {
-            echo "PRIVATE_IMAGES_PRELOADED=true"
+            echo "GHCR_USERNAME=$GHCR_DEPLOY_USERNAME"
+            echo "GHCR_TOKEN=$GHCR_DEPLOY_TOKEN"
           } > /tmp/autoforge-private.deploy.env
           scp -F ~/.ssh/config /tmp/autoforge-private.deploy.env autoforge-private:"$DEPLOY_PATH/.deploy.env"
 
