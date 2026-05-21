@@ -185,7 +185,7 @@ Fontos:
 ## Szükséges OCI Vault secret-ek
 
 - `autoforge-opencode-server-password`: az OpenCode REST szerver HTTP basic auth jelszava. Legalabb 32 karakteres, veletlen, newline nelkuli ertek legyen.
-- `autoforge-openrouter-api-key`: az OpenRouter API kulcs, amelyet csak az OpenRouter proxy hasznal. Newline nelkuli ertek legyen.
+- `openrouter-api-key`: az OpenRouter API kulcs, amelyet csak az OpenRouter proxy hasznal. Newline nelkuli ertek legyen.
 - `db-wallet-pwd`: az ADB wallet zip kicsomagolasi jelszava.
 
 Megjegyzes:

@@ -351,7 +351,7 @@ if [ -z "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] && [ -z "$OPENCODE_SERVER_PASS
 fi
 
 if [ -z "$OPENROUTER_API_KEY_SECRET_OCID" ] && [ -z "$OPENROUTER_API_KEY_SECRET_NAME" ] && [ -z "$OPENROUTER_API_KEY_ENV" ]; then
-  OPENROUTER_API_KEY_SECRET_NAME="autoforge-openrouter-api-key"
+  OPENROUTER_API_KEY_SECRET_NAME="openrouter-api-key"
 fi
 
 NEEDS_OCI=true
