@@ -11,7 +11,8 @@
       },
       "models": {
         "deepseek/deepseek-v4-flash:free": {
-          "name": "DeepSeek V4 Flash Free via OpenRouter Proxy"
+          "name": "DeepSeek V4 Flash Free via OpenRouter Proxy",
+          "maxTokens": 2048
         }
       }
     }
