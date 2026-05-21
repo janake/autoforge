@@ -4,9 +4,9 @@ Statusz: In progress
 
 Verzio: 0.1.79
 
-Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`
+Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`, `bug/AUTO-474-ssh-keepalive`
 
-PR: https://github.com/janake/autoforge/pull/190, https://github.com/janake/autoforge/pull/191, pending follow-up
+PR: https://github.com/janake/autoforge/pull/190, https://github.com/janake/autoforge/pull/191, https://github.com/janake/autoforge/pull/192, https://github.com/janake/autoforge/pull/193
 
 ## Cel
 
@@ -36,4 +36,9 @@ A prompt draft flow vegig tudjon menni a draft/clarify lepestol az approval es J
 - Root cause: `deploy.sh` writes secrets to `RUNTIME_ENV` temp file (used as compose `--env-file`), but smoke test runs without sourcing that file, so shell env vars are missing
 - Fix: source `RUNTIME_ENV` with `set -a` before running `opencode-smoke.sh`
 - `bash -n infra/deploy/private/deploy.sh` - ok
+- `git diff --check` - ok
+- `gh run view 26243386952` - private deploy SSH broken pipe: `client_loop: send disconnect: Broken pipe` (exit code 255)
+- Root cause: SSH connection has no keepalive; OCI Vault lookups take 4+ minutes without output, connection drops
+- Fix: add `ServerAliveInterval 60` and `ServerAliveCountMax 5` to SSH config for `autoforge-private` host
+- `bash -n .github/workflows/deploy-private.yml` - ok
 - `git diff --check` - ok

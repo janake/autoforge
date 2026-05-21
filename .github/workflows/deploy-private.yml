@@ -116,7 +116,9 @@ jobs:
             BatchMode yes
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
-            ProxyCommand ssh -F ~/.ssh/config -W %h:%p autoforge-jump
+            ServerAliveInterval 60
+            ServerAliveCountMax 5
+            ProxyCommand ssh -F ~/.ssh/config -o ServerAliveInterval=60 -W %h:%p autoforge-jump
           EOF
           chmod 600 ~/.ssh/config
 
