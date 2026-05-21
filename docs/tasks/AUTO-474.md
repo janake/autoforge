@@ -4,9 +4,9 @@ Statusz: Under test
 
 Verzio: 0.1.79
 
-Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`, `bug/AUTO-474-ssh-keepalive`, `bug/AUTO-474-opencode-message-model`
+Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`, `bug/AUTO-474-ssh-keepalive`, `bug/AUTO-474-opencode-message-model`, `bug/AUTO-474-batch-private-upload`
 
-PR: https://github.com/janake/autoforge/pull/190, https://github.com/janake/autoforge/pull/191, https://github.com/janake/autoforge/pull/192, https://github.com/janake/autoforge/pull/193, https://github.com/janake/autoforge/pull/197
+PR: https://github.com/janake/autoforge/pull/190, https://github.com/janake/autoforge/pull/191, https://github.com/janake/autoforge/pull/192, https://github.com/janake/autoforge/pull/193, https://github.com/janake/autoforge/pull/197, https://github.com/janake/autoforge/pull/198
 
 ## Cel
 
@@ -48,4 +48,10 @@ A prompt draft flow vegig tudjon menni a draft/clarify lepestol az approval es J
 - Fix: split `OPENCODE_MODEL` at the first `/` for the smoke message payload and print the OpenCode HTTP response body on non-2xx message responses
 - Direct OpenRouter probe: current `deepseek/deepseek-v4-flash:free` returned upstream 429 during investigation; if this remains, deploy will surface a provider rate-limit body instead of a bare curl 400
 - `bash -n infra/deploy/private/opencode-smoke.sh` - ok
+- `git diff --check` - ok
+- `gh run view 26252435050 --job 77267401295 --log-failed` - private deploy failed before smoke in `Upload private stack files` with `Connection closed by UNKNOWN port 65535`
+- Root cause: the upload step opened repeated SCP connections through the jump host, so transient SSH/proxy instability could fail before deploy reached the host
+- Fix: use native `ProxyJump`, add keepalives to the jump host entry, and upload the private stack files as one tar stream over a single SSH connection
+- `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/deploy-private.yml')); print('YAML OK')"` - ok
+- `tar -czf - --transform='s|.*/||' ... | tar -tzf -` - ok, archive contains the expected flat deploy filenames
 - `git diff --check` - ok
