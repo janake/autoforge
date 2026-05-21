@@ -55,3 +55,9 @@ A prompt draft flow vegig tudjon menni a draft/clarify lepestol az approval es J
 - `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/deploy-private.yml')); print('YAML OK')"` - ok
 - `tar -czf - --transform='s|.*/||' ... | tar -tzf -` - ok, archive contains the expected flat deploy filenames
 - `git diff --check` - ok
+- `gh run view 26253049075 --job 77267401295 --log-failed` - even with ProxyJump + keepalives, upload still fails: `Connection closed by UNKNOWN port 65535` after ~2 min, exit code 255
+- Root cause: transient SSH connection failure through ProxyJump; tar pipe is not retried
+- Fix: wrap tar-over-SSH upload in bash retry loop (3 attempts, 10s delay), add explicit per-command `-o ServerAliveInterval=30 -o ServerAliveCountMax=3` on the upload ssh invocation, and tighten the SSH config keepalive interval from 60s to 30s
+- `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/deploy-private.yml')); print('YAML OK')"` - ok
+- `bash -n .github/workflows/deploy-private.yml` - ok
+- `git diff --check` - ok
