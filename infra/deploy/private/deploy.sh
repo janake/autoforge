@@ -509,6 +509,9 @@ fi
 install_arm_capacity_timer
 
 if [ "$OPENCODE_PROFILE_ENABLED" = "true" ]; then
+  set -a
+  . "$RUNTIME_ENV"
+  set +a
   bash "$APP_DIR/opencode-smoke.sh"
 fi
 

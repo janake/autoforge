@@ -4,9 +4,9 @@ Statusz: In progress
 
 Verzio: 0.1.79
 
-Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`
+Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`
 
-PR: https://github.com/janake/autoforge/pull/190, pending follow-up
+PR: https://github.com/janake/autoforge/pull/190, https://github.com/janake/autoforge/pull/191, pending follow-up
 
 ## Cel
 
@@ -30,5 +30,10 @@ A prompt draft flow vegig tudjon menni a draft/clarify lepestol az approval es J
 - `oci search resource free-text-search --text openrouter` - found ACTIVE Vault secret `openrouter-api-key`
 - `oci vault secret create-base64 --secret-name autoforge-opencode-server-password` - OpenCode REST password secret created
 - `oci vault secret get --secret-id <autoforge-opencode-server-password>` - ACTIVE
+- `bash -n infra/deploy/private/deploy.sh` - ok
+- `git diff --check` - ok
+- `gh run view 26242615861` - private deploy containers started but smoke test failed: `OPENCODE_SERVER_USERNAME: OPENCODE_SERVER_USERNAME is required`
+- Root cause: `deploy.sh` writes secrets to `RUNTIME_ENV` temp file (used as compose `--env-file`), but smoke test runs without sourcing that file, so shell env vars are missing
+- Fix: source `RUNTIME_ENV` with `set -a` before running `opencode-smoke.sh`
 - `bash -n infra/deploy/private/deploy.sh` - ok
 - `git diff --check` - ok
