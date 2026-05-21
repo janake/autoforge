@@ -1,12 +1,12 @@
 # [AUTO-476] Limit memory usage of private compose services
 
-Statusz: In progress
+Statusz: Under test
 
 Verzio: 0.1.80
 
 Branch: `feature/AUTO-476-compose-memory-limits`
 
-PR: pending
+PR: https://github.com/janake/autoforge/pull/196
 
 ## Cel
 
@@ -28,3 +28,4 @@ A private compose stack minden service-e kapjon memory cap-et, hogy a 1 GB-os pr
 - `infra/compose/docker-compose.private.yml` - backend/opencode/openrouter-proxy memory cap-ek hozzaadva, env override lehetoseggel
 - `docs/deployment.md` - memory cap dokumentacio frissitve
 - `docs/releases.md` - AUTO-476 felvetele a 0.1.80 release manifestbe
+- `gh pr create #196` - https://github.com/janake/autoforge/pull/196
