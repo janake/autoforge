@@ -73,6 +73,32 @@ get_env_value() {
   return 1
 }
 
+export_env_file() {
+  local file_path="$1"
+  local line key value
+
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      "" | \#*)
+        continue
+        ;;
+    esac
+
+    case "$line" in
+      *=*)
+        key="${line%%=*}"
+        value="${line#*=}"
+        case "$key" in
+          [A-Za-z_][A-Za-z0-9_]*)
+            printf -v "$key" '%s' "$value"
+            export "$key"
+            ;;
+        esac
+        ;;
+    esac
+  done < "$file_path"
+}
+
 ensure_oci_command() {
   if command -v oci >/dev/null 2>&1; then
     OCI_CMD=(oci)
@@ -331,9 +357,6 @@ trap 'rm -f "$APP_DIR/.deploy.env" "${RUNTIME_ENV:-}"' EXIT
 chmod 600 "$RUNTIME_ENV"
 cp "$ENV_FILE" "$RUNTIME_ENV"
 printf '\n' >> "$RUNTIME_ENV"
-set -a
-. "$RUNTIME_ENV"
-set +a
 
 COMPOSE_ARGS=(--env-file "$RUNTIME_ENV" -f docker-compose.private.yml)
 
@@ -485,6 +508,7 @@ fi
 
 ensure_metadata_block
 ensure_arm_capacity_notifications
+export_env_file "$RUNTIME_ENV"
 
 if [ -f "$BACKEND_IMAGE_ARCHIVE" ]; then
   docker load --input "$BACKEND_IMAGE_ARCHIVE"
