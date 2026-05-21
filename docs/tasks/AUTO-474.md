@@ -1,12 +1,12 @@
 # [AUTO-474] Prompt draft flow cannot complete because AI clarification runtime is unavailable
 
-Statusz: In progress
+Statusz: Under test
 
 Verzio: 0.1.79
 
 Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`, `bug/AUTO-474-ssh-keepalive`, `bug/AUTO-474-opencode-message-model`
 
-PR: https://github.com/janake/autoforge/pull/190, https://github.com/janake/autoforge/pull/191, https://github.com/janake/autoforge/pull/192, https://github.com/janake/autoforge/pull/193
+PR: https://github.com/janake/autoforge/pull/190, https://github.com/janake/autoforge/pull/191, https://github.com/janake/autoforge/pull/192, https://github.com/janake/autoforge/pull/193, https://github.com/janake/autoforge/pull/197
 
 ## Cel
 
