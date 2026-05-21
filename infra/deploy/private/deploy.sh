@@ -331,6 +331,9 @@ trap 'rm -f "$APP_DIR/.deploy.env" "${RUNTIME_ENV:-}"' EXIT
 chmod 600 "$RUNTIME_ENV"
 cp "$ENV_FILE" "$RUNTIME_ENV"
 printf '\n' >> "$RUNTIME_ENV"
+set -a
+. "$RUNTIME_ENV"
+set +a
 
 COMPOSE_ARGS=(--env-file "$RUNTIME_ENV" -f docker-compose.private.yml)
 
@@ -509,9 +512,6 @@ fi
 install_arm_capacity_timer
 
 if [ "$OPENCODE_PROFILE_ENABLED" = "true" ]; then
-  set -a
-  . "$RUNTIME_ENV"
-  set +a
   bash "$APP_DIR/opencode-smoke.sh"
 fi
 
