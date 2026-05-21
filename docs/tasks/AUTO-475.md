@@ -6,7 +6,7 @@ Verzio: 0.1.80
 
 Branch: `feature/AUTO-475-direct-pull`
 
-PR: https://github.com/janake/autoforge/pull/194
+PR: https://github.com/janake/autoforge/pull/195
 
 ## Cel
 
@@ -38,4 +38,4 @@ A private host kozvetlenul pullolja a Docker imageket a GHCR-bol `docker compose
 - `bash -n infra/deploy/private/deploy.sh` - ok
 - `git diff --check` - ok
 - `git commit` - `[AUTO-475] Replace SCP image preload with direct docker pull on private host`
-- `gh pr create #194` - https://github.com/janake/autoforge/pull/194
+- `gh pr create #195` - https://github.com/janake/autoforge/pull/195
