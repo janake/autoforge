@@ -62,6 +62,8 @@ jobs:
             BatchMode yes
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
+            ServerAliveInterval 60
+            ServerAliveCountMax 5
 
           Host autoforge-private
             HostName $PRIVATE_SSH_HOST
@@ -72,23 +74,23 @@ jobs:
             UserKnownHostsFile /dev/null
             ServerAliveInterval 60
             ServerAliveCountMax 5
-            ProxyCommand ssh -F ~/.ssh/config -o ServerAliveInterval=60 -W %h:%p autoforge-jump
+            ProxyJump autoforge-jump
           EOF
           chmod 600 ~/.ssh/config
 
       - name: Upload private stack files
         run: |
-          ssh -F ~/.ssh/config autoforge-private "mkdir -p '$DEPLOY_PATH'"
-          scp -F ~/.ssh/config infra/compose/docker-compose.private.yml autoforge-private:"$DEPLOY_PATH/docker-compose.private.yml"
-          scp -F ~/.ssh/config infra/compose/opencode.json autoforge-private:"$DEPLOY_PATH/opencode.json"
-          scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity-check.service autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity-check.service"
-          scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity-check.timer autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity-check.timer"
-          scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity-summary.service autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity-summary.service"
-          scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity-summary.timer autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity-summary.timer"
-          scp -F ~/.ssh/config infra/deploy/private/autoforge-arm-capacity.py autoforge-private:"$DEPLOY_PATH/autoforge-arm-capacity.py"
-          scp -F ~/.ssh/config infra/deploy/private/opencode-smoke.sh autoforge-private:"$DEPLOY_PATH/opencode-smoke.sh"
-          scp -F ~/.ssh/config infra/deploy/private/deploy.sh autoforge-private:"$DEPLOY_PATH/deploy.sh"
-          ssh -F ~/.ssh/config autoforge-private "chmod +x '$DEPLOY_PATH/deploy.sh' '$DEPLOY_PATH/opencode-smoke.sh'"
+          tar -czf - --transform='s|.*/||' \
+            infra/compose/docker-compose.private.yml \
+            infra/compose/opencode.json \
+            infra/deploy/private/autoforge-arm-capacity-check.service \
+            infra/deploy/private/autoforge-arm-capacity-check.timer \
+            infra/deploy/private/autoforge-arm-capacity-summary.service \
+            infra/deploy/private/autoforge-arm-capacity-summary.timer \
+            infra/deploy/private/autoforge-arm-capacity.py \
+            infra/deploy/private/opencode-smoke.sh \
+            infra/deploy/private/deploy.sh \
+            | ssh -F ~/.ssh/config autoforge-private "mkdir -p '$DEPLOY_PATH' && tar -xzf - -C '$DEPLOY_PATH' && chmod +x '$DEPLOY_PATH/deploy.sh' '$DEPLOY_PATH/opencode-smoke.sh'"
 
       - name: Render private runtime environment
         env:
