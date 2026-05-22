@@ -4,7 +4,7 @@ Statusz: Under test
 
 Verzio: 0.1.79
 
-Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`, `bug/AUTO-474-ssh-keepalive`, `bug/AUTO-474-opencode-message-model`, `bug/AUTO-474-batch-private-upload`
+Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`, `bug/AUTO-474-ssh-keepalive`, `bug/AUTO-474-opencode-message-model`, `bug/AUTO-474-batch-private-upload`, `bug/AUTO-474-upload-retry`, `bug/AUTO-474-opencode-max-tokens`
 
 PR: https://github.com/janake/autoforge/pull/190, https://github.com/janake/autoforge/pull/191, https://github.com/janake/autoforge/pull/192, https://github.com/janake/autoforge/pull/193, https://github.com/janake/autoforge/pull/197, https://github.com/janake/autoforge/pull/198
 
@@ -61,3 +61,18 @@ A prompt draft flow vegig tudjon menni a draft/clarify lepestol az approval es J
 - `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/deploy-private.yml')); print('YAML OK')"` - ok
 - `bash -n .github/workflows/deploy-private.yml` - ok
 - `git diff --check` - ok
+- `gh run view 26255891186 --job 77278347552 --log-failed` - upload succeeded, deploy reached OpenCode smoke, then OpenRouter rejected the smoke completion with `max_tokens exceeds configured limit of 2048`
+- User clarified that the previous Qwen choice was wrong because the relevant path is still a free deployment path, not the local Zen login
+- OpenRouter model catalog check: `google/gemma-4-26b-a4b-it:free` is `text+image+video->text` with prompt/completion pricing `0` and max completion tokens 32768; it is an actually free multimodal option
+- Fix: make `google/gemma-4-26b-a4b-it:free` the OpenCode/OpenRouter default and allowed model; raise default proxy completion limit to 32768 and request body limit to 10485760 bytes for image-capable payloads
+- `python3 -c "import json; json.load(open('infra/compose/opencode.json')); print('JSON OK')"` - ok
+- `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/deploy-private.yml')); yaml.safe_load(open('infra/compose/docker-compose.private.yml')); print('YAML OK')"` - ok
+- `bash -n infra/deploy/private/opencode-smoke.sh` - ok
+- `npm run test:provider-proxy` - ok
+- `mvn -q -f services/backend/pom.xml -Dtest=HttpPromptDraftClarifierTest,HttpOpenCodeAIPatchGeneratorTest,PromptDraftFallbackMessageTest test` - ok
+- `npm run test:backend` - failed in existing unrelated `LearningContentGenerationControllerTest.questionSetSettingsPersistAndLimitAttempts` with expected 201 but got 403
+- `git diff --check` - ok
+- Root cause of backend suite failure: `LearningContentGenerationControllerTest.questionSetSettingsPersistAndLimitAttempts` used `deadlineAt=2026-05-21T12:00:00Z`, which is already in the past on the current date, so the first attempt was rejected by the deadline guard
+- Fix: move that test deadline to a far-future timestamp so the first attempt is allowed and the second attempt still verifies `maxAttempts=1`
+- `mvn -q -f services/backend/pom.xml -Dtest=LearningContentGenerationControllerTest#questionSetSettingsPersistAndLimitAttempts test` - ok after moving the deadline assertion to `2099-05-21T12:00:00Z`
+- `npm run test:backend` - ok after the deadline test fix

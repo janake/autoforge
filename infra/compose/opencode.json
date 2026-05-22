@@ -10,8 +10,8 @@
         "apiKey": "proxy-auth-placeholder"
       },
       "models": {
-        "deepseek/deepseek-v4-flash:free": {
-          "name": "DeepSeek V4 Flash Free via OpenRouter Proxy"
+        "google/gemma-4-26b-a4b-it:free": {
+          "name": "Gemma 4 26B A4B IT Free via OpenRouter Proxy"
         }
       }
     }

@@ -26,5 +26,5 @@ autoforge:
       server-url: http://opencode:4096
       username: opencode
       password: test-token
-      model: autoforge-openrouter/deepseek/deepseek-v4-flash:free
+      model: autoforge-openrouter/google/gemma-4-26b-a4b-it:free
       api-key: test-api-key

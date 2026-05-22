@@ -307,16 +307,16 @@ class LearningContentGenerationControllerTest {
         .with(jwt().jwt(token -> token.subject("teacher-1")))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
-          {"deadlineAt": "2026-05-21T12:00:00Z", "maxAttempts": 1}
+          {"deadlineAt": "2099-05-21T12:00:00Z", "maxAttempts": 1}
           """))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.deadlineAt").value("2026-05-21T12:00:00Z"))
+      .andExpect(jsonPath("$.deadlineAt").value("2099-05-21T12:00:00Z"))
       .andExpect(jsonPath("$.maxAttempts").value(1));
 
     mockMvc.perform(get("/api/v1/learning/materials/{materialId}/question-sets", material.getId())
         .with(jwt().jwt(token -> token.subject("student-1"))))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$[0].deadlineAt").value("2026-05-21T12:00:00Z"))
+      .andExpect(jsonPath("$[0].deadlineAt").value("2099-05-21T12:00:00Z"))
       .andExpect(jsonPath("$[0].maxAttempts").value(1));
 
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/question-attempts", material.getId())

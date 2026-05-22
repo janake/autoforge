@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
   "autoforge.mvp.opencode.server-url=http://opencode:4096",
   "autoforge.mvp.opencode.username=opencode",
   "autoforge.mvp.opencode.password=",
-  "autoforge.mvp.opencode.model=autoforge-openrouter/deepseek/deepseek-v4-flash:free"
+  "autoforge.mvp.opencode.model=autoforge-openrouter/google/gemma-4-26b-a4b-it:free"
 })
 @AutoConfigureMockMvc
 class PromptDraftFallbackMessageTest {

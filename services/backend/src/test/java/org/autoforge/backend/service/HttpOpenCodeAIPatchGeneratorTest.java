@@ -48,7 +48,7 @@ class HttpOpenCodeAIPatchGeneratorTest {
         "http://127.0.0.1:%d".formatted(port),
         "opencode",
         "secret",
-        "autoforge-openrouter/deepseek/deepseek-v4-flash:free",
+        "autoforge-openrouter/google/gemma-4-26b-a4b-it:free",
         null
       )),
       new ObjectMapper()
@@ -69,7 +69,7 @@ class HttpOpenCodeAIPatchGeneratorTest {
     assertThat(sessionAuth.get()).isEqualTo(basicAuth("opencode", "secret"));
     assertThat(messageAuth.get()).isEqualTo(basicAuth("opencode", "secret"));
     assertThat(sessionBody.get()).contains("Autoforge AUTO-321");
-    assertThat(messageBody.get()).contains("autoforge-openrouter/deepseek/deepseek-v4-flash:free");
+    assertThat(messageBody.get()).contains("autoforge-openrouter/google/gemma-4-26b-a4b-it:free");
     assertThat(messageBody.get()).contains("Return JSON only.");
     assertThat(messageBody.get()).contains("Process queued job");
   }

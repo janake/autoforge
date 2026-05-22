@@ -175,7 +175,8 @@ Fontos:
 - A private host `deploy.sh` scriptje olvassa ki a konkret secret ertekeket OCI Vaultbol, `--auth instance_principal` hasznalataval.
 - A kapacitasjelzes OCI Notifications topicra megy; a deploy script ezt a topicot kezeli, az email subscription pedig `janak.endre@gmail.com` cimre mutat.
 - A provider API kulcsot az OpenRouter proxy kapja meg runtime env-kent; az `opencode` kontener csak a belso proxy URL-t es nem titkos placeholder authot lat.
-- Az OpenRouter proxy `OPENROUTER_ALLOWED_MODELS`, `OPENROUTER_MAX_COMPLETION_TOKENS` es `OPENROUTER_MAX_REQUEST_BYTES` guardrailekkel korlatozza az AI runtime koltseg- es payload-kockazatat.
+- Az OpenRouter proxy alapertelmezett modellje `google/gemma-4-26b-a4b-it:free`, mert text, image es video inputot is tud kezelni, es az OpenRouter katalogusban free modellkent szerepel.
+- Az OpenRouter proxy `OPENROUTER_ALLOWED_MODELS`, `OPENROUTER_MAX_COMPLETION_TOKENS` es `OPENROUTER_MAX_REQUEST_BYTES` guardrailekkel korlatozza az AI runtime koltseg- es payload-kockazatat, a default completion limit pedig a modell 32768-as plafonjahoz igazodik.
 - A provider proxy logjai csak provider/model/status/duration metaadatot irhatnak; promptot, bearer tokent, API kulcsot vagy provider response bodyt nem.
 - Az ADB wallet zipet a private host `deploy.sh` letolti object storage-bol, kicsomagolja az `APP_DIR/wallet` mappaba, majd a backend kontenernek `TNS_ADMIN`-nel atadja.
 - A backend nem olvas Vaultot runtime alatt; csak runtime env valtozokat kap.
