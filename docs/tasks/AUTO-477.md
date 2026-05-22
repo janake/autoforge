@@ -1,12 +1,12 @@
 # [AUTO-477] Token economy guidance for global agent rules
 
-Statusz: In Progress
+Statusz: Under Review
 
 Verzio: 0.1.16
 
 Branch: `feature/AUTO-477-token-economy`
 
-PR: -
+PR: #201
 
 ## Cél
 
@@ -26,6 +26,9 @@ Az AGENT.md-ben legyenek rovid, token-takarekos munkastilus iranyelvek, hogy min
 - `AGENT.md` - token economy szekcio hozzaadasa
 - `docs/releases.md` - 0.1.16 release entry frissitese
 - `git diff --check` - ok
+- `git commit -m "[AUTO-477] Add token economy guidance to agent rules"` - elso commit kesz
+- `git push -u origin feature/AUTO-477-token-economy` - branch feltolva
+- `gh pr create` - PR megnyitva
 
 ## Megjegyzes
 
