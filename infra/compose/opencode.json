@@ -10,8 +10,8 @@
         "apiKey": "proxy-auth-placeholder"
       },
       "models": {
-        "qwen/qwen3.6-plus": {
-          "name": "Qwen3.6 Plus via OpenRouter Proxy"
+        "google/gemma-4-26b-a4b-it:free": {
+          "name": "Gemma 4 26B A4B IT Free via OpenRouter Proxy"
         }
       }
     }

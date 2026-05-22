@@ -38,8 +38,8 @@ test("forwards allowed chat completion requests with the proxy-held API key", as
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
     OPENROUTER_BASE_URL: `http://127.0.0.1:${upstreamPort}/v1`,
-    OPENROUTER_DEFAULT_MODEL: "qwen/qwen3.6-plus",
-    OPENROUTER_ALLOWED_MODELS: "qwen/qwen3.6-plus",
+    OPENROUTER_DEFAULT_MODEL: "google/gemma-4-26b-a4b-it:free",
+    OPENROUTER_ALLOWED_MODELS: "google/gemma-4-26b-a4b-it:free",
   }));
   const proxyPort = await listen(proxy);
 
@@ -55,8 +55,8 @@ test("forwards allowed chat completion requests with the proxy-held API key", as
 
     assert.equal(response.status, 200);
     assert.equal(upstreamAuthorization, "Bearer real-openrouter-key");
-    assert.equal(upstreamBody.model, "qwen/qwen3.6-plus");
-    assert.equal(upstreamBody.max_tokens, 65536);
+    assert.equal(upstreamBody.model, "google/gemma-4-26b-a4b-it:free");
+    assert.equal(upstreamBody.max_tokens, 32768);
   } finally {
     await close(proxy);
   }
@@ -65,8 +65,8 @@ test("forwards allowed chat completion requests with the proxy-held API key", as
 test("reports non-secret health and guardrail configuration", async () => {
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
-    OPENROUTER_DEFAULT_MODEL: "qwen/qwen3.6-plus",
-    OPENROUTER_ALLOWED_MODELS: "qwen/qwen3.6-plus",
+    OPENROUTER_DEFAULT_MODEL: "google/gemma-4-26b-a4b-it:free",
+    OPENROUTER_ALLOWED_MODELS: "google/gemma-4-26b-a4b-it:free",
     OPENROUTER_MAX_COMPLETION_TOKENS: "512",
     OPENROUTER_MAX_REQUEST_BYTES: "4096",
   }));
@@ -79,7 +79,7 @@ test("reports non-secret health and guardrail configuration", async () => {
     assert.equal(response.status, 200);
     assert.equal(body.healthy, true);
     assert.equal(body.apiKeyConfigured, true);
-    assert.deepEqual(body.allowedModels, ["qwen/qwen3.6-plus"]);
+    assert.deepEqual(body.allowedModels, ["google/gemma-4-26b-a4b-it:free"]);
     assert.equal(body.maxCompletionTokens, 512);
     assert.equal(body.maxRequestBytes, 4096);
   } finally {
@@ -91,8 +91,8 @@ test("rejects models outside the allowlist", async () => {
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
     OPENROUTER_BASE_URL: `http://127.0.0.1:${upstreamPort}/v1`,
-    OPENROUTER_DEFAULT_MODEL: "qwen/qwen3.6-plus",
-    OPENROUTER_ALLOWED_MODELS: "qwen/qwen3.6-plus",
+    OPENROUTER_DEFAULT_MODEL: "google/gemma-4-26b-a4b-it:free",
+    OPENROUTER_ALLOWED_MODELS: "google/gemma-4-26b-a4b-it:free",
   }));
   const proxyPort = await listen(proxy);
 
@@ -115,8 +115,8 @@ test("rejects requests above the max token limit", async () => {
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
     OPENROUTER_BASE_URL: `http://127.0.0.1:${upstreamPort}/v1`,
-    OPENROUTER_DEFAULT_MODEL: "qwen/qwen3.6-plus",
-    OPENROUTER_ALLOWED_MODELS: "qwen/qwen3.6-plus",
+    OPENROUTER_DEFAULT_MODEL: "google/gemma-4-26b-a4b-it:free",
+    OPENROUTER_ALLOWED_MODELS: "google/gemma-4-26b-a4b-it:free",
     OPENROUTER_MAX_COMPLETION_TOKENS: "128",
   }));
   const proxyPort = await listen(proxy);
@@ -140,8 +140,8 @@ test("rejects invalid max token values", async () => {
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
     OPENROUTER_BASE_URL: `http://127.0.0.1:${upstreamPort}/v1`,
-    OPENROUTER_DEFAULT_MODEL: "qwen/qwen3.6-plus",
-    OPENROUTER_ALLOWED_MODELS: "qwen/qwen3.6-plus",
+    OPENROUTER_DEFAULT_MODEL: "google/gemma-4-26b-a4b-it:free",
+    OPENROUTER_ALLOWED_MODELS: "google/gemma-4-26b-a4b-it:free",
   }));
   const proxyPort = await listen(proxy);
 
@@ -164,8 +164,8 @@ test("rejects request bodies above the byte limit", async () => {
   const proxy = createServer(readConfig({
     OPENROUTER_API_KEY: "real-openrouter-key",
     OPENROUTER_BASE_URL: `http://127.0.0.1:${upstreamPort}/v1`,
-    OPENROUTER_DEFAULT_MODEL: "qwen/qwen3.6-plus",
-    OPENROUTER_ALLOWED_MODELS: "qwen/qwen3.6-plus",
+    OPENROUTER_DEFAULT_MODEL: "google/gemma-4-26b-a4b-it:free",
+    OPENROUTER_ALLOWED_MODELS: "google/gemma-4-26b-a4b-it:free",
     OPENROUTER_MAX_REQUEST_BYTES: "32",
   }));
   const proxyPort = await listen(proxy);

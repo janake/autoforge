@@ -2,8 +2,8 @@ import http from "node:http";
 
 const DEFAULT_PORT = 8080;
 const DEFAULT_UPSTREAM = "https://openrouter.ai/api/v1";
-const DEFAULT_MODEL = "qwen/qwen3.6-plus";
-const DEFAULT_MAX_COMPLETION_TOKENS = 65536;
+const DEFAULT_MODEL = "google/gemma-4-26b-a4b-it:free";
+const DEFAULT_MAX_COMPLETION_TOKENS = 32768;
 const DEFAULT_MAX_REQUEST_BYTES = 10485760;
 
 function readPositiveInteger(value, fallback) {

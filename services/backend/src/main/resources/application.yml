@@ -43,7 +43,7 @@ autoforge:
       server-url: ${OPENCODE_SERVER_URL:}
       username: ${OPENCODE_SERVER_USERNAME:opencode}
       password: ${OPENCODE_SERVER_PASSWORD:}
-      model: ${OPENCODE_MODEL:autoforge-openrouter/qwen/qwen3.6-plus}
+      model: ${OPENCODE_MODEL:autoforge-openrouter/google/gemma-4-26b-a4b-it:free}
       api-key: ${OPENCODE_API_KEY:}
     github:
       token: ${AUTOFORGE_GITHUB_TOKEN:}

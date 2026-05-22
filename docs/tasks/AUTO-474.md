@@ -62,9 +62,9 @@ A prompt draft flow vegig tudjon menni a draft/clarify lepestol az approval es J
 - `bash -n .github/workflows/deploy-private.yml` - ok
 - `git diff --check` - ok
 - `gh run view 26255891186 --job 77278347552 --log-failed` - upload succeeded, deploy reached OpenCode smoke, then OpenRouter rejected the smoke completion with `max_tokens exceeds configured limit of 2048`
-- User direction: switch from the DeepSeek free model to Qwen3.6 Plus so the private OpenCode runtime can handle image-bearing prompts
-- OpenRouter model catalog check: `qwen/qwen3.6-plus` is `text+image+video->text` with max completion tokens 65536; no `qwen/qwen3.6-plus:free` model id is currently exposed by the catalog
-- Fix: make `qwen/qwen3.6-plus` the OpenCode/OpenRouter default and allowed model; raise default proxy completion limit to 65536 and request body limit to 10485760 bytes for image-capable payloads
+- User clarified that the previous Qwen choice was wrong because the relevant path is still a free deployment path, not the local Zen login
+- OpenRouter model catalog check: `google/gemma-4-26b-a4b-it:free` is `text+image+video->text` with prompt/completion pricing `0` and max completion tokens 32768; it is an actually free multimodal option
+- Fix: make `google/gemma-4-26b-a4b-it:free` the OpenCode/OpenRouter default and allowed model; raise default proxy completion limit to 32768 and request body limit to 10485760 bytes for image-capable payloads
 - `python3 -c "import json; json.load(open('infra/compose/opencode.json')); print('JSON OK')"` - ok
 - `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/deploy-private.yml')); yaml.safe_load(open('infra/compose/docker-compose.private.yml')); print('YAML OK')"` - ok
 - `bash -n infra/deploy/private/opencode-smoke.sh` - ok
