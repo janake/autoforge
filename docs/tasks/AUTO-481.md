@@ -1,12 +1,12 @@
 # [AUTO-481] Provider proxy smoke should tolerate upstream rate limits
 
-Statusz: In Progress
+Statusz: Under Test
 
 Verzio: 0.1.84
 
 Branch: `bug/AUTO-481-provider-proxy-smoke-rate-limit`
 
-PR: TBD
+PR: #205
 
 ## Cel
 
@@ -27,6 +27,9 @@ A private deploy ne bukjon el akkor, ha a provider-proxy health es model ellenor
 - `PATH=/tmp/opencode/fake-docker-bin:$PATH AI_PROVIDER_MODEL=google/gemma-4-26b-a4b-it:free bash infra/deploy/private/provider-proxy-smoke.sh` - ok, szimulalt upstream HTTP 429 non-fatal ag
 - `bash -n infra/deploy/private/provider-proxy-smoke.sh && git diff --check` - ok
 - `docker-compose -f infra/compose/docker-compose.private.yml --profile ai config` - ok, placeholder env-ekkel validalt compose render
+- `git commit -m "[AUTO-481] Tolerate provider proxy smoke rate limits"` - fix commitolva
+- `git push -u origin bug/AUTO-481-provider-proxy-smoke-rate-limit` - branch feltolva
+- `gh pr create` - PR #205 megnyitva
 
 ## Megjegyzes
 
