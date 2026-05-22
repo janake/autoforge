@@ -36,6 +36,8 @@ Az Autoforge backend kozvetlenul a konnyu OpenAI-kompatibilis provider proxyt ha
 - `git commit -m "[AUTO-480] Replace OpenCode runtime with provider proxy client"` - implementacio commitolva
 - `git push -u origin feature/AUTO-480-provider-proxy-ai-client` - branch feltolva
 - `gh pr create` - PR #204 megnyitva
+- `jira_transition_issue(AUTO-480, Under test)` - Jira statusz allitasa
+- `jira_add_comment(AUTO-480)` - PR, branch, verzio es verification komment felteve
 
 ## Megjegyzes
 
