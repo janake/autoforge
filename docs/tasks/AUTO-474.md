@@ -72,3 +72,7 @@ A prompt draft flow vegig tudjon menni a draft/clarify lepestol az approval es J
 - `mvn -q -f services/backend/pom.xml -Dtest=HttpPromptDraftClarifierTest,HttpOpenCodeAIPatchGeneratorTest,PromptDraftFallbackMessageTest test` - ok
 - `npm run test:backend` - failed in existing unrelated `LearningContentGenerationControllerTest.questionSetSettingsPersistAndLimitAttempts` with expected 201 but got 403
 - `git diff --check` - ok
+- Root cause of backend suite failure: `LearningContentGenerationControllerTest.questionSetSettingsPersistAndLimitAttempts` used `deadlineAt=2026-05-21T12:00:00Z`, which is already in the past on the current date, so the first attempt was rejected by the deadline guard
+- Fix: move that test deadline to a far-future timestamp so the first attempt is allowed and the second attempt still verifies `maxAttempts=1`
+- `mvn -q -f services/backend/pom.xml -Dtest=LearningContentGenerationControllerTest#questionSetSettingsPersistAndLimitAttempts test` - ok after moving the deadline assertion to `2099-05-21T12:00:00Z`
+- `npm run test:backend` - ok after the deadline test fix
