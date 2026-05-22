@@ -1,12 +1,12 @@
 # [AUTO-478] Spike lightweight AI communication alternatives to OpenCode runtime
 
-Statusz: In Progress
+Statusz: Under Review
 
 Verzio: 0.1.81
 
 Branch: `feature/AUTO-478-ai-communication-spike`
 
-PR: -
+PR: #202
 
 ## Cel
 
@@ -26,6 +26,11 @@ El kell donteni, mivel kommunikáljon az Autoforge az AI-val, ha a private szerv
 - `git worktree add -b feature/AUTO-478-ai-communication-spike ... origin/main` - dedikalt worktree/branch letrehozva
 - `task(subagent_type=explore)` - jelenlegi AI runtime es alternativak feltarasa
 - `git diff --check` - ok
+- `git commit -m "[AUTO-478] Spike AI communication alternatives"` - spike docs commitolva
+- `git push -u origin feature/AUTO-478-ai-communication-spike` - branch feltolva
+- `gh pr create` - PR #202 megnyitva
+- `jira_transition_issue(AUTO-478, Under review)` - Jira review statusz beallitva
+- `jira_add_comment(AUTO-478)` - PR, branch, verzio es verification komment felteve
 
 ## Eredmeny roviden
 
