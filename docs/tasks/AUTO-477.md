@@ -29,6 +29,11 @@ Az AGENT.md-ben legyenek rovid, token-takarekos munkastilus iranyelvek, hogy min
 - `git commit -m "[AUTO-477] Add token economy guidance to agent rules"` - elso commit kesz
 - `git push -u origin feature/AUTO-477-token-economy` - branch feltolva
 - `gh pr create` - PR megnyitva
+- `jira_transition_issue(AUTO-477, Under review)` - review statusz beallitva
+- `git commit -m "[AUTO-477] Record PR and review status"` - task doc frissites commitolva
+- `git push` - frissitett branch feltolva
+- `jira_add_comment(AUTO-477)` - PR, branch, verzio es verification komment felteve
+- `gh pr view 201 --json body --jq .body` - PR body ellenorizve
 
 ## Megjegyzes
 
