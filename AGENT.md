@@ -12,6 +12,13 @@ This file is mandatory for every AI agent working in this repository. Before sta
 - Use placeholders or configured secrets for sensitive values, for example `${AUTOFORGE_SSH_KEY}`, `<registry-owner>`, `<repo-url>`.
 - Before starting any task, check whether a relevant skill exists; if one does, use it.
 
+## Token Economy
+
+- Prefer the smallest correct change.
+- Read only the files needed for the task.
+- Keep responses brief unless the user asks for detail.
+- Avoid repeated summaries, repeated searches, and broad scans.
+
 ## Task Classification
 
 Classify every new request before making changes.

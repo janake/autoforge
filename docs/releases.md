@@ -208,9 +208,11 @@ Statusz
 
 Taskok
 - `AUTO-25`: Integrate Gemini and ChatGPT API keys into OpenCode runtime
+- `AUTO-477`: Token economy guidance for global agent rules
 
 Megjegyzes
 - A Gemini és ChatGPT API kulcsok kezelése az OCI Vault-ból a belső OpenCode konténer számára.
+- Az AGENT.md token economy szekcioja rovidebb, token-takarekos sessionoket ir elo.
 
 ## 0.1.17
 
