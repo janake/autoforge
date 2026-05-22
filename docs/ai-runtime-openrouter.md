@@ -73,7 +73,9 @@ The private deploy should run a provider-proxy smoke test after the stack comes 
 
 - `GET /health` must report `healthy: true` and `apiKeyConfigured: true`.
 - `GET /v1/models` must include the configured `AI_PROVIDER_MODEL`.
-- `POST /v1/chat/completions` must complete through the configured model.
+- `POST /v1/chat/completions` should complete through the configured model when the upstream provider is available.
+- HTTP `429` from the upstream provider is treated as non-fatal after health/model checks pass, because free-model rate limiting is outside deploy control.
+- Other non-2xx chat completion responses still fail the deploy smoke test.
 
 ## Acceptance Notes
 

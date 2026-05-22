@@ -31,6 +31,10 @@ chat_result="$(docker_curl -sS -w '\n%{http_code}' -H 'Content-Type: application
 chat_status="${chat_result##*$'\n'}"
 chat_response="${chat_result%$'\n'*}"
 if [[ "$chat_status" != 2* ]]; then
+  if [[ "$chat_status" == "429" ]]; then
+    echo "Provider proxy smoke prompt was rate-limited by the upstream provider after health/model checks passed: $chat_response" >&2
+    exit 0
+  fi
   echo "Provider proxy smoke prompt returned HTTP $chat_status: $chat_response" >&2
   exit 1
 fi
