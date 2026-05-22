@@ -1,12 +1,12 @@
 # [AUTO-479] Persist AI-generated learning material content to database
 
-Statusz: In Progress
+Statusz: Under Test
 
 Verzio: 0.1.82
 
 Branch: `feature/AUTO-479-generated-learning-material`
 
-PR: -
+PR: #203
 
 ## Cel
 
@@ -33,6 +33,11 @@ A tanar tudjon tananyaghoz AI-generalt lesson tartalmat letrehozni, es az eredme
 - `npm run test:backend` - ok
 - `npm run build:web` - ok
 - `git diff --check` - ok
+- `git commit -m "[AUTO-479] Add generated lesson persistence flow"` - implementacio commitolva
+- `git push -u origin feature/AUTO-479-generated-learning-material` - branch feltolva
+- `gh pr create` - PR #203 megnyitva
+- `jira_transition_issue(AUTO-479, Under test)` - Jira statusz allitasa
+- `jira_add_comment(AUTO-479)` - PR, branch, verzio es verification komment felteve
 
 ## Megjegyzes
 
