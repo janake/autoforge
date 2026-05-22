@@ -84,15 +84,14 @@ jobs:
           for attempt in 1 2 3; do
             tar -czf - --transform='s|.*/||' \
               infra/compose/docker-compose.private.yml \
-              infra/compose/opencode.json \
               infra/deploy/private/autoforge-arm-capacity-check.service \
               infra/deploy/private/autoforge-arm-capacity-check.timer \
               infra/deploy/private/autoforge-arm-capacity-summary.service \
               infra/deploy/private/autoforge-arm-capacity-summary.timer \
               infra/deploy/private/autoforge-arm-capacity.py \
-              infra/deploy/private/opencode-smoke.sh \
+              infra/deploy/private/provider-proxy-smoke.sh \
               infra/deploy/private/deploy.sh \
-              | ssh -F ~/.ssh/config -o ConnectTimeout=120 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 autoforge-private "mkdir -p '$DEPLOY_PATH' && tar -xzf - -C '$DEPLOY_PATH' && chmod +x '$DEPLOY_PATH/deploy.sh' '$DEPLOY_PATH/opencode-smoke.sh'" \
+              | ssh -F ~/.ssh/config -o ConnectTimeout=120 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 autoforge-private "mkdir -p '$DEPLOY_PATH' && tar -xzf - -C '$DEPLOY_PATH' && chmod +x '$DEPLOY_PATH/deploy.sh' '$DEPLOY_PATH/provider-proxy-smoke.sh'" \
               && { echo "Upload succeeded on attempt $attempt"; break; }
             echo "Upload attempt $attempt failed" >&2
             [ "$attempt" -lt 3 ] && echo "Retrying in 10s..." >&2 && sleep 10
@@ -106,10 +105,11 @@ jobs:
           PRIVATE_SSH_HOST: ${{ secrets.OCI_PRIVATE_SSH_HOST }}
           PRIVATE_HOST: ${{ secrets.OCI_PRIVATE_HOST }}
           PRIVATE_USER: ${{ secrets.OCI_PRIVATE_USER }}
-          OPENCODE_SERVER_PASSWORD_SECRET_OCID: ${{ secrets.OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID }}
           OPENROUTER_API_KEY_SECRET_OCID: ${{ secrets.OCI_OPENROUTER_API_KEY_SECRET_OCID }}
-          OPENCODE_SERVER_PASSWORD_SECRET_NAME: ${{ vars.OCI_OPENCODE_SERVER_PASSWORD_SECRET_NAME }}
           OPENROUTER_API_KEY_SECRET_NAME: ${{ vars.OCI_OPENROUTER_API_KEY_SECRET_NAME }}
+          AI_PROVIDER_MODEL: ${{ vars.AI_PROVIDER_MODEL }}
+          OPENROUTER_DEFAULT_MODEL: ${{ vars.OPENROUTER_DEFAULT_MODEL }}
+          OPENROUTER_ALLOWED_MODELS: ${{ vars.OPENROUTER_ALLOWED_MODELS }}
           OPENROUTER_MAX_COMPLETION_TOKENS: ${{ vars.OPENROUTER_MAX_COMPLETION_TOKENS }}
           OPENROUTER_MAX_REQUEST_BYTES: ${{ vars.OPENROUTER_MAX_REQUEST_BYTES }}
           AUTOFORGE_DB_URL: ${{ secrets.AUTOFORGE_DB_URL }}
@@ -138,8 +138,8 @@ jobs:
           IMAGE_TAG="${IMAGE_TAG:?IMAGE_TAG is required}"
           KEYCLOAK_URL="${KEYCLOAK_URL:-https://kc.prodet.org}"
           KEYCLOAK_REALM="${KEYCLOAK_REALM:-autoforge}"
-          OPENCODE_SERVER_PASSWORD_SECRET_NAME="${OPENCODE_SERVER_PASSWORD_SECRET_NAME:-autoforge-opencode-server-password}"
           OPENROUTER_API_KEY_SECRET_NAME="${OPENROUTER_API_KEY_SECRET_NAME:-openrouter-api-key}"
+          AI_PROVIDER_MODEL="${AI_PROVIDER_MODEL:-${OPENROUTER_DEFAULT_MODEL:-google/gemma-4-26b-a4b-it:free}}"
           {
             echo "BACKEND_IMAGE=ghcr.io/${{ github.repository_owner }}/autoforge/backend"
             echo "BACKEND_IMAGE_TAG=$IMAGE_TAG"
@@ -151,14 +151,10 @@ jobs:
             echo "AUTOFORGE_GITHUB_OWNER=${{ github.repository_owner }}"
             echo "AUTOFORGE_GITHUB_REPO=${{ github.event.repository.name }}"
             echo "AUTOFORGE_BASE_BRANCH=${{ github.event.repository.default_branch }}"
-            echo "OPENCODE_IMAGE=ghcr.io/anomalyco/opencode"
-            echo "OPENCODE_IMAGE_TAG=latest"
             echo "OPENROUTER_PROXY_IMAGE=ghcr.io/${{ github.repository_owner }}/autoforge/openrouter-proxy"
             echo "OPENROUTER_PROXY_IMAGE_TAG=$IMAGE_TAG"
-            echo "OPENCODE_SERVER_URL=http://opencode:4096"
-            echo "OPENCODE_SERVER_USERNAME=opencode"
-            echo "OPENCODE_SERVER_PORT=4096"
-            echo "OPENCODE_MODEL=autoforge-openrouter/google/gemma-4-26b-a4b-it:free"
+            echo "AI_PROVIDER_PROXY_BASE_URL=http://openrouter-proxy:8080/v1"
+            echo "AI_PROVIDER_MODEL=$AI_PROVIDER_MODEL"
             if [[ -n "${OPENROUTER_DEFAULT_MODEL:-}" ]]; then
               echo "OPENROUTER_DEFAULT_MODEL=$OPENROUTER_DEFAULT_MODEL"
             else
@@ -173,10 +169,6 @@ jobs:
             echo "OPENROUTER_MAX_REQUEST_BYTES=${OPENROUTER_MAX_REQUEST_BYTES:-10485760}"
             echo "OPENROUTER_SITE_URL=https://oci.prodet.org"
             echo "OPENROUTER_APP_NAME=Autoforge"
-            if [ -n "${OPENCODE_SERVER_PASSWORD_SECRET_OCID:-}" ]; then
-              echo "OPENCODE_SERVER_PASSWORD_SECRET_OCID=$OPENCODE_SERVER_PASSWORD_SECRET_OCID"
-            fi
-            echo "OPENCODE_SERVER_PASSWORD_SECRET_NAME=$OPENCODE_SERVER_PASSWORD_SECRET_NAME"
             if [ -n "${OPENROUTER_API_KEY_SECRET_OCID:-}" ]; then
               echo "OPENROUTER_API_KEY_SECRET_OCID=$OPENROUTER_API_KEY_SECRET_OCID"
             fi

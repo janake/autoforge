@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.autoforge.backend.config.BackendMvpProperties;
 import org.autoforge.backend.domain.Job;
@@ -17,21 +18,18 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class HttpOpenCodeAIPatchGeneratorTest {
+class HttpProviderProxyAIPatchGeneratorTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static HttpServer server;
   private static int port;
-  private static final AtomicReference<String> sessionAuth = new AtomicReference<>();
-  private static final AtomicReference<String> sessionBody = new AtomicReference<>();
-  private static final AtomicReference<String> messageAuth = new AtomicReference<>();
-  private static final AtomicReference<String> messageBody = new AtomicReference<>();
+  private static final AtomicReference<String> chatPath = new AtomicReference<>();
+  private static final AtomicReference<String> chatBody = new AtomicReference<>();
 
   @BeforeAll
   static void startServer() throws IOException {
     server = HttpServer.create(new InetSocketAddress(0), 0);
-    server.createContext("/session", HttpOpenCodeAIPatchGeneratorTest::handleSession);
-    server.createContext("/session/session-123/message", HttpOpenCodeAIPatchGeneratorTest::handleMessage);
+    server.createContext("/v1/chat/completions", HttpProviderProxyAIPatchGeneratorTest::handleChatCompletion);
     server.start();
     port = server.getAddress().getPort();
   }
@@ -42,14 +40,11 @@ class HttpOpenCodeAIPatchGeneratorTest {
   }
 
   @Test
-  void createsSessionAndParsesGeneratedPatchJson() throws Exception {
-    HttpOpenCodeAIPatchGenerator generator = new HttpOpenCodeAIPatchGenerator(
-      new BackendMvpProperties(null, new BackendMvpProperties.Opencode(
-        "http://127.0.0.1:%d".formatted(port),
-        "opencode",
-        "secret",
-        "autoforge-openrouter/google/gemma-4-26b-a4b-it:free",
-        null
+  void callsProviderProxyAndParsesGeneratedPatchJson() throws Exception {
+    HttpProviderProxyAIPatchGenerator generator = new HttpProviderProxyAIPatchGenerator(
+      new BackendMvpProperties(null, new BackendMvpProperties.ProviderProxy(
+        "http://127.0.0.1:%d/v1".formatted(port),
+        "google/gemma-4-26b-a4b-it:free"
       )),
       new ObjectMapper()
     );
@@ -66,23 +61,15 @@ class HttpOpenCodeAIPatchGeneratorTest {
     assertThat(response.patch()).contains("diff --git a/README.md b/README.md");
     assertThat(response.patch()).contains("+processed");
 
-    assertThat(sessionAuth.get()).isEqualTo(basicAuth("opencode", "secret"));
-    assertThat(messageAuth.get()).isEqualTo(basicAuth("opencode", "secret"));
-    assertThat(sessionBody.get()).contains("Autoforge AUTO-321");
-    assertThat(messageBody.get()).contains("autoforge-openrouter/google/gemma-4-26b-a4b-it:free");
-    assertThat(messageBody.get()).contains("Return JSON only.");
-    assertThat(messageBody.get()).contains("Process queued job");
+    assertThat(chatPath.get()).isEqualTo("/v1/chat/completions");
+    assertThat(chatBody.get()).contains("google/gemma-4-26b-a4b-it:free");
+    assertThat(chatBody.get()).contains("Return JSON only.");
+    assertThat(chatBody.get()).contains("Process queued job");
   }
 
-  private static void handleSession(HttpExchange exchange) throws IOException {
-    sessionAuth.set(exchange.getRequestHeaders().getFirst("Authorization"));
-    sessionBody.set(readBody(exchange));
-    writeJson(exchange, 200, OBJECT_MAPPER.writeValueAsString(java.util.Map.of("id", "session-123")));
-  }
-
-  private static void handleMessage(HttpExchange exchange) throws IOException {
-    messageAuth.set(exchange.getRequestHeaders().getFirst("Authorization"));
-    messageBody.set(readBody(exchange));
+  private static void handleChatCompletion(HttpExchange exchange) throws IOException {
+    chatPath.set(exchange.getRequestURI().getPath());
+    chatBody.set(readBody(exchange));
 
     String patchJson = OBJECT_MAPPER.writeValueAsString(java.util.Map.of(
       "patch",
@@ -95,8 +82,8 @@ class HttpOpenCodeAIPatchGeneratorTest {
     String assistantText = "```json\n" + patchJson + "\n```";
 
     writeJson(exchange, 200, OBJECT_MAPPER.writeValueAsString(java.util.Map.of(
-      "parts",
-      java.util.List.of(java.util.Map.of("type", "text", "text", assistantText))
+      "choices",
+      List.of(Map.of("message", Map.of("content", assistantText)))
     )));
   }
 
@@ -113,8 +100,4 @@ class HttpOpenCodeAIPatchGeneratorTest {
     }
   }
 
-  private static String basicAuth(String username, String password) {
-    String credentials = username + ":" + password;
-    return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
-  }
 }

@@ -71,8 +71,9 @@ Erintett image-ek:
 - `ghcr.io/<registry-owner>/autoforge/web:<version>`
 - `ghcr.io/<registry-owner>/autoforge/backend:<version>`
 - `ghcr.io/<registry-owner>/autoforge/api-gateway:<version>`
+- `ghcr.io/<registry-owner>/autoforge/openrouter-proxy:<version>`
 
-Kulsos upstream image-eket, peldaul az OpenCode image-et, nem tagelunk at sajat projektverziora.
+Kulsos upstream image-eket nem tagelunk at sajat projektverziora.
 
 ## Deploy verziozas
 

@@ -8,7 +8,6 @@ cd "$APP_DIR"
 ENV_FILE="$APP_DIR/.env"
 BACKEND_IMAGE_ARCHIVE="$APP_DIR/autoforge-backend-image.tar.gz"
 OPENROUTER_PROXY_IMAGE_ARCHIVE="$APP_DIR/autoforge-openrouter-proxy-image.tar.gz"
-OPENCODE_IMAGE_ARCHIVE="$APP_DIR/autoforge-opencode-image.tar.gz"
 OCI_CLI_IMAGE_ARCHIVE="$APP_DIR/autoforge-oci-cli-image.tar.gz"
 PRIVATE_IMAGES_PRELOADED="${PRIVATE_IMAGES_PRELOADED:-false}"
 WALLET_DIR="$APP_DIR/wallet"
@@ -329,15 +328,14 @@ ensure_arm_capacity_notifications() {
   printf '%s=%s\n' "AUTOFORGE_ARM_CAPACITY_NOTIFICATION_TOPIC_OCID" "$topic_id" >> "$ENV_FILE"
 }
 
-OPENCODE_SERVER_PASSWORD_SECRET_OCID="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_OCID || true)"
 OPENROUTER_API_KEY_SECRET_OCID="$(get_env_value OPENROUTER_API_KEY_SECRET_OCID || true)"
-OPENCODE_SERVER_PASSWORD_SECRET_NAME="$(get_env_value OPENCODE_SERVER_PASSWORD_SECRET_NAME || true)"
 OPENROUTER_API_KEY_SECRET_NAME="$(get_env_value OPENROUTER_API_KEY_SECRET_NAME || true)"
-OPENCODE_SERVER_PASSWORD_ENV="$(get_env_value OPENCODE_SERVER_PASSWORD || true)"
 OPENROUTER_API_KEY_ENV="$(get_env_value OPENROUTER_API_KEY || true)"
-OPENCODE_SERVER_PASSWORD_VALUE="$OPENCODE_SERVER_PASSWORD_ENV"
 OPENROUTER_API_KEY_VALUE="$OPENROUTER_API_KEY_ENV"
-OPENCODE_PROFILE_ENABLED=false
+AI_PROVIDER_PROXY_BASE_URL_ENV="$(get_env_value AI_PROVIDER_PROXY_BASE_URL || true)"
+AI_PROVIDER_MODEL_ENV="$(get_env_value AI_PROVIDER_MODEL || true)"
+OPENROUTER_DEFAULT_MODEL_ENV="$(get_env_value OPENROUTER_DEFAULT_MODEL || true)"
+AI_PROVIDER_PROXY_ENABLED=false
 DB_URL="$(get_env_value AUTOFORGE_DB_URL || true)"
 DB_URL_SECRET_NAME="$(get_env_value AUTOFORGE_DB_URL_SECRET_NAME || true)"
 DB_WALLET_URL="$(get_env_value AUTOFORGE_DB_WALLET_URL || true)"
@@ -372,19 +370,13 @@ fi
 : "${DB_USERNAME_SECRET_NAME:=autoforge-db-username}"
 : "${DB_SERVICE_ALIAS_SECRET_NAME:=autoforge-db-service-alias}"
 
-if [ -z "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] && [ -z "$OPENCODE_SERVER_PASSWORD_SECRET_NAME" ] && [ -z "$OPENCODE_SERVER_PASSWORD_ENV" ]; then
-  OPENCODE_SERVER_PASSWORD_SECRET_NAME="autoforge-opencode-server-password"
-fi
-
 if [ -z "$OPENROUTER_API_KEY_SECRET_OCID" ] && [ -z "$OPENROUTER_API_KEY_SECRET_NAME" ] && [ -z "$OPENROUTER_API_KEY_ENV" ]; then
   OPENROUTER_API_KEY_SECRET_NAME="openrouter-api-key"
 fi
 
 NEEDS_OCI=true
 
-if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] \
-  || [ -n "$OPENROUTER_API_KEY_SECRET_OCID" ] \
-  || [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_NAME" ] \
+if [ -n "$OPENROUTER_API_KEY_SECRET_OCID" ] \
   || [ -n "$OPENROUTER_API_KEY_SECRET_NAME" ] \
   || [ -n "$DB_WALLET_PASSWORD_SECRET_OCID" ] \
   || [ -n "$DB_PASSWORD_SECRET_OCID" ]; then
@@ -404,19 +396,6 @@ if [ "$NEEDS_OCI" = "true" ]; then
   fi
 fi
 
-if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ]; then
-  OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret "$OPENCODE_SERVER_PASSWORD_SECRET_OCID")"
-elif [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_NAME" ]; then
-  OPENCODE_SERVER_PASSWORD_VALUE="$(get_vault_secret_by_name "$OPENCODE_SERVER_PASSWORD_SECRET_NAME")"
-fi
-if [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_OCID" ] || [ -n "$OPENCODE_SERVER_PASSWORD_SECRET_NAME" ]; then
-  if [ -n "$OPENCODE_SERVER_PASSWORD_VALUE" ]; then
-    append_secret_env "OPENCODE_SERVER_PASSWORD" "$OPENCODE_SERVER_PASSWORD_VALUE"
-  fi
-elif [ -z "$OPENCODE_SERVER_PASSWORD_VALUE" ]; then
-  append_secret_env "OPENCODE_SERVER_PASSWORD" "disabled-until-vault-secrets-are-configured"
-fi
-
 if [ -n "$OPENROUTER_API_KEY_SECRET_OCID" ]; then
   OPENROUTER_API_KEY_VALUE="$(get_vault_secret "$OPENROUTER_API_KEY_SECRET_OCID")"
 elif [ -n "$OPENROUTER_API_KEY_SECRET_NAME" ]; then
@@ -431,14 +410,13 @@ if [ -z "$OPENROUTER_API_KEY_VALUE" ]; then
   append_secret_env "OPENROUTER_API_KEY" "disabled-until-vault-secrets-are-configured"
 fi
 
-# OPENCODE_API_KEY uses the same OpenRouter key from Vault
 if [ -n "$OPENROUTER_API_KEY_VALUE" ]; then
-  append_secret_env "OPENCODE_API_KEY" "$OPENROUTER_API_KEY_VALUE"
-fi
-
-if [ -n "$OPENCODE_SERVER_PASSWORD_VALUE" ] && [ -n "$OPENROUTER_API_KEY_VALUE" ]; then
-  COMPOSE_ARGS+=(--profile opencode)
-  OPENCODE_PROFILE_ENABLED=true
+  append_secret_env "AI_PROVIDER_PROXY_BASE_URL" "${AI_PROVIDER_PROXY_BASE_URL_ENV:-http://openrouter-proxy:8080/v1}"
+  append_secret_env "AI_PROVIDER_MODEL" "${AI_PROVIDER_MODEL_ENV:-${OPENROUTER_DEFAULT_MODEL_ENV:-google/gemma-4-26b-a4b-it:free}}"
+  COMPOSE_ARGS+=(--profile ai)
+  AI_PROVIDER_PROXY_ENABLED=true
+else
+  append_secret_env "AI_PROVIDER_PROXY_BASE_URL" ""
 fi
 
 if [ -z "$DB_URL" ] && [ -n "$DB_URL_SECRET_NAME" ]; then
@@ -520,11 +498,6 @@ if [ -f "$OPENROUTER_PROXY_IMAGE_ARCHIVE" ]; then
   rm -f "$OPENROUTER_PROXY_IMAGE_ARCHIVE"
 fi
 
-if [ -f "$OPENCODE_IMAGE_ARCHIVE" ]; then
-  docker load --input "$OPENCODE_IMAGE_ARCHIVE"
-  rm -f "$OPENCODE_IMAGE_ARCHIVE"
-fi
-
 if [ "$PRIVATE_IMAGES_PRELOADED" != "true" ]; then
   : "${GHCR_USERNAME:?GHCR_USERNAME is required}"
   : "${GHCR_TOKEN:?GHCR_TOKEN is required}"
@@ -535,8 +508,8 @@ fi
 "${COMPOSE_CMD[@]}" "${COMPOSE_ARGS[@]}" up -d --remove-orphans
 install_arm_capacity_timer
 
-if [ "$OPENCODE_PROFILE_ENABLED" = "true" ]; then
-  bash "$APP_DIR/opencode-smoke.sh"
+if [ "$AI_PROVIDER_PROXY_ENABLED" = "true" ]; then
+  bash "$APP_DIR/provider-proxy-smoke.sh"
 fi
 
 docker image prune -f

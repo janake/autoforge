@@ -39,12 +39,9 @@ autoforge:
     job-processor:
       enabled: ${AUTOFORGE_JOB_PROCESSOR_ENABLED:false}
       poll-interval-ms: ${AUTOFORGE_JOB_PROCESSOR_POLL_INTERVAL_MS:5000}
-    opencode:
-      server-url: ${OPENCODE_SERVER_URL:}
-      username: ${OPENCODE_SERVER_USERNAME:opencode}
-      password: ${OPENCODE_SERVER_PASSWORD:}
-      model: ${OPENCODE_MODEL:autoforge-openrouter/google/gemma-4-26b-a4b-it:free}
-      api-key: ${OPENCODE_API_KEY:}
+    provider-proxy:
+      base-url: ${AI_PROVIDER_PROXY_BASE_URL:}
+      model: ${AI_PROVIDER_MODEL:google/gemma-4-26b-a4b-it:free}
     github:
       token: ${AUTOFORGE_GITHUB_TOKEN:}
       owner: ${AUTOFORGE_GITHUB_OWNER:}

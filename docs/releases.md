@@ -960,3 +960,14 @@ Taskok
 
 Megjegyzes
 - A teacher UI-bol indithato lesson/summary/question generálás DB-ben persistalt `learning_generated_content` rekordot hoz letre.
+
+## 0.1.83
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-480`: Replace OpenCode AI runtime with lightweight provider-proxy client
+
+Megjegyzes
+- A backend OpenAI-kompatibilis provider-proxy kliensen keresztul eri el az OpenRoutert, mikozben az OpenCode container/config/smoke kikerul a private runtime utvonalbol.

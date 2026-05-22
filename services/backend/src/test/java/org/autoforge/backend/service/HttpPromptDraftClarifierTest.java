@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -21,18 +20,15 @@ import org.junit.jupiter.api.Test;
 class HttpPromptDraftClarifierTest {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final AtomicReference<String> sessionAuth = new AtomicReference<>();
-  private static final AtomicReference<String> sessionBody = new AtomicReference<>();
-  private static final AtomicReference<String> messageAuth = new AtomicReference<>();
-  private static final AtomicReference<String> messageBody = new AtomicReference<>();
+  private static final AtomicReference<String> chatPath = new AtomicReference<>();
+  private static final AtomicReference<String> chatBody = new AtomicReference<>();
   private static HttpServer server;
   private static int port;
 
   @BeforeAll
   static void startServer() throws IOException {
     server = HttpServer.create(new InetSocketAddress(0), 0);
-    server.createContext("/session", HttpPromptDraftClarifierTest::handleSession);
-    server.createContext("/session/session-clarify/message", HttpPromptDraftClarifierTest::handleMessage);
+    server.createContext("/v1/chat/completions", HttpPromptDraftClarifierTest::handleChatCompletion);
     server.start();
     port = server.getAddress().getPort();
   }
@@ -43,14 +39,11 @@ class HttpPromptDraftClarifierTest {
   }
 
   @Test
-  void createsOpenCodeSessionAndParsesClarificationResponse() {
+  void callsProviderProxyAndParsesClarificationResponse() {
     HttpPromptDraftClarifier clarifier = new HttpPromptDraftClarifier(
-      new BackendMvpProperties(null, new BackendMvpProperties.Opencode(
-        "http://127.0.0.1:%d".formatted(port),
-        "opencode",
-        "secret",
-        "autoforge-openrouter/google/gemma-4-26b-a4b-it:free",
-        "test-api-key"
+      new BackendMvpProperties(null, new BackendMvpProperties.ProviderProxy(
+        "http://127.0.0.1:%d/v1".formatted(port),
+        "google/gemma-4-26b-a4b-it:free"
       )),
       new ObjectMapper()
     );
@@ -60,31 +53,22 @@ class HttpPromptDraftClarifierTest {
     assertThat(result.readyForApproval()).isFalse();
     assertThat(result.questions()).containsExactly("Which repository should this apply to?");
     assertThat(result.message()).isEqualTo("Which repository should this apply to?");
-    assertThat(sessionAuth.get()).isEqualTo(basicAuth("opencode", "secret"));
-    assertThat(messageAuth.get()).isEqualTo(basicAuth("opencode", "secret"));
-    assertThat(sessionBody.get()).contains("Autoforge prompt draft clarification");
-    assertThat(sessionBody.get()).contains("test-api-key");
-    assertThat(messageBody.get()).contains("autoforge-openrouter/google/gemma-4-26b-a4b-it:free");
-    assertThat(messageBody.get()).contains("readyForApproval");
-    assertThat(messageBody.get()).contains("Audit the workflow");
+    assertThat(chatPath.get()).isEqualTo("/v1/chat/completions");
+    assertThat(chatBody.get()).contains("google/gemma-4-26b-a4b-it:free");
+    assertThat(chatBody.get()).contains("readyForApproval");
+    assertThat(chatBody.get()).contains("Audit the workflow");
   }
 
-  private static void handleSession(HttpExchange exchange) throws IOException {
-    sessionAuth.set(exchange.getRequestHeaders().getFirst("Authorization"));
-    sessionBody.set(readBody(exchange));
-    writeJson(exchange, 200, OBJECT_MAPPER.writeValueAsString(Map.of("id", "session-clarify")));
-  }
-
-  private static void handleMessage(HttpExchange exchange) throws IOException {
-    messageAuth.set(exchange.getRequestHeaders().getFirst("Authorization"));
-    messageBody.set(readBody(exchange));
+  private static void handleChatCompletion(HttpExchange exchange) throws IOException {
+    chatPath.set(exchange.getRequestURI().getPath());
+    chatBody.set(readBody(exchange));
     String assistantText = OBJECT_MAPPER.writeValueAsString(Map.of(
       "readyForApproval", false,
       "questions", List.of("Which repository should this apply to?"),
       "message", "Which repository should this apply to?"
     ));
     writeJson(exchange, 200, OBJECT_MAPPER.writeValueAsString(Map.of(
-      "parts", List.of(Map.of("type", "text", "text", assistantText))
+      "choices", List.of(Map.of("message", Map.of("content", assistantText)))
     )));
   }
 
@@ -101,8 +85,4 @@ class HttpPromptDraftClarifierTest {
     }
   }
 
-  private static String basicAuth(String username, String password) {
-    String credentials = username + ":" + password;
-    return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
-  }
 }

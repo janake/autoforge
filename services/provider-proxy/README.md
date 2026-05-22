@@ -1,6 +1,6 @@
 # provider-proxy
 
-Small OpenAI-compatible proxy used to keep the OpenRouter API key outside the `opencode` runtime.
+Small OpenAI-compatible proxy used to keep the OpenRouter API key outside the Spring backend runtime.
 
 The proxy accepts `POST /v1/chat/completions` from the private Docker network, enforces allowlisted models plus request limits, and forwards the request to OpenRouter with the real `OPENROUTER_API_KEY` injected inside this process only. The default model is the free multimodal Gemma 4 26B A4B IT model.
 

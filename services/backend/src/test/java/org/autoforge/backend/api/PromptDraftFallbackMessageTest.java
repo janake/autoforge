@@ -15,10 +15,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(properties = {
-  "autoforge.mvp.opencode.server-url=http://opencode:4096",
-  "autoforge.mvp.opencode.username=opencode",
-  "autoforge.mvp.opencode.password=",
-  "autoforge.mvp.opencode.model=autoforge-openrouter/google/gemma-4-26b-a4b-it:free"
+  "autoforge.mvp.provider-proxy.base-url=",
+  "autoforge.mvp.provider-proxy.model=google/gemma-4-26b-a4b-it:free"
 })
 @AutoConfigureMockMvc
 class PromptDraftFallbackMessageTest {
@@ -27,7 +25,7 @@ class PromptDraftFallbackMessageTest {
   private MockMvc mockMvc;
 
   @Test
-  void returnsServiceUnavailableWhenOpencodePasswordIsMissing() throws Exception {
+  void returnsServiceUnavailableWhenProviderProxyBaseUrlIsMissing() throws Exception {
     mockMvc.perform(post("/api/v1/prompt-drafts")
         .with(jwt().jwt(token -> token.claim("groups", List.of("developer"))).authorities(new SimpleGrantedAuthority("ROLE_developer")))
         .contentType(MediaType.APPLICATION_JSON)
@@ -37,6 +35,6 @@ class PromptDraftFallbackMessageTest {
           }
           """))
       .andExpect(status().isServiceUnavailable())
-      .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Prompt draft AI is unavailable because OPENCODE_SERVER_PASSWORD is not configured")));
+      .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("AI_PROVIDER_PROXY_BASE_URL is not configured")));
   }
 }

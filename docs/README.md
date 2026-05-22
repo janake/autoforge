@@ -6,8 +6,8 @@ Ez a könyvtár tartalmazza a jelenlegi Autoforge OCI topológia, deploy modell,
 
 Fő dokumentumok:
 
-- `docs/architecture.md`: public/private OCI felépítés, gateway lánc, OpenCode és workspace storage, a részletes ábra Confluence-ban él
-- `docs/ai-runtime-openrouter.md`: OpenRouter + OpenCode runtime döntés, secret izoláció és REST validációs terv
+- `docs/architecture.md`: public/private OCI felépítés, gateway lánc, provider proxy és workspace storage, a részletes ábra Confluence-ban él
+- `docs/ai-runtime-openrouter.md`: OpenRouter provider proxy runtime, secret izoláció és REST validációs terv
 - `docs/learning-rag-adb-vector.md`: Learning RAG Autonomous Database vector capability döntés
 - `docs/learning-api-contract.md`: Learning API contract web és Android klienshez
 - `docs/learning-content-generation.md`: Learning kérdésgenerálás és összefoglaló slice
