@@ -30,6 +30,8 @@ A private deploy ne bukjon el akkor, ha a provider-proxy health es model ellenor
 - `git commit -m "[AUTO-481] Tolerate provider proxy smoke rate limits"` - fix commitolva
 - `git push -u origin bug/AUTO-481-provider-proxy-smoke-rate-limit` - branch feltolva
 - `gh pr create` - PR #205 megnyitva
+- `jira_transition_issue(AUTO-481, Under test)` - Jira statusz allitasa
+- `jira_add_comment(AUTO-481)` - PR, branch, verzio es verification komment felteve
 
 ## Megjegyzes
 
