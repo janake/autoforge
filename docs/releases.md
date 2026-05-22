@@ -971,3 +971,14 @@ Taskok
 
 Megjegyzes
 - A backend OpenAI-kompatibilis provider-proxy kliensen keresztul eri el az OpenRoutert, mikozben az OpenCode container/config/smoke kikerul a private runtime utvonalbol.
+
+## 0.1.84
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-481`: Provider proxy smoke should tolerate upstream rate limits
+
+Megjegyzes
+- A provider-proxy smoke tovabbra is kotelezove teszi a health/model ellenorzest, de upstream OpenRouter `429` rate limit eseten nem buktatja a private deployt.

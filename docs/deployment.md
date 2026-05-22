@@ -105,7 +105,7 @@ A tipikus tartalom:
 - a private hoston a deploy a `autoforge-arm-capacity-check.timer` systemd timert is telepiti, amely 3 percenkent futtatja az `oci-a1-capacity` ellenorzest a Frankfurt tenancy ARM kapacitasara
 - a private hoston a deploy a `autoforge-arm-capacity-summary.timer` systemd timert is telepiti, amely minden nap 07:00-kor kuldi az elozo 24 ora osszegzeset
 - a private hoston a deploy OCI Notifications topicot hoz letre vagy ujrahasznal, majd ehhez email subscriptiont regisztral `janak.endre@gmail.com` cimre
-- a private deploy a sikeres provider proxy inditas utan egy REST smoke tesztet is futtat, amely ellenorzi a proxy health/model endpointjait es egy OpenAI-kompatibilis chat completiont
+- a private deploy a sikeres provider proxy inditas utan egy REST smoke tesztet is futtat, amely ellenorzi a proxy health/model endpointjait es megprobal egy OpenAI-kompatibilis chat completiont; upstream provider `429` rate limit esetén a health/model ellenorzes utan nem buktatja a deployt
 - ugyanazok a workflow-k `main`-re merge-elt, relevans fájlokat erinto pushokra is lefutnak, hogy a deploy automatikusan meginduljon
 
 Fontos trigger-ek:
