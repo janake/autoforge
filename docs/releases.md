@@ -949,3 +949,14 @@ Taskok
 
 Megjegyzes
 - Spike annak eldontesere, hogy a private hoston futo OpenCode runtime helyett milyen kisebb eroforrasigenyu AI kommunikacios utat hasznaljon az Autoforge.
+
+## 0.1.82
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-479`: Persist AI-generated learning material content to database
+
+Megjegyzes
+- A teacher UI-bol indithato lesson/summary/question generálás DB-ben persistalt `learning_generated_content` rekordot hoz letre.

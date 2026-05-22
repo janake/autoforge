@@ -196,6 +196,17 @@ function latestByType(
   return generations.find((generation) => generation.generationType === generationType) ?? null;
 }
 
+function generationTitle(generationType: LearningContentGenerationResponse["generationType"]): string {
+  switch (generationType) {
+    case "QUESTION_SET":
+      return "Questions";
+    case "SUMMARY":
+      return "Summary";
+    case "LESSON":
+      return "Lesson";
+  }
+}
+
 function questionSetStatusTone(status: LearningContentGenerationResponse["questionSetStatus"]): string {
   switch (status) {
     case "PUBLISHED":
@@ -335,6 +346,7 @@ function LearningWorkspacePanel({ roles, groups, onOpenMaterial }: { roles: stri
           {state.materials.map((material) => {
             const latestQuestions = latestByType(material.generations, "QUESTION_SET");
             const latestSummary = latestByType(material.generations, "SUMMARY");
+            const latestLesson = latestByType(material.generations, "LESSON");
             const latestProgress = material.progressEntries[0] ?? null;
 
             return (
@@ -358,6 +370,10 @@ function LearningWorkspacePanel({ roles, groups, onOpenMaterial }: { roles: stri
                   <section>
                     <h4>Summary</h4>
                     <p>{latestSummary ? latestSummary.content : "No summary generated yet."}</p>
+                  </section>
+                  <section>
+                    <h4>Lesson</h4>
+                    <p>{latestLesson ? latestLesson.content : "No lesson generated yet."}</p>
                   </section>
                 </div>
 
@@ -982,6 +998,21 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
     }
   };
 
+  const generateContent = async (kind: "questions" | "summary" | "lesson") => {
+    const label = kind === "questions" ? "questions" : kind;
+    setGenerationError(null);
+    setGenerationStatus(`Generating ${label}...`);
+
+    try {
+      await postAuthedJson<LearningContentGenerationResponse>(`/v1/learning/materials/${materialId}/${kind}`, {});
+      setRefreshToken((value) => value + 1);
+      setGenerationStatus(`Generated ${label}.`);
+    } catch (error) {
+      setGenerationStatus(null);
+      setGenerationError(error instanceof Error ? error.message : `Unable to generate ${label}.`);
+    }
+  };
+
   const submitDispute = async (event: FormEvent<HTMLFormElement>, attemptId: string) => {
     event.preventDefault();
     setDisputeError(null);
@@ -1436,11 +1467,27 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
 
             <article className="card learning-detail-card">
               <p className="card-kicker">content</p>
-              <h3>Latest generated content</h3>
+              <div className="section-head">
+                <h3>Latest generated content</h3>
+                <span className="pill">{state.generations.length}</span>
+              </div>
+              {state.material.canManageAssignments && (
+                <div className="learning-card-actions">
+                  <button className="secondary-button" type="button" onClick={() => void generateContent("lesson")}>
+                    Generate lesson
+                  </button>
+                  <button className="secondary-button" type="button" onClick={() => void generateContent("summary")}>
+                    Generate summary
+                  </button>
+                  <button className="secondary-button" type="button" onClick={() => void generateContent("questions")}>
+                    Generate questions
+                  </button>
+                </div>
+              )}
               {generationStatus && <p className="success-title">{generationStatus}</p>}
               {generationError && <p className="error-title">{generationError}</p>}
               {state.generations.length === 0 ? (
-                <p className="muted">No generated questions or summaries yet.</p>
+                <p className="muted">No generated lessons, questions, or summaries yet.</p>
               ) : (
                 <div className="learning-detail-generation-list">
                   {state.generations.map((generation) => {
@@ -1449,7 +1496,7 @@ function LearningMaterialDetailPanel({ materialId, onBack }: { materialId: strin
                     return (
                       <section className="learning-detail-generation-card" key={`${generation.id}-${generation.deadlineAt ?? ""}-${generation.maxAttempts ?? ""}`}>
                         <div className="section-head">
-                          <h4>{generation.generationType === "QUESTION_SET" ? "Questions" : "Summary"}</h4>
+                          <h4>{generationTitle(generation.generationType)}</h4>
                           <div className="learning-generation-badges">
                             {generation.generationType === "QUESTION_SET" && generation.questionSetStatus && (
                               <span className={`pill status-pill ${questionSetStatusTone(generation.questionSetStatus)}`}>

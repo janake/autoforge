@@ -117,10 +117,7 @@ public class HttpLearningAiEngineProvider implements LearningAiEngineProvider {
   }
 
   private String sessionPayload(GenerationContext context) {
-    String title = "Learning %s for %s".formatted(
-      context.generationType() == LearningContentGenerationType.QUESTION_SET ? "questions" : "summary",
-      context.title()
-    );
+    String title = "Learning %s for %s".formatted(generationLabel(context.generationType()), context.title());
     var fields = new java.util.LinkedHashMap<String, Object>();
     fields.put("title", title.length() > 200 ? title.substring(0, 200) : title);
     String apiKey = opencode.apiKey();
@@ -161,6 +158,20 @@ public class HttpLearningAiEngineProvider implements LearningAiEngineProvider {
         - Questions must be in Hungarian.
         - Each question must have 4 options.
         """);
+    } else if (context.generationType() == LearningContentGenerationType.LESSON) {
+      text.append("""
+
+        Generate a teacher-ready lesson in Hungarian based on the material.
+        Return a single JSON object with keys:
+        - "content": a human-readable lesson with title, sections, key concepts, practice goals, and short recap
+        - "structuredContent": null
+        - "sources": an array of { "chunkIndex": 0, "excerpt": "..." } referencing key points
+
+        Rules:
+        - Return JSON only, no markdown fences.
+        - Lesson must be in Hungarian.
+        - Keep it concise enough to review before publishing.
+        """);
     } else {
       text.append("""
 
@@ -185,6 +196,14 @@ public class HttpLearningAiEngineProvider implements LearningAiEngineProvider {
     } catch (IOException exception) {
       throw new OpenCodeClientException("Failed to build message payload", exception);
     }
+  }
+
+  private String generationLabel(LearningContentGenerationType generationType) {
+    return switch (generationType) {
+      case QUESTION_SET -> "questions";
+      case SUMMARY -> "summary";
+      case LESSON -> "lesson";
+    };
   }
 
   private JsonNode sendJson(HttpRequest request, String errorMessage) {

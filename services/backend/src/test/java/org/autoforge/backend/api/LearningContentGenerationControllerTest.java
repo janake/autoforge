@@ -118,9 +118,20 @@ class LearningContentGenerationControllerTest {
       .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Chunk 1")))
       .andExpect(jsonPath("$.sources[0].excerpt").exists());
 
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/lesson", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-1"))))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.generationType").value(LearningContentGenerationType.LESSON.name()))
+      .andExpect(jsonPath("$.generationStatus").value("COMPLETED"))
+      .andExpect(jsonPath("$.questionSetStatus").value(org.hamcrest.Matchers.nullValue()))
+      .andExpect(jsonPath("$.structuredContent").value(org.hamcrest.Matchers.nullValue()))
+      .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Tananyagvázlat:")))
+      .andExpect(jsonPath("$.content").value(org.hamcrest.Matchers.containsString("Gyakorlási célok:")))
+      .andExpect(jsonPath("$.sources[0].excerpt").exists());
+
     assertThat(learningGeneratedContentRepository.findAll())
       .extracting(LearningGeneratedContent::getGenerationType)
-      .containsExactlyInAnyOrder(LearningContentGenerationType.QUESTION_SET, LearningContentGenerationType.SUMMARY);
+      .containsExactlyInAnyOrder(LearningContentGenerationType.QUESTION_SET, LearningContentGenerationType.SUMMARY, LearningContentGenerationType.LESSON);
 
     LearningGeneratedContent questionSet = learningGeneratedContentRepository.findAll().stream()
       .filter(content -> content.getGenerationType() == LearningContentGenerationType.QUESTION_SET)
@@ -394,6 +405,10 @@ class LearningContentGenerationControllerTest {
     ));
 
     mockMvc.perform(post("/api/v1/learning/materials/{materialId}/questions", material.getId())
+        .with(jwt().jwt(token -> token.subject("teacher-2"))))
+      .andExpect(status().isForbidden());
+
+    mockMvc.perform(post("/api/v1/learning/materials/{materialId}/lesson", material.getId())
         .with(jwt().jwt(token -> token.subject("teacher-2"))))
       .andExpect(status().isForbidden());
 

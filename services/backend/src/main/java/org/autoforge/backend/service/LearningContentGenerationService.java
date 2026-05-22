@@ -99,6 +99,30 @@ public class LearningContentGenerationService {
     return toResponse(saved, aiResult.sources());
   }
 
+  @Transactional
+  public LearningContentGenerationResponse generateLesson(String materialId, String subject) {
+    LearningMaterial material = loadOwnedMaterial(materialId, subject);
+    List<LearningSourceVersionReference> sourceVersions = captureSourceVersions(material.getId());
+    LearningAiEngineProvider.LearningGenerationResult aiResult = generateWithAiEngine(material, subject, LearningContentGenerationType.LESSON);
+    LearningGeneratedContent saved = learningGeneratedContentRepository.save(LearningGeneratedContent.create(
+      material.getId(),
+      subject,
+      LearningContentGenerationType.LESSON,
+      aiResult.content(),
+      aiResult.structuredContent(),
+      sourceText(aiResult.sources()),
+      writeJson(sourceVersions),
+      null,
+      null,
+      null,
+      aiResult.fallbackUsed(),
+      aiResult.fallbackReason(),
+      LearningGenerationStatus.COMPLETED,
+      null
+    ));
+    return toResponse(saved, aiResult.sources());
+  }
+
   @Transactional(readOnly = true)
   public List<LearningContentGenerationResponse> listGeneratedContent(String materialId, String subject, Collection<String> groups) {
     LearningMaterial material = loadAccessibleMaterial(materialId, subject, groups);
@@ -228,6 +252,9 @@ public class LearningContentGenerationService {
     if (generationType == LearningContentGenerationType.SUMMARY) {
       return new LearningAiEngineProvider.LearningGenerationResult(summaryContent(material, sources, retrievalContext), null, sources, true, fallbackReason);
     }
+    if (generationType == LearningContentGenerationType.LESSON) {
+      return new LearningAiEngineProvider.LearningGenerationResult(lessonContent(material, sources, retrievalContext), null, sources, true, fallbackReason);
+    }
     LearningQuestionSetPayload payload = questionSetPayload(material, sources, retrievalContext, optimizedImageUrl);
     return new LearningAiEngineProvider.LearningGenerationResult(questionSetContent(payload), writeJson(payload), sources, true, fallbackReason);
   }
@@ -239,8 +266,11 @@ public class LearningContentGenerationService {
       ? "/api/v1/learning/materials/%s/optimized-image".formatted(material.getId())
       : null;
     if (generationType == LearningContentGenerationType.SUMMARY) {
-    return new GeneratedContent(summaryContent(material, sources, retrievalContext), null, sourceText(sources), sources);
-  }
+      return new GeneratedContent(summaryContent(material, sources, retrievalContext), null, sourceText(sources), sources);
+    }
+    if (generationType == LearningContentGenerationType.LESSON) {
+      return new GeneratedContent(lessonContent(material, sources, retrievalContext), null, sourceText(sources), sources);
+    }
     LearningQuestionSetPayload payload = questionSetPayload(material, sources, retrievalContext, optimizedImageUrl);
     return new GeneratedContent(questionSetContent(payload), writeJson(payload), sourceText(sources), sources);
   }
@@ -329,6 +359,31 @@ public class LearningContentGenerationService {
       lines.add("- Kép: /api/v1/learning/materials/%s/optimized-image".formatted(material.getId()));
     }
     sources.stream().limit(3).forEach(source -> lines.add("- Chunk %d: %s".formatted(source.chunkIndex() + 1, source.excerpt())));
+    return String.join("\n", lines);
+  }
+
+  private String lessonContent(LearningMaterial material, List<LearningContentSourceReference> sources, String retrievalContext) {
+    List<String> lines = new ArrayList<>();
+    lines.add("Tananyagvázlat: %s".formatted(material.getTitle()));
+    lines.add("");
+    if (material.getDescription() != null && !material.getDescription().isBlank()) {
+      lines.add("Leírás: %s".formatted(material.getDescription().trim()));
+      lines.add("");
+    }
+    lines.add("Tanulói profil:");
+    lines.add(retrievalContext);
+    lines.add("");
+    lines.add("Fő részek:");
+    if (sources.isEmpty()) {
+      lines.add("- %s".formatted(fallbackText(material)));
+    } else {
+      sources.stream().limit(5).forEach(source -> lines.add("- %s".formatted(source.excerpt())));
+    }
+    lines.add("");
+    lines.add("Gyakorlási célok:");
+    lines.add("- A kulcsfogalmak felismerése és saját szavakkal történő magyarázata.");
+    lines.add("- A tananyag fő összefüggéseinek összekapcsolása gyakorló kérdésekkel.");
+    lines.add("- A bizonytalan részek visszakeresése a forrás chunkok alapján.");
     return String.join("\n", lines);
   }
 
