@@ -938,3 +938,14 @@ Taskok
 Megjegyzes
 - A private host (10.42.1.144) kozvetlenul pullolja a Docker imaget a GHCR-bol a `docker compose pull` segitsegevel, ahelyett hogy a GitHub runner toltené le, tar.gz-be mentené, SCP-vel feltöltené, majd a private host docker load-olná. Ezzel ~5-10 perc SSH/SCP forgalom esik ki.
 - A private compose stack szolgaltatasai konzervativ memory cap-eket kapnak, hogy az 1 GB-os hoston egyik kontener se tudjon elszabadulni startup vagy smoke teszt kozben.
+
+## 0.1.81
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-478`: Spike lightweight AI communication alternatives to OpenCode runtime
+
+Megjegyzes
+- Spike annak eldontesere, hogy a private hoston futo OpenCode runtime helyett milyen kisebb eroforrasigenyu AI kommunikacios utat hasznaljon az Autoforge.
