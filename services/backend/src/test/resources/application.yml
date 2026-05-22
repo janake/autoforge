@@ -22,9 +22,6 @@ autoforge:
       repo: autoforge
       api-base-url: https://api.github.com
       token: test-token
-    opencode:
-      server-url: http://opencode:4096
-      username: opencode
-      password: test-token
-      model: autoforge-openrouter/google/gemma-4-26b-a4b-it:free
-      api-key: test-api-key
+    provider-proxy:
+      base-url: ""
+      model: google/gemma-4-26b-a4b-it:free

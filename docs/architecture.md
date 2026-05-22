@@ -12,7 +12,7 @@ The live architecture diagram is published in Confluence:
   - reverse proxy / Caddy
 - Private OCI instance:
   - Spring Boot backend service
-  - OpenCode REST AI service
+  - OpenRouter provider proxy for backend AI requests
   - worker service
   - attached OCI Block Volume for the shared Autoforge workspace
 - OCI storage services:
@@ -46,12 +46,12 @@ The live architecture diagram is published in Confluence:
 ## Current status
 
 - The public host runs versioned `web` and `api-gateway` containers behind Caddy.
-- The private host runs versioned `backend` and optional `opencode` containers via Docker Compose.
+- The private host runs the versioned `backend` container and the versioned `openrouter-proxy` container via Docker Compose when AI provider credentials are configured.
 - Container images are built in GitHub Actions and tagged with the root project version from `package.json`.
 - `main` merges automatically trigger relevant public/private deploy workflows based on changed paths.
 - The frontend uses Keycloak PKCE login and the backend serves `/api/v1/me` for authenticated profile bootstrapping.
 - The backend validates JWTs with a bundled Keycloak public key to avoid production-only remote JWKS/issuer fetch failures.
-- OCI Vault still stores OpenCode runtime secrets, which the private host reads at deploy time via instance principal.
+- OCI Vault stores the OpenRouter provider key, which the private host reads at deploy time via instance principal and passes only to the provider proxy.
 - The 100 GB OCI Block Volume remains mounted at `/mnt/autoforge-workspace`.
 - Prompt audit storage uses the hybrid OCI Object Storage plus Oracle Autonomous Database Job Store model decided in `AUTO-114`.
 - The worker runtime is still not selected and is not shown as an active service in the current deploy chain.

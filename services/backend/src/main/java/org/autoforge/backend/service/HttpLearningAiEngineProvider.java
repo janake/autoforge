@@ -1,20 +1,14 @@
 package org.autoforge.backend.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import org.autoforge.backend.config.BackendMvpProperties;
 import org.autoforge.backend.domain.LearningContentGenerationType;
 import org.autoforge.backend.dto.LearningContentSourceReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,79 +20,31 @@ public class HttpLearningAiEngineProvider implements LearningAiEngineProvider {
     Generate teaching content in Hungarian based on the provided material.
     """.trim();
 
-  private final HttpClient httpClient;
-  private final BackendMvpProperties.Opencode opencode;
+  private final ProviderProxyChatClient chatClient;
   private final ObjectMapper objectMapper;
 
   public HttpLearningAiEngineProvider(BackendMvpProperties properties, ObjectMapper objectMapper) {
-    this.httpClient = HttpClient.newHttpClient();
-    this.opencode = properties.opencode();
+    this.chatClient = new ProviderProxyChatClient(properties, objectMapper);
     this.objectMapper = objectMapper;
   }
 
   @Override
   public LearningGenerationResult generate(GenerationContext context) {
     Objects.requireNonNull(context, "context");
-    if (!isConfigured()) {
+    if (!chatClient.isConfigured()) {
       return new LearningGenerationResult(null, null, List.of(), true, FALLBACK_REASON_UNCONFIGURED);
     }
 
     try {
-      String sessionId = createSession(context);
-      String responseText = sendPrompt(sessionId, context);
-      return parseResponse(responseText, context);
+      String responseText = chatClient.complete(SYSTEM_PROMPT, prompt(context), "Provider proxy learning generation failed");
+      return parseResponse(responseText);
     } catch (Exception exception) {
       String reason = exception.getMessage() != null ? exception.getMessage() : exception.getClass().getSimpleName();
       return new LearningGenerationResult(null, null, List.of(), true, reason);
     }
   }
 
-  private boolean isConfigured() {
-    if (opencode == null) return false;
-    String url = opencode.serverUrl();
-    if (url == null || url.isBlank()) return false;
-    if (!url.startsWith("http://") && !url.startsWith("https://")) return false;
-    if (opencode.username() == null || opencode.username().isBlank()) return false;
-    if (opencode.password() == null || opencode.password().isBlank()) return false;
-    if (opencode.model() == null || opencode.model().isBlank()) return false;
-    return true;
-  }
-
-  private String createSession(GenerationContext context) {
-    HttpRequest request = HttpRequest.newBuilder()
-      .uri(URI.create(baseUrl() + "/session"))
-      .header("Authorization", basicAuth())
-      .header("Accept", "application/json")
-      .header("Content-Type", "application/json")
-      .POST(HttpRequest.BodyPublishers.ofString(sessionPayload(context), StandardCharsets.UTF_8))
-      .build();
-
-    JsonNode response = sendJson(request, "OpenCode session creation failed");
-    String sessionId = textValue(response, "id");
-    if (sessionId == null || sessionId.isBlank()) {
-      throw new OpenCodeClientException("OpenCode session creation response missing id");
-    }
-    return sessionId;
-  }
-
-  private String sendPrompt(String sessionId, GenerationContext context) {
-    HttpRequest request = HttpRequest.newBuilder()
-      .uri(URI.create(baseUrl() + "/session/" + sessionId + "/message"))
-      .header("Authorization", basicAuth())
-      .header("Accept", "application/json")
-      .header("Content-Type", "application/json")
-      .POST(HttpRequest.BodyPublishers.ofString(messageBody(context), StandardCharsets.UTF_8))
-      .build();
-
-    JsonNode response = sendJson(request, "OpenCode learning generation failed");
-    String responseText = extractMessageText(response);
-    if (responseText == null || responseText.isBlank()) {
-      throw new OpenCodeClientException("OpenCode response did not include assistant text");
-    }
-    return responseText;
-  }
-
-  private LearningGenerationResult parseResponse(String responseText, GenerationContext context) {
+  private LearningGenerationResult parseResponse(String responseText) {
     String jsonText = extractJsonObject(responseText);
     try {
       JsonNode response = objectMapper.readTree(jsonText);
@@ -107,31 +53,16 @@ public class HttpLearningAiEngineProvider implements LearningAiEngineProvider {
       List<LearningContentSourceReference> sources = parseSources(response.get("sources"));
 
       if (content == null || content.isBlank()) {
-        throw new OpenCodeClientException("AI response missing content");
+        throw new ProviderProxyClientException("AI response missing content");
       }
 
       return new LearningGenerationResult(content, structuredContent, sources, false, null);
     } catch (IOException exception) {
-      throw new OpenCodeClientException("Failed to parse AI response", exception);
+      throw new ProviderProxyClientException("Failed to parse AI response", exception);
     }
   }
 
-  private String sessionPayload(GenerationContext context) {
-    String title = "Learning %s for %s".formatted(generationLabel(context.generationType()), context.title());
-    var fields = new java.util.LinkedHashMap<String, Object>();
-    fields.put("title", title.length() > 200 ? title.substring(0, 200) : title);
-    String apiKey = opencode.apiKey();
-    if (apiKey != null && !apiKey.isBlank()) {
-      fields.put("apiKey", apiKey);
-    }
-    try {
-      return objectMapper.writeValueAsString(fields);
-    } catch (IOException exception) {
-      throw new OpenCodeClientException("Failed to build session payload", exception);
-    }
-  }
-
-  private String messageBody(GenerationContext context) {
+  private String prompt(GenerationContext context) {
     StringBuilder text = new StringBuilder();
     text.append("Learning material:\n");
     text.append("Title: ").append(context.title()).append("\n");
@@ -187,47 +118,7 @@ public class HttpLearningAiEngineProvider implements LearningAiEngineProvider {
         """);
     }
 
-    try {
-      return objectMapper.writeValueAsString(java.util.Map.of(
-        "model", opencode.model(),
-        "system", SYSTEM_PROMPT,
-        "parts", List.of(java.util.Map.of("type", "text", "text", text.toString()))
-      ));
-    } catch (IOException exception) {
-      throw new OpenCodeClientException("Failed to build message payload", exception);
-    }
-  }
-
-  private String generationLabel(LearningContentGenerationType generationType) {
-    return switch (generationType) {
-      case QUESTION_SET -> "questions";
-      case SUMMARY -> "summary";
-      case LESSON -> "lesson";
-    };
-  }
-
-  private JsonNode sendJson(HttpRequest request, String errorMessage) {
-    try {
-      HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-      if (response.statusCode() < 200 || response.statusCode() >= 300) {
-        throw new OpenCodeClientException(errorMessage + ": " + response.statusCode() + " " + response.body());
-      }
-      return objectMapper.readTree(response.body());
-    } catch (InterruptedException exception) {
-      Thread.currentThread().interrupt();
-      throw new OpenCodeClientException(errorMessage + " (interrupted)", exception);
-    } catch (IOException exception) {
-      throw new OpenCodeClientException(errorMessage, exception);
-    }
-  }
-
-  private String baseUrl() {
-    return opencode.serverUrl().replaceAll("/+$", "");
-  }
-
-  private String basicAuth() {
-    String credentials = opencode.username() + ":" + opencode.password();
-    return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+    return text.toString();
   }
 
   private String textValue(JsonNode node, String fieldName) {
@@ -249,27 +140,6 @@ public class HttpLearningAiEngineProvider implements LearningAiEngineProvider {
       }
     }
     return List.copyOf(result);
-  }
-
-  private String extractMessageText(JsonNode response) {
-    if (response == null) return null;
-    StringBuilder text = new StringBuilder();
-    JsonNode parts = response.get("parts");
-    if (parts != null && parts.isArray()) {
-      for (JsonNode part : parts) {
-        String partText = textValue(part, "text");
-        if (partText != null) text.append(partText);
-      }
-    }
-    if (text.length() > 0) return text.toString();
-    String directText = textValue(response, "text");
-    if (directText != null) return directText;
-    JsonNode info = response.get("info");
-    if (info != null) {
-      String infoText = textValue(info, "text");
-      if (infoText != null) return infoText;
-    }
-    return null;
   }
 
   private String extractJsonObject(String value) {

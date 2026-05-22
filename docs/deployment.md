@@ -5,7 +5,7 @@
 Az Autoforge jelenlegi deploy modellje ket OCI geppel szamol:
 
 - publikus host: React frontend + Spring Cloud API gateway + Caddy gateway
-- privat host: Spring Boot backend + optional OpenCode REST AI
+- privat host: Spring Boot backend + OpenRouter provider proxy
 
 A GitHub Actions workflow-k GHCR image-eket hasznalnak, majd SSH-n keresztul frissitik a ket hostot.
 A publikus host deployja opcionálisan Cloudflare DNS rekordokat is frissit a webes domainhez.
@@ -17,7 +17,7 @@ A `Container Images` workflow ezeket az image-eket kezeli:
 - `ghcr.io/<registry-owner>/autoforge/web`
 - `ghcr.io/<registry-owner>/autoforge/api-gateway`
 - `ghcr.io/<registry-owner>/autoforge/backend`
-- `ghcr.io/anomalyco/opencode` hivatalos OpenCode image-kent fut a private stackben, ezt nem ez a workflow epiti
+- `ghcr.io/<registry-owner>/autoforge/openrouter-proxy`
 
 A workflow a `main`, `<version>` es `sha-<commit>` tageket kesziti el. A `<version>` tag a root `package.json` `version` mezojebol jon, peldaul `0.1.13`.
 Deploy soran a sajat image-eknel a `<version>` tag kerul a Compose env fajlba, nem a mozgó `main` tag.
@@ -44,16 +44,15 @@ Publikus host:
 Privat host:
 
 - fajl: `infra/compose/docker-compose.private.yml`
-- szolgaltatasok: `backend`, `opencode`, `openrouter-proxy`
+- szolgaltatasok: `backend`, `openrouter-proxy` (`ai` profillal, ha az OpenRouter kulcs feloldhato)
 - host port: `8080`
-- memoriakorlatozas: konzervativ `mem_limit` cap-ek a backendhez, az OpenCode szerverhez es az OpenRouter proxyhoz; a limitek `BACKEND_MEMORY_LIMIT`, `OPENCODE_MEMORY_LIMIT` es `OPENROUTER_PROXY_MEMORY_LIMIT` env varokkal felulirhatok
-- plusz config: `infra/compose/opencode.json`
-- opencode server: belso REST endpoint a backendhez, auth-vedett
-- opencode image: `ghcr.io/anomalyco/opencode`
+- memoriakorlatozas: konzervativ `mem_limit` cap-ek a backendhez es az OpenRouter proxyhoz; a limitek `BACKEND_MEMORY_LIMIT` es `OPENROUTER_PROXY_MEMORY_LIMIT` env varokkal felulirhatok
+- backend AI endpoint: `AI_PROVIDER_PROXY_BASE_URL`, alapertelmezett private compose ertek `http://openrouter-proxy:8080/v1`
+- backend AI modell: `AI_PROVIDER_MODEL`, alapertelmezett `google/gemma-4-26b-a4b-it:free`
 - openrouter-proxy image: `ghcr.io/<registry-owner>/autoforge/openrouter-proxy`
-- opencode secret ertekek: OCI Vaultbol, instance principal-lal olvasva a private hoston
+- OpenRouter secret ertek: OCI Vaultbol, instance principal-lal olvasva a private hoston, csak a provider proxy kapja meg runtime env-kent
 - workspace storage: 100 GB OCI Block Volume, ext4, mount point: `/mnt/autoforge-workspace`
-- ha az OpenCode Vault secret OCID-k nincsenek beallitva, a deploy csak a backendet inditja, az `opencode` profile nelkul
+- ha nincs feloldhato OpenRouter API key, a deploy nem engedelyezi az `ai` profilt, es a backend AI provider base URL uresen marad
 
 Keycloak / OIDC:
 
@@ -73,7 +72,7 @@ A private hosthoz egy kulon 100 GB-os OCI Block Volume van csatolva az Autoforge
 - mount point: `/mnt/autoforge-workspace`
 - fstab: UUID alapu mount `defaults,nofail,_netdev` opciokkal
 - tulajdonos a hoston: deploy SSH user
-- cel: OpenCode/backend/worker altal hasznalt tartos workspace, nem kontener image vagy gitelt adat
+- cel: backend/worker altal hasznalt tartos workspace, nem kontener image vagy gitelt adat
 
 Megjegyzes:
 
@@ -95,7 +94,6 @@ A tipikus tartalom:
 - `.deploy.env`
 - `deploy.sh`
 - publikus hoston plusz `Caddyfile`
-- privat hoston plusz `opencode.json`
 
 ## Workflow-k
 
@@ -103,11 +101,11 @@ A tipikus tartalom:
 - `Backend Build`: PR es main test a Spring Boot apphoz
 - `Container Images`: web, backend, API gateway es OpenRouter proxy image build + push GHCR-be
 - `Deploy Public Host`: public stack frissitese merge utan vagy manual dispatch-csel
-- `Deploy Private Host`: private stack frissitese merge utan vagy manual dispatch-csel, beleertve a backendet es az opencode REST AI service-et
+- `Deploy Private Host`: private stack frissitese merge utan vagy manual dispatch-csel, beleertve a backendet es az OpenRouter provider proxyt
 - a private hoston a deploy a `autoforge-arm-capacity-check.timer` systemd timert is telepiti, amely 3 percenkent futtatja az `oci-a1-capacity` ellenorzest a Frankfurt tenancy ARM kapacitasara
 - a private hoston a deploy a `autoforge-arm-capacity-summary.timer` systemd timert is telepiti, amely minden nap 07:00-kor kuldi az elozo 24 ora osszegzeset
 - a private hoston a deploy OCI Notifications topicot hoz letre vagy ujrahasznal, majd ehhez email subscriptiont regisztral `janak.endre@gmail.com` cimre
-- a private deploy a sikeres `opencode` inditas utan egy REST smoke tesztet is futtat, amely ellenorzi az OpenRouter proxy health/model endpointjait, az OpenCode health endpointot, a session letrehozasat es egy smoke prompt completiont
+- a private deploy a sikeres provider proxy inditas utan egy REST smoke tesztet is futtat, amely ellenorzi a proxy health/model endpointjait es egy OpenAI-kompatibilis chat completiont
 - ugyanazok a workflow-k `main`-re merge-elt, relevans fájlokat erinto pushokra is lefutnak, hogy a deploy automatikusan meginduljon
 
 Fontos trigger-ek:
@@ -142,9 +140,7 @@ Megjegyzések:
 
 Vault secret azonosito GitHub secret-ek:
 
-- `OCI_OPENCODE_SERVER_PASSWORD_SECRET_OCID`: az OCI Vaultban tarolt `autoforge-opencode-server-password` secret OCID-ja
-- `OCI_OPENCODE_SERVER_PASSWORD_SECRET_NAME`: opcionális OCI Vault display name az OpenCode REST jelszóhoz, ha OCID helyett név alapján oldjuk fel
-- `OCI_OPENROUTER_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt OpenRouter API key secret OCID-ja; ezt csak az OpenRouter proxy kapja meg, az OpenCode kontener nem
+- `OCI_OPENROUTER_API_KEY_SECRET_OCID`: az OCI Vaultban tarolt OpenRouter API key secret OCID-ja; ezt csak az OpenRouter proxy kapja meg, a backend nem
 - `OCI_OPENROUTER_API_KEY_SECRET_NAME`: opcionális OCI Vault display name az OpenRouter API keyhez, ha OCID helyett név alapján oldjuk fel
 - `AUTOFORGE_DB_URL`: opcionális direkt JDBC URL, ha nem walletes ADB kapcsolatot hasznalunk
 - `AUTOFORGE_DB_URL_SECRET_NAME`: opcionális OCI Vault display name a direkt JDBC URL-hez, alapertelmezett: `autoforge-db-url`
@@ -169,12 +165,12 @@ GitHub PR broker konfiguráció:
 
 Fontos:
 
-- A GitHub secret-ekben csak a Vault secret OCID-k szerepelnek, nem az OpenCode jelszo vagy provider API kulcs ertekei.
-- A GitHub variable-okban opcionálisan Vault display name-ek is szerepelhetnek; konkrét OpenCode/OpenRouter secret érték nem kerülhet GitHubba vagy gitelt fájlba.
+- A GitHub secret-ekben csak a Vault secret OCID-k szerepelnek, nem a provider API kulcs ertekei.
+- A GitHub variable-okban opcionálisan Vault display name-ek is szerepelhetnek; konkrét OpenRouter secret érték nem kerülhet GitHubba vagy gitelt fájlba.
 - A deploy workflow ezeket az OCID/name referenciákat masolja a private host `.env` fajljaba.
 - A private host `deploy.sh` scriptje olvassa ki a konkret secret ertekeket OCI Vaultbol, `--auth instance_principal` hasznalataval.
 - A kapacitasjelzes OCI Notifications topicra megy; a deploy script ezt a topicot kezeli, az email subscription pedig `janak.endre@gmail.com` cimre mutat.
-- A provider API kulcsot az OpenRouter proxy kapja meg runtime env-kent; az `opencode` kontener csak a belso proxy URL-t es nem titkos placeholder authot lat.
+- A provider API kulcsot csak az OpenRouter proxy kapja meg runtime env-kent; a backend csak a belso proxy URL-t es a modellazonositot latja.
 - Az OpenRouter proxy alapertelmezett modellje `google/gemma-4-26b-a4b-it:free`, mert text, image es video inputot is tud kezelni, es az OpenRouter katalogusban free modellkent szerepel.
 - Az OpenRouter proxy `OPENROUTER_ALLOWED_MODELS`, `OPENROUTER_MAX_COMPLETION_TOKENS` es `OPENROUTER_MAX_REQUEST_BYTES` guardrailekkel korlatozza az AI runtime koltseg- es payload-kockazatat, a default completion limit pedig a modell 32768-as plafonjahoz igazodik.
 - A provider proxy logjai csak provider/model/status/duration metaadatot irhatnak; promptot, bearer tokent, API kulcsot vagy provider response bodyt nem.
@@ -186,7 +182,6 @@ Fontos:
 
 ## Szükséges OCI Vault secret-ek
 
-- `autoforge-opencode-server-password`: az OpenCode REST szerver HTTP basic auth jelszava. Legalabb 32 karakteres, veletlen, newline nelkuli ertek legyen.
 - `openrouter-api-key`: az OpenRouter API kulcs, amelyet csak az OpenRouter proxy hasznal. Newline nelkuli ertek legyen.
 - `db-wallet-pwd`: az ADB wallet zip kicsomagolasi jelszava.
 
@@ -219,7 +214,7 @@ Allow dynamic-group <dynamic-group-name> to read secret-bundles in compartment p
 - Gitbe nem kerulhet privat kulcs, kulcsfajl-nev, abszolut lokalis path, szemelyes felhasznalonev, email, token vagy cloud credential.
 - Deploy parancsokban szemelyes path helyett env valtozot kell hasznalni, peldaul `${AUTOFORGE_SSH_KEY}`.
 - Registry owner, repo owner es account nev csak placeholderkent vagy GitHub Actions runtime valtozokent szerepelhet.
-- Konkreten hasznalt secret ertekek gitelt fajlban nem lehetnek; OpenCode runtime secret ertekek OCI Vaultban vannak, es csak deploy futaskor kerulnek at ideiglenes runtime env fajlba.
+- Konkreten hasznalt secret ertekek gitelt fajlban nem lehetnek; provider runtime secret ertekek OCI Vaultban vannak, es csak deploy futaskor kerulnek at ideiglenes runtime env fajlba.
 
 ## Szerver bootstrap minimum
 
