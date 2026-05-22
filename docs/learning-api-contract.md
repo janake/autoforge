@@ -47,7 +47,7 @@
 
 ### `GET /api/v1/learning/materials/{materialId}/generations`
 
-- A bejelentkezett user tananyaghoz kötött kérdés- és összefoglaló-generálásait listázza.
+- A bejelentkezett user tananyaghoz kötött kérdés-, összefoglaló- és lesson-generálásait listázza.
 - A válasz a Learning workspace shell számára szolgál.
 
 ### `PUT /api/v1/learning/materials/{materialId}/assignments`
@@ -75,6 +75,7 @@ Az API ugyanebben a namespace-ben már támogatja az alábbi generálási művel
 
 - `POST /api/v1/learning/materials/{materialId}/questions`
 - `POST /api/v1/learning/materials/{materialId}/summary`
+- `POST /api/v1/learning/materials/{materialId}/lesson`
 
 Az API ugyanebben a namespace-ben tovább bővíthető ingestion státusz, tananyag chunk lista és learner profile endpointokkal, anélkül hogy a kliens oldali auth vagy base URL modell változna.
 

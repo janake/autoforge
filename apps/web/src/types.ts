@@ -136,7 +136,7 @@ export type LearningAssignmentAuditResponse = {
   createdAt: string;
 };
 
-export type LearningContentGenerationType = "QUESTION_SET" | "SUMMARY";
+export type LearningContentGenerationType = "QUESTION_SET" | "SUMMARY" | "LESSON";
 
 export type LearningQuestionSetStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
