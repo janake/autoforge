@@ -131,7 +131,7 @@ skills:
     responsibilities:
       - Decide when containers are insufficient and microVM isolation should be considered.
       - Review Firecracker jailer, network, rootfs, kernel, and metadata isolation tradeoffs.
-      - Keep AI worker and OpenCode sandboxing assumptions explicit before implementation.
+      - Keep AI worker sandboxing assumptions explicit before implementation.
       - Document follow-up infrastructure work when microVM isolation is selected.
 
   - id: backend-auth-runtime

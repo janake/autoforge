@@ -104,7 +104,7 @@ mcps:
       - Evaluate whether risky AI/code-execution workloads should run in microVMs instead of plain containers.
       - Review jailer, tap networking, kernel/rootfs, and metadata isolation assumptions.
       - Compare container, microVM, and host-level trust boundaries before runtime changes.
-      - Plan future sandboxing for OpenCode or self-improving worker execution.
+      - Plan future sandboxing for self-improving worker execution.
 
   - id: http-api
     enabled: true

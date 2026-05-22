@@ -22,7 +22,7 @@ autoforge/
 
 - A live frontend React + Vite + TypeScript alapon fut a public hoston.
 - A public hoston Caddy -> Spring Cloud API gateway -> React frontend lánc szolgálja ki a külső forgalmat.
-- A private hoston Spring Boot backend és OpenCode REST AI szolgáltatás fut Docker Compose stackben.
+- A private hoston Spring Boot backend és OpenRouter provider-proxy AI szolgáltatás fut Docker Compose stackben.
 - A saját image-ek verziózott GHCR tagekkel (`<version>`) épülnek és deployolódnak.
 - A `main` merge-ek automatikusan triggerelik a releváns build/deploy workflow-kat public és private hostra.
 - A frontend Keycloak PKCE flow-val hitelesít, a backend JWT-alapú protected endpointokat szolgál ki.
@@ -58,7 +58,7 @@ autoforge/
 
 ## Indulasi megjegyzes
 
-A jelenlegi fókusz a live web + gateway + backend + OpenCode lánc stabil működése. Az auth/deploy hibák után a fő dokumentáció most már a tényleges production állapotot követi; a következő nagyobb lépések a feature work és a worker runtime aktiválása lehetnek.
+A jelenlegi fókusz a live web + gateway + backend + provider-proxy lánc stabil működése. Az auth/deploy hibák után a fő dokumentáció most már a tényleges production állapotot követi; a következő nagyobb lépések a feature work és a worker runtime aktiválása lehetnek.
 
 ## Helyi MVP
 

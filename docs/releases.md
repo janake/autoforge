@@ -975,10 +975,25 @@ Megjegyzes
 ## 0.1.84
 
 Statusz
-- in progress
+- done
 
 Taskok
 - `AUTO-481`: Provider proxy smoke should tolerate upstream rate limits
 
 Megjegyzes
 - A provider-proxy smoke tovabbra is kotelezove teszi a health/model ellenorzest, de upstream OpenRouter `429` rate limit eseten nem buktatja a private deployt.
+
+## 0.1.85
+
+Statusz
+- in progress
+
+Taskok
+- `AUTO-482`: Remove remaining OpenCode references from deploy and docs
+- `AUTO-483`: Remove OpenCode references from deploy shell scripts
+- `AUTO-484`: Remove OpenCode references from GitHub workflow and compose config
+- `AUTO-485`: Remove OpenCode references from documentation
+
+Megjegyzes
+- README.md, ops/ai/mcps.yaml, ops/ai/skills.yaml, provider-proxy test: OpenCode emlitesek frissitve
+- A deploy pipeline mar nem tartalmaz OpenCode referencia valtozokat

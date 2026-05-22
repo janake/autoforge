@@ -47,7 +47,7 @@ test("forwards allowed chat completion requests with the proxy-held API key", as
     const response = await fetch(`http://127.0.0.1:${proxyPort}/v1/chat/completions`, {
       method: "POST",
       headers: {
-        authorization: "Bearer dummy-opencode-token",
+        authorization: "Bearer dummy-provider-proxy-token",
         "content-type": "application/json",
       },
       body: JSON.stringify({ messages: [{ role: "user", content: "hello" }] }),
