@@ -10,9 +10,8 @@
         "apiKey": "proxy-auth-placeholder"
       },
       "models": {
-        "deepseek/deepseek-v4-flash:free": {
-          "name": "DeepSeek V4 Flash Free via OpenRouter Proxy",
-          "maxTokens": 2048
+        "qwen/qwen3.6-plus": {
+          "name": "Qwen3.6 Plus via OpenRouter Proxy"
         }
       }
     }

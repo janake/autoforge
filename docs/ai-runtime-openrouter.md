@@ -8,7 +8,7 @@ Use a Docker-only private runtime for the first AI integration sprint:
 
 - `opencode` runs in `serve` mode and is controlled through its HTTP REST API.
 - OpenRouter is the only provider integration target for this sprint.
-- DeepSeek may be selected only as an OpenRouter-hosted model, not as a separate provider.
+- Qwen3.6 Plus is the default OpenRouter-hosted model because it supports text, image, and video inputs.
 - A dedicated provider proxy holds the OpenRouter credential boundary.
 - `opencode` must not receive OpenRouter or other provider API keys as environment variables, config values, mounted files, prompts, MCP tool results, or generated context.
 - Firecracker is deferred to a later sandboxing decision for AI-driven code execution, not required for the first provider integration.
@@ -96,7 +96,7 @@ This is enough to proceed with `AUTO-322`, but that story must still smoke-test 
 
 - No new direct provider API key should be added to the `opencode` service environment.
 - Any config checked into git must use non-secret placeholders only.
-- Provider model IDs should be allowlisted, with the first candidate being an OpenRouter-hosted low-cost coding model.
-- The provider proxy caps completion tokens and request body bytes with `OPENROUTER_MAX_COMPLETION_TOKENS` and `OPENROUTER_MAX_REQUEST_BYTES` so the OpenCode path has a predictable default cost envelope.
+- Provider model IDs should be allowlisted, with Qwen3.6 Plus as the default multimodal model.
+- The provider proxy caps completion tokens and request body bytes with `OPENROUTER_MAX_COMPLETION_TOKENS` and `OPENROUTER_MAX_REQUEST_BYTES` so the OpenCode path has a predictable default cost envelope while allowing image-bearing requests through the private proxy.
 - Logs must prove which model/provider path was used without recording the API key, bearer token, full prompt payload, or provider response body by default.
 - The private deploy should run proxy health/model checks and an `opencode` REST smoke test after the stack comes up, using the documented health/session/message endpoints.

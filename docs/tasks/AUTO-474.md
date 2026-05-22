@@ -4,7 +4,7 @@ Statusz: Under test
 
 Verzio: 0.1.79
 
-Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`, `bug/AUTO-474-ssh-keepalive`, `bug/AUTO-474-opencode-message-model`, `bug/AUTO-474-batch-private-upload`
+Branch: `bug/AUTO-474-enable-prompt-ai-runtime`, `bug/AUTO-474-openrouter-secret-name`, `bug/AUTO-474-opencode-smoke-env`, `bug/AUTO-474-ssh-keepalive`, `bug/AUTO-474-opencode-message-model`, `bug/AUTO-474-batch-private-upload`, `bug/AUTO-474-upload-retry`, `bug/AUTO-474-opencode-max-tokens`
 
 PR: https://github.com/janake/autoforge/pull/190, https://github.com/janake/autoforge/pull/191, https://github.com/janake/autoforge/pull/192, https://github.com/janake/autoforge/pull/193, https://github.com/janake/autoforge/pull/197, https://github.com/janake/autoforge/pull/198
 
@@ -60,4 +60,15 @@ A prompt draft flow vegig tudjon menni a draft/clarify lepestol az approval es J
 - Fix: wrap tar-over-SSH upload in bash retry loop (3 attempts, 10s delay), add explicit per-command `-o ServerAliveInterval=30 -o ServerAliveCountMax=3` on the upload ssh invocation, and tighten the SSH config keepalive interval from 60s to 30s
 - `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/deploy-private.yml')); print('YAML OK')"` - ok
 - `bash -n .github/workflows/deploy-private.yml` - ok
+- `git diff --check` - ok
+- `gh run view 26255891186 --job 77278347552 --log-failed` - upload succeeded, deploy reached OpenCode smoke, then OpenRouter rejected the smoke completion with `max_tokens exceeds configured limit of 2048`
+- User direction: switch from the DeepSeek free model to Qwen3.6 Plus so the private OpenCode runtime can handle image-bearing prompts
+- OpenRouter model catalog check: `qwen/qwen3.6-plus` is `text+image+video->text` with max completion tokens 65536; no `qwen/qwen3.6-plus:free` model id is currently exposed by the catalog
+- Fix: make `qwen/qwen3.6-plus` the OpenCode/OpenRouter default and allowed model; raise default proxy completion limit to 65536 and request body limit to 10485760 bytes for image-capable payloads
+- `python3 -c "import json; json.load(open('infra/compose/opencode.json')); print('JSON OK')"` - ok
+- `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/deploy-private.yml')); yaml.safe_load(open('infra/compose/docker-compose.private.yml')); print('YAML OK')"` - ok
+- `bash -n infra/deploy/private/opencode-smoke.sh` - ok
+- `npm run test:provider-proxy` - ok
+- `mvn -q -f services/backend/pom.xml -Dtest=HttpPromptDraftClarifierTest,HttpOpenCodeAIPatchGeneratorTest,PromptDraftFallbackMessageTest test` - ok
+- `npm run test:backend` - failed in existing unrelated `LearningContentGenerationControllerTest.questionSetSettingsPersistAndLimitAttempts` with expected 201 but got 403
 - `git diff --check` - ok

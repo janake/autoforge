@@ -49,7 +49,7 @@ class HttpPromptDraftClarifierTest {
         "http://127.0.0.1:%d".formatted(port),
         "opencode",
         "secret",
-        "autoforge-openrouter/deepseek/deepseek-v4-flash:free",
+        "autoforge-openrouter/qwen/qwen3.6-plus",
         "test-api-key"
       )),
       new ObjectMapper()
@@ -64,7 +64,7 @@ class HttpPromptDraftClarifierTest {
     assertThat(messageAuth.get()).isEqualTo(basicAuth("opencode", "secret"));
     assertThat(sessionBody.get()).contains("Autoforge prompt draft clarification");
     assertThat(sessionBody.get()).contains("test-api-key");
-    assertThat(messageBody.get()).contains("autoforge-openrouter/deepseek/deepseek-v4-flash:free");
+    assertThat(messageBody.get()).contains("autoforge-openrouter/qwen/qwen3.6-plus");
     assertThat(messageBody.get()).contains("readyForApproval");
     assertThat(messageBody.get()).contains("Audit the workflow");
   }
